@@ -37,7 +37,7 @@ cv_max_date_clean = format(as.POSIXct(current_date),'%d %B %Y')
 # CREATE BASEMAP ---------------------------------------------------------------
 
 basemap <- leaflet() %>% setView(lng = -85.3232, lat = 49, zoom = 6)
-basemap <- basemap %>% addProviderTiles(providers$CartoDB.Positron) %>%
+basemap <- basemap %>% addProviderTiles(providers$Esri.NatGeoWorldMap) %>%
     addCircleMarkers(data = cases_per_school, 
                      lng = ~lon, 
                      lat = ~lat, 
@@ -56,7 +56,7 @@ basemap <- basemap %>% addProviderTiles(providers$CartoDB.Positron) %>%
 ui <- bootstrapPage(
     tags$head(includeHTML('gtag.html')),
     navbarPage(theme = shinytheme('flatly'), collapsible = TRUE,
-               'COVID-19 tracker', id='nav',
+               'Ontario Schools COVID-19 Tracker', id='nav',
                
                # tab: COVID-19 mapper ------------------------------------------
                tabPanel('COVID-19 mapper',
