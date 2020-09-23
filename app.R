@@ -37,7 +37,7 @@ cv_max_date_clean = format(as.POSIXct(current_date),'%d %B %Y')
 # CREATE BASEMAP ---------------------------------------------------------------
 
 basemap <- leaflet() %>% setView(lng = -85.3232, lat = 49, zoom = 6)
-basemap <- basemap %>% addProviderTiles(providers$Esri.NatGeoWorldMap) %>%
+basemap <- basemap %>% addTiles() %>% # addProviderTiles(providers$Esri.NatGeoWorldMap) %>%
     addCircleMarkers(data = cases_per_school, 
                      lng = ~lon, 
                      lat = ~lat, 
@@ -45,8 +45,9 @@ basemap <- basemap %>% addProviderTiles(providers$Esri.NatGeoWorldMap) %>%
                      weight = 1, 
                      color = covid_col,
                      fillOpacity = 0.2, 
-                     label = sprintf('<strong>%s</strong><br/>Confirmed cases (cumulative): %s<br/>', 
+                     label = sprintf('<strong>%s</strong><br/>City: %s<br/>Confirmed cases (cumulative): %s<br/>', 
                                      cases_per_school$school_name, 
+                                     cases_per_school$city, 
                                      cases_per_school$cases_per_school) %>% lapply(htmltools::HTML), 
                      labelOptions = labelOptions(
                          style = list('font-weight' = 'normal', padding = '3px 8px', 'color' = covid_col),

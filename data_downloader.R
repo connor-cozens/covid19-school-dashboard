@@ -32,13 +32,13 @@ library(xts)
 
 # SETTINGS ---------------------------------------------------------------------
 
-google_api_key <- 'AIzaSyCaT001gVQOgUi3BnJ5MJJHR8CgwcdIixQ' # you need a google api key with maps javascript api and geocoding api enabled
+google_api_key <- 'XXXXXXXXXXXXXXX' # you need a google api key with maps javascript api and geocoding api enabled
 
 data_dir <- 'data'
 
 geocodes_cache_file <- file.path(data_dir, 'geocode_cache.rdata')
 
-max_file_age_hrs <- 24L
+max_file_age_hrs <- 12L
 
 # MAIN -------------------------------------------------------------------------
 
@@ -47,17 +47,26 @@ max_file_age_hrs <- 24L
 url <- 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/7fbdbb48-d074-45d9-93cb-f7de58950418/download/schoolcovidsummary.csv'
 fname_summary <- sprintf('%s/%s', data_dir, basename(url))
 needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_summary)$mtime), units = 'hours') >= max_file_age_hrs
-if (needs_refresh) GET(url, write_disk(fname_summary, overwrite = TRUE))
+if (needs_refresh) { 
+	message('updating summary data file')
+	GET(url, write_disk(fname_summary, overwrite = TRUE))
+}
 
 url <- 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/8b6d22e2-7065-4b0f-966f-02640be366f2/download/schoolsactivecovid.csv'
 fname_active <- sprintf('%s/%s', data_dir, basename(url))
 needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_active)$mtime), units = 'hours') >= max_file_age_hrs
-if (needs_refresh) GET(url, write_disk(fname_active, overwrite = TRUE))
+if (needs_refresh) { 
+	message('updating active cases data file')
+	GET(url, write_disk(fname_active, overwrite = TRUE))
+}
 
 url <- 'https://data.ontario.ca/dataset/f4112442-bdc8-45d2-be3c-12efae72fb27/resource/455fd63b-603d-4608-8216-7d8647f43350/download/conposcovidloc.csv'
 fname_all_cases <- sprintf('%s/%s', data_dir, basename(url))
 needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_all_cases)$mtime), units = 'hours') >= max_file_age_hrs
-if (needs_refresh) GET(url, write_disk(fname_all_cases, overwrite = TRUE))
+if (needs_refresh) { 
+	message('updating all cases data file')
+	GET(url, write_disk(fname_all_cases, overwrite = TRUE))
+}
 
 # 2. load school summary data into memory --------------------------------------
 
