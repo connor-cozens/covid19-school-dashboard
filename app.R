@@ -2,6 +2,7 @@
 
 library(shiny)
 library(shinythemes)
+library(plotly)
 
 # LOAD DATA --------------------------------------------------------------------
 
@@ -12,6 +13,29 @@ source('data_downloader.R')
 covid_col = '#cc4c02'
 
 # FUNCTIONS --------------------------------------------------------------------
+
+# function to plot cumulative cases by region
+province_cases_cumulative <- function(plot_start_date) {
+    # g = ggplot(covid19_schools_summary, 
+    #            aes(x = Collected_Date, 
+    #                y = Cumulative_School_Related_Cases, 
+    #                text = paste0(format(Collected_Date, "%d %B %Y"), "\n", Collected_Date, ": ", Cumulative_School_Related_Cases))) +
+    #     xlim(c(plot_start_date,(current_date+1))) + xlab("date")
+    # g1 = g + geom_line(alpha=0.8) + geom_point(size = 1, alpha = 0.8) +
+    #     ylab("cumulative school related cases") + theme_bw() + 
+    #     theme(legend.title = element_blank(), legend.position = "", plot.title = element_text(size=10))
+    # ggplotly(g1, tooltip = c("text")) %>% layout(legend = list(font = list(size=11)))
+    fig <- plot_ly(covid19_schools_summary, x = ~Collected_Date)
+    fig <- fig %>% add_trace(y = ~New_Total_School_Related_Cases, name = 'New Total School Related Cases', mode = 'lines+markers') 
+    fig <- fig %>% add_trace(y = ~New_School_Related_Student_Cases, name = 'New School Related Student Cases', mode = 'lines+markers') 
+    fig <- fig %>% add_trace(y = ~New_School_Related_Staff_Cases, name = 'New School Related Staff Cases', mode = 'lines+markers') 
+    fig <- fig %>% add_trace(y = ~New_School_Related_Unspecified_Cases, name = 'New School Related Unspecified Cases', mode = 'lines+markers') 
+    fig <- fig %>% add_trace(y = ~Cumulative_School_Related_Cases, name = 'Cumulative School Related Cases', mode = 'lines+markers') 
+    fig <- fig %>% add_trace(y = ~Cumulative_School_Related_Student_Cases, name = 'Cumulative School Related Student Cases', mode = 'lines+markers') 
+    fig <- fig %>% add_trace(y = ~Cumulative_School_Related_Staff_Cases, name = 'Cumulative School Related Staff Cases', mode = 'lines+markers') 
+    fig <- fig %>% add_trace(y = ~Cumulative_School_Related_Unspecified_Cases, name = 'Cumulative School Related Unspecified Cases', mode = 'lines+markers')
+    fig
+}
 
 # function to plot cumulative COVID cases by date
 cumulative_plot <- function(plot_date) {
@@ -37,7 +61,7 @@ cv_max_date_clean = format(as.POSIXct(current_date),'%d %B %Y')
 # CREATE BASEMAP ---------------------------------------------------------------
 
 basemap <- leaflet() %>% setView(lng = -85.3232, lat = 49, zoom = 6)
-basemap <- basemap %>% addTiles() %>% # addProviderTiles(providers$Esri.NatGeoWorldMap) %>%
+basemap <- basemap %>% addProviderTiles(providers$Esri.NatGeoWorldMap) %>%
     addCircleMarkers(data = cases_per_school, 
                      lng = ~lon, 
                      lat = ~lat, 
@@ -93,6 +117,57 @@ ui <- bootstrapPage(
                         )
                ),
                
+               # tab: plots ----------------------------------------------------
+               tabPanel('Plots',
+                        
+                        sidebarLayout(
+                            sidebarPanel(
+                                
+                                # span(tags$i(h6("Reported cases are subject to significant variation in testing policy and capacity between countries.")), style="color:#045a8d"),
+                                # span(tags$i(h6("Occasional anomalies (e.g. spikes in daily case counts) are generally caused by changes in case definitions.")), style="color:#045a8d"),
+                                # 
+                                # pickerInput("level_select", "Level:",
+                                #             choices = c("Global", "Continent", "Country", "US state"),
+                                #             selected = c("Country"),
+                                #             multiple = FALSE),
+                                # 
+                                # pickerInput("region_select", "Country/Region:",
+                                #             choices = as.character(cv_today_reduced[order(-cv_today_reduced$cases),]$country),
+                                #             options = list(`actions-box` = TRUE, `none-selected-text` = "Please make a selection!"),
+                                #             selected = as.character(cv_today_reduced[order(-cv_today_reduced$cases),]$country)[1:10],
+                                #             multiple = TRUE),
+                                # 
+                                # pickerInput("outcome_select", "Outcome:",
+                                #             choices = c("Deaths per 100,000", "Cases per 100,000", "Cases (total)", "Deaths (total)"),
+                                #             selected = c("Deaths per 100,000"),
+                                #             multiple = FALSE),
+                                # 
+                                # pickerInput("start_date", "Plotting start date:",
+                                #             choices = c("Date", "Day of 100th confirmed case", "Day of 10th death"),
+                                #             options = list(`actions-box` = TRUE),
+                                #             selected = "Date",
+                                #             multiple = FALSE),
+                                
+                                sliderInput("minimum_date",
+                                            "Minimum date:",
+                                            min = as.Date(cv_min_date,"%Y-%m-%d"),
+                                            max = as.Date(current_date,"%Y-%m-%d"),
+                                            value=as.Date(cv_min_date),
+                                            timeFormat="%d %b")
+                                
+                            ),
+                            
+                            mainPanel(
+                                tabsetPanel(
+                                    # tabPanel("Cumulative", plotlyOutput("country_plot_cumulative")),
+                                    # tabPanel("New", plotlyOutput("country_plot")),
+                                    # tabPanel("Cumulative (log10)", plotlyOutput("country_plot_cumulative_log")),
+                                    tabPanel('Cumulative cases', plotlyOutput("province_plot_cumulative"))
+                                )
+                            )
+                        )
+               ),
+               
                # tab: Data -----------------------------------------------------
                tabPanel('Data',
                         h3('Summary of cases in schools'),
@@ -118,6 +193,11 @@ ui <- bootstrapPage(
 # SHINY SERVER -----------------------------------------------------------------
 
 server <- function(input, output) {
+    
+    # province_plot_cumulative -------------------------------------------------
+    output$province_plot_cumulative <- renderPlotly({
+        province_cases_cumulative(input$minimum_date)
+    })
     
     # cumulative_plot ----------------------------------------------------------
     output$cumulative_plot <- renderPlot({
