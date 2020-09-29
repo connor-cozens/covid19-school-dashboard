@@ -142,7 +142,7 @@ ui <- bootstrapPage(
                                     # tabPanel("Cumulative (log10)", plotlyOutput("country_plot_cumulative_log")),
                                     tabPanel('School related cases', br(), plotlyOutput('school_related_cases_details_plot')),
                                     tabPanel('Schools with cases', br(), plotlyOutput('schools_with_cases_plot')),
-                                    tabPanel('Active cases by municipality', br(), plotlyOutput('active_cases_by_municipality_plot'))
+                                    tabPanel('Active school cases by municipality', br(), plotlyOutput('active_cases_by_municipality_plot'))
                                 )
                             )
                         )
@@ -247,7 +247,7 @@ server <- function(input, output) {
                             nms[ 9 ], nms2[ 9 ],
                             nms[ 10 ], nms2[ 10 ])
         fig <- parse(text = code_str) %>% eval
-        fig <- fig %>% layout(title = 'Cases by municipality (top 10)',
+        fig <- fig %>% layout(title = 'Active school cases by municipality (top 10)',
                               xaxis = list(title = 'collected date'),
                               yaxis = list (title = 'cases'))
         fig
