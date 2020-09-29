@@ -3,6 +3,7 @@
 library(shiny)
 library(shinythemes)
 library(plotly)
+library(xts)
 
 # LOAD DATA --------------------------------------------------------------------
 
@@ -13,29 +14,6 @@ source('data_downloader.R')
 covid_col = '#cc4c02'
 
 # FUNCTIONS --------------------------------------------------------------------
-
-# function to plot cumulative cases by region
-province_cases_cumulative <- function(plot_start_date) {
-    # g = ggplot(covid19_schools_summary, 
-    #            aes(x = Collected_Date, 
-    #                y = Cumulative_School_Related_Cases, 
-    #                text = paste0(format(Collected_Date, "%d %B %Y"), "\n", Collected_Date, ": ", Cumulative_School_Related_Cases))) +
-    #     xlim(c(plot_start_date,(current_date+1))) + xlab("date")
-    # g1 = g + geom_line(alpha=0.8) + geom_point(size = 1, alpha = 0.8) +
-    #     ylab("cumulative school related cases") + theme_bw() + 
-    #     theme(legend.title = element_blank(), legend.position = "", plot.title = element_text(size=10))
-    # ggplotly(g1, tooltip = c("text")) %>% layout(legend = list(font = list(size=11)))
-    fig <- plot_ly(covid19_schools_summary, x = ~Collected_Date)
-    fig <- fig %>% add_trace(y = ~New_Total_School_Related_Cases, name = 'New Total School Related Cases', mode = 'lines+markers') 
-    fig <- fig %>% add_trace(y = ~New_School_Related_Student_Cases, name = 'New School Related Student Cases', mode = 'lines+markers') 
-    fig <- fig %>% add_trace(y = ~New_School_Related_Staff_Cases, name = 'New School Related Staff Cases', mode = 'lines+markers') 
-    fig <- fig %>% add_trace(y = ~New_School_Related_Unspecified_Cases, name = 'New School Related Unspecified Cases', mode = 'lines+markers') 
-    fig <- fig %>% add_trace(y = ~Cumulative_School_Related_Cases, name = 'Cumulative School Related Cases', mode = 'lines+markers') 
-    fig <- fig %>% add_trace(y = ~Cumulative_School_Related_Student_Cases, name = 'Cumulative School Related Student Cases', mode = 'lines+markers') 
-    fig <- fig %>% add_trace(y = ~Cumulative_School_Related_Staff_Cases, name = 'Cumulative School Related Staff Cases', mode = 'lines+markers') 
-    fig <- fig %>% add_trace(y = ~Cumulative_School_Related_Unspecified_Cases, name = 'Cumulative School Related Unspecified Cases', mode = 'lines+markers')
-    fig
-}
 
 # function to plot cumulative COVID cases by date
 cumulative_plot <- function(plot_date) {
@@ -162,7 +140,9 @@ ui <- bootstrapPage(
                                     # tabPanel("Cumulative", plotlyOutput("country_plot_cumulative")),
                                     # tabPanel("New", plotlyOutput("country_plot")),
                                     # tabPanel("Cumulative (log10)", plotlyOutput("country_plot_cumulative_log")),
-                                    tabPanel('Cumulative cases', plotlyOutput("province_plot_cumulative"))
+                                    tabPanel('School related cases', br(), plotlyOutput('school_related_cases_details_plot')),
+                                    tabPanel('Schools with cases', br(), plotlyOutput('schools_with_cases_plot')),
+                                    tabPanel('Active cases by municipality', br(), plotlyOutput('active_cases_by_municipality_plot'))
                                 )
                             )
                         )
@@ -194,9 +174,83 @@ ui <- bootstrapPage(
 
 server <- function(input, output) {
     
-    # province_plot_cumulative -------------------------------------------------
-    output$province_plot_cumulative <- renderPlotly({
-        province_cases_cumulative(input$minimum_date)
+    # school_related_cases_details_plot ----------------------------------------
+    output$school_related_cases_details_plot <- renderPlotly({
+        df <- covid19_schools_summary
+        idx <- which(df$Collected_Date >= as.Date(input$minimum_date))
+        df <- df[ idx, ]
+        fig <- plot_ly(df, x = ~Collected_Date, y = ~Cumulative_School_Related_Cases, name = 'Cumulative School Related Cases', type = 'scatter', mode = 'lines+markers')
+        # fig <- fig %>% add_trace(y = ~New_Total_School_Related_Cases, name = 'New Total School Related Cases', mode = 'lines+markers') 
+        # fig <- fig %>% add_trace(y = ~New_School_Related_Student_Cases, name = 'New School Related Student Cases', mode = 'lines+markers') 
+        # fig <- fig %>% add_trace(y = ~New_School_Related_Staff_Cases, name = 'New School Related Staff Cases', mode = 'lines+markers') 
+        # fig <- fig %>% add_trace(y = ~New_School_Related_Unspecified_Cases, name = 'New School Related Unspecified Cases', mode = 'lines+markers') 
+        # fig <- fig %>% add_trace(y = ~Cumulative_School_Related_Cases, name = 'Cumulative School Related Cases', mode = 'lines+markers') 
+        fig <- fig %>% add_trace(y = ~Cumulative_School_Related_Student_Cases, name = 'Cumulative School Related Student Cases', mode = 'lines+markers') 
+        fig <- fig %>% add_trace(y = ~Cumulative_School_Related_Staff_Cases, name = 'Cumulative School Related Staff Cases', mode = 'lines+markers') 
+        fig <- fig %>% add_trace(y = ~Cumulative_School_Related_Unspecified_Cases, name = 'Cumulative School Related Unspecified Cases', mode = 'lines+markers')
+        fig <- fig %>% layout(title = 'School related cases',
+                              xaxis = list(title = 'collected date'),
+                              yaxis = list (title = 'cases'))
+        fig
+    })
+    
+    # schools_with_cases_plot --------------------------------------------------
+    output$schools_with_cases_plot <- renderPlotly({
+        df <- covid19_schools_summary[ , c('Collected_Date', 'Current_Schools_w_Cases') ]
+        idx <- which(df$Collected_Date >= as.Date(input$minimum_date))
+        df <- df[ idx, ]
+        fig <- plot_ly(df, x = ~Collected_Date, y = ~Current_Schools_w_Cases, name = 'Current schools with cases', type = 'scatter', mode = 'lines+markers')
+        fig <- fig %>% layout(title = 'Schools with cases',
+                              xaxis = list(title = 'collected date'),
+                              yaxis = list (title = 'schools'))
+        fig
+    })
+    
+    # active_cases_by_municipality_plot ----------------------------------------
+    output$active_cases_by_municipality_plot <- renderPlotly({
+        active_cases_by_municipality <- tapply(covid19_schools_active$Municipality,
+                                               list(covid19_schools_active$Collected_Date,
+                                                    covid19_schools_active$Municipality),
+                                               length)
+        active_cases_by_municipality <- na.locf(active_cases_by_municipality)
+        colidx <- order(active_cases_by_municipality[ nrow(active_cases_by_municipality), ], decreasing = TRUE)
+        active_cases_by_municipality <- active_cases_by_municipality[ , colidx ] 
+        active_cases_by_municipality <- data.frame(active_cases_by_municipality)
+        active_cases_by_municipality <- data.frame(Collected_Date = as.Date(rownames(active_cases_by_municipality)), active_cases_by_municipality)
+        rownames(active_cases_by_municipality) <- NULL
+        df <- active_cases_by_municipality[ , 1:11 ]
+        idx <- which(df$Collected_Date >= as.Date(input$minimum_date))
+        df <- df[ idx, ]
+        nms <- colnames(df)[ -1 ]
+        nms2 <- colnames(df)[ -1 ] %>% str_replace_all(., '\\.', ' ') %>% str_replace_all(., '\\s+', ' ') %>% str_trim
+        code_str <- sprintf('
+                            fig <- plot_ly(df, x = ~Collected_Date, y = ~%s, name = \'%s\', type = \'scatter\', mode = \'lines+markers\')
+                            fig <- fig %%>%% add_trace(y = ~%s, name = \'%s\', mode = \'lines+markers\') 
+                            fig <- fig %%>%% add_trace(y = ~%s, name = \'%s\', mode = \'lines+markers\') 
+                            fig <- fig %%>%% add_trace(y = ~%s, name = \'%s\', mode = \'lines+markers\') 
+                            fig <- fig %%>%% add_trace(y = ~%s, name = \'%s\', mode = \'lines+markers\') 
+                            fig <- fig %%>%% add_trace(y = ~%s, name = \'%s\', mode = \'lines+markers\') 
+                            fig <- fig %%>%% add_trace(y = ~%s, name = \'%s\', mode = \'lines+markers\') 
+                            fig <- fig %%>%% add_trace(y = ~%s, name = \'%s\', mode = \'lines+markers\') 
+                            fig <- fig %%>%% add_trace(y = ~%s, name = \'%s\', mode = \'lines+markers\') 
+                            fig <- fig %%>%% add_trace(y = ~%s, name = \'%s\', mode = \'lines+markers\') 
+                            fig
+                            ', 
+                            nms[ 1 ], nms2[ 1 ],
+                            nms[ 2 ], nms2[ 2 ],
+                            nms[ 3 ], nms2[ 3 ],
+                            nms[ 4 ], nms2[ 4 ],
+                            nms[ 5 ], nms2[ 5 ],
+                            nms[ 6 ], nms2[ 6 ],
+                            nms[ 7 ], nms2[ 7 ],
+                            nms[ 8 ], nms2[ 8 ],
+                            nms[ 9 ], nms2[ 9 ],
+                            nms[ 10 ], nms2[ 10 ])
+        fig <- parse(text = code_str) %>% eval
+        fig <- fig %>% layout(title = 'Cases by municipality (top 10)',
+                              xaxis = list(title = 'collected date'),
+                              yaxis = list (title = 'cases'))
+        fig
     })
     
     # cumulative_plot ----------------------------------------------------------
