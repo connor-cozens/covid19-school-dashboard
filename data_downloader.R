@@ -435,39 +435,39 @@ covid19_schools_active_with_demographics$percentage.of.students.whose.parents.ha
 # 13. exploratory data analysis ------------------------------------------------
 
 # 13a. summary data exploration ------------------------------------------------
-(covid19_schools_summary)
-
-dt <- as.Date(covid19_schools_summary[ , 'collected_date' ])
-
-d1 <- covid19_schools_summary[ , 'current_schools_w_cases' ]
-current_schools_w_cases <- xts(d1, order.by = dt)
-plot(current_schools_w_cases, main = 'current schools with cases')
-
-d1 <- covid19_schools_summary[ , 'current_schools_w_cases' ] / covid19_schools_summary[ , 'current_total_number_schools' ] * 1e2
-current_schools_w_cases_percent <- xts(d1, order.by = dt)
-plot(current_schools_w_cases_percent, main = 'current schools with cases percent')
-
-d1 <- covid19_schools_summary[ , 'cumulative_school_related_cases' ]
-cumulative_school_related_cases <- xts(d1, order.by = dt)
-plot(cumulative_school_related_cases, main = 'cumulative school related cases')
+# (covid19_schools_summary)
+# 
+# dt <- as.Date(covid19_schools_summary[ , 'collected_date' ])
+# 
+# d1 <- covid19_schools_summary[ , 'current_schools_w_cases' ]
+# current_schools_w_cases <- xts(d1, order.by = dt)
+# plot(current_schools_w_cases, main = 'current schools with cases')
+# 
+# d1 <- covid19_schools_summary[ , 'current_schools_w_cases' ] / covid19_schools_summary[ , 'current_total_number_schools' ] * 1e2
+# current_schools_w_cases_percent <- xts(d1, order.by = dt)
+# plot(current_schools_w_cases_percent, main = 'current schools with cases percent')
+# 
+# d1 <- covid19_schools_summary[ , 'cumulative_school_related_cases' ]
+# cumulative_school_related_cases <- xts(d1, order.by = dt)
+# plot(cumulative_school_related_cases, main = 'cumulative school related cases')
 
 # 13b. active cases data exploration -------------------------------------------
-(covid19_schools_active)
-
-dt <- as.Date(covid19_schools_active[ , 'collected_date' ])
-idx <- which(!is.na(dt))
-covid19_schools_active <- covid19_schools_active[ idx, ]
-dt <- dt[ idx ]
-
-active_cases_by_municipality <- tapply(covid19_schools_active$municipality,
-									   list(covid19_schools_active$collected_date,
-									   	 covid19_schools_active$municipality),
-									   length)
-active_cases_by_municipality <- as.xts(active_cases_by_municipality)
-plot(active_cases_by_municipality, type = 'b',
-	 main = 'cases in schools by municipality',
-	 legend.loc = 'topleft',
-	 grid.ticks.lwd = 0.25)
+# (covid19_schools_active)
+# 
+# dt <- as.Date(covid19_schools_active[ , 'collected_date' ])
+# idx <- which(!is.na(dt))
+# covid19_schools_active <- covid19_schools_active[ idx, ]
+# dt <- dt[ idx ]
+# 
+# active_cases_by_municipality <- tapply(covid19_schools_active$municipality,
+# 									   list(covid19_schools_active$collected_date,
+# 									   	 covid19_schools_active$municipality),
+# 									   length)
+# active_cases_by_municipality <- as.xts(active_cases_by_municipality)
+# plot(active_cases_by_municipality, type = 'b',
+# 	 main = 'cases in schools by municipality',
+# 	 legend.loc = 'topleft',
+# 	 grid.ticks.lwd = 0.25)
 
 # 13c. active cases with demographic data exploration --------------------------
 
