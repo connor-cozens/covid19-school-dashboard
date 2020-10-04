@@ -1,7 +1,9 @@
 # DEPENDENCIES -----------------------------------------------------------------
 
+library(rgdal)
 library(shiny)
 library(shinythemes)
+library(sp)
 library(plotly)
 library(xts)
 
@@ -38,7 +40,12 @@ cv_max_date_clean = format(as.POSIXct(current_date),'%d %B %Y')
 
 # CREATE BASEMAP ---------------------------------------------------------------
 
-basemap <- leaflet() %>% setView(lng = -85.3232, lat = 49, zoom = 6)
+# https://www12.statcan.gc.ca/census-recensement/alternative_alternatif.cfm?archived=1&l=eng&dispext=zip&teng=gpr_000b11a_e.zip&k=%20%20%20%2040968&loc=http://www12.statcan.gc.ca/census-recensement/2011/geo/bound-limit/files-fichiers/gpr_000b11a_e.zip
+# https://stackoverflow.com/questions/43093712/draw-a-map-of-a-specific-country-with-leaflet
+# canada <- readOGR(dsn = 'data', layer = 'gpr_000b11a_e')
+# ontario <- subset(canada, PRNAME != 'Ontario')
+# basemap <- leaflet(ontario) %>% setView(lng = -85.3232, lat = 49, zoom = 6) %>% addPolygons(fillColor = 'gray', weight = 3, color = 'gray', fillOpacity = 1)
+basemap <- leaflet() %>% setView(lng = -85.3232, lat = 49, zoom = 6) 
 basemap <- basemap %>% addProviderTiles(providers$Esri.NatGeoWorldMap) %>%
     addCircleMarkers(data = cases_per_school, 
                      lng = ~lon, 
