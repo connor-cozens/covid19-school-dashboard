@@ -1,5 +1,6 @@
 # DEPENDENCIES -----------------------------------------------------------------
 
+library(DT)
 library(rgdal)
 library(shiny)
 library(shinythemes)
@@ -42,18 +43,18 @@ cv_max_date_clean = format(as.POSIXct(current_date),'%d %B %Y')
 
 # https://www12.statcan.gc.ca/census-recensement/alternative_alternatif.cfm?archived=1&l=eng&dispext=zip&teng=gpr_000b11a_e.zip&k=%20%20%20%2040968&loc=http://www12.statcan.gc.ca/census-recensement/2011/geo/bound-limit/files-fichiers/gpr_000b11a_e.zip
 # https://stackoverflow.com/questions/43093712/draw-a-map-of-a-specific-country-with-leaflet
-# canada <- readOGR(dsn = 'data', layer = 'gpr_000b11a_e')
-# ontario <- subset(canada, PRNAME != 'Ontario')
-# basemap <- leaflet(ontario) %>% setView(lng = -85.3232, lat = 49, zoom = 6) %>% addPolygons(fillColor = 'gray', weight = 3, color = 'gray', fillOpacity = 1)
-basemap <- leaflet() %>% setView(lng = -85.3232, lat = 49, zoom = 6) 
+canada <- readOGR(dsn = 'data', layer = 'gpr_000b11a_e')
+ontario <- subset(canada, PRNAME == 'Ontario')
+basemap <- leaflet(ontario) %>% setView(lng = -85.3232, lat = 49, zoom = 6) %>% addPolygons(weight = 3)
+# basemap <- leaflet() %>% setView(lng = -85.3232, lat = 49, zoom = 6) 
 basemap <- basemap %>% addProviderTiles(providers$Esri.NatGeoWorldMap) %>%
     addCircleMarkers(data = cases_per_school, 
                      lng = ~lon, 
                      lat = ~lat, 
-                     radius = ~(cases_per_school), # ~(cases_per_school)^(1/5), 
+                     radius = ~(cases_per_school) * 2, # ~(cases_per_school)^(1/5), 
                      weight = 1, 
                      color = ~covid_col,
-                     fillOpacity = 0.4, 
+                     fillOpacity = 0.3, 
                      label = sprintf('<strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Confirmed cases (cumulative): %s<br/>', 
                                      cases_per_school$school_name, 
                                      cases_per_school$city, 
@@ -106,7 +107,7 @@ ui <- bootstrapPage(
                         )
                ),
                
-               # tab: plots ----------------------------------------------------
+               # tab: Plots ----------------------------------------------------
                tabPanel('Plots',
                         
                         sidebarLayout(
@@ -162,16 +163,29 @@ ui <- bootstrapPage(
                
                # tab: Data -----------------------------------------------------
                tabPanel('Data',
-                        h3('Summary of cases in schools'),
-                        numericInput('maxrows_1', 'Rows to show', 10),
-                        verbatimTextOutput('rawtable_1'),
-                        downloadButton('downloadCsv_1', 'Download as CSV'),tags$br(),tags$br(),
-                        h3('Schools with active COVID-19 cases'),
-                        numericInput('maxrows_2', 'Rows to show', 10),
-                        verbatimTextOutput('rawtable_2'),
-                        downloadButton('downloadCsv_2', 'Download as CSV'),tags$br(),tags$br(),
-                        'Adapted from data published by ', tags$a(href='https://data.ontario.ca/dataset/summary-of-cases-in-schools', 
-                                                                  'Government of Ontario.')
+                        # h3('Summary of cases in schools'),
+                        # # numericInput('maxrows_1', 'Rows to show', 10),
+                        # DTOutput('rawtable_1'),
+                        # downloadButton('downloadCsv_1', 'Download as CSV'),tags$br(),tags$br(),
+                        # h3('Schools with active COVID-19 cases'),
+                        # # numericInput('maxrows_2', 'Rows to show', 10),
+                        # DTOutput('rawtable_2'),
+                        # downloadButton('downloadCsv_2', 'Download as CSV'),tags$br(),tags$br(),
+                        # 'Adapted from data published by ', tags$a(href='https://data.ontario.ca/dataset/summary-of-cases-in-schools', 
+                        #                                           'Government of Ontario.')
+                        
+                        tabsetPanel(
+                            tabPanel('Summary of cases in schools', 
+                                     br(), 
+                                     downloadButton('downloadCsv_1', 'Download as CSV'),
+                                     br(),
+                                     DTOutput('rawtable_1')),
+                            tabPanel('Schools with active COVID-19 cases with demographics', 
+                                     br(), 
+                                     downloadButton('downloadCsv_2', 'Download as CSV'),
+                                     br(),
+                                     DTOutput('rawtable_2'))
+                        )
                ),
                
                # tab: About this site --------------------------------------------
@@ -268,9 +282,9 @@ server <- function(input, output) {
     # active_cases_by_board_plot -----------------------------------------------
     output$active_cases_by_board_plot <- renderPlotly({
         active_cases_by_board <- tapply(covid19_schools_active$school_board,
-                                               list(covid19_schools_active$collected_date,
-                                                    covid19_schools_active$school_board),
-                                               length)
+                                        list(covid19_schools_active$collected_date,
+                                             covid19_schools_active$school_board),
+                                        length)
         active_cases_by_board <- na.locf(active_cases_by_board)
         colidx <- order(active_cases_by_board[ nrow(active_cases_by_board), ], decreasing = TRUE)
         active_cases_by_board <- active_cases_by_board[ , colidx ] 
@@ -334,6 +348,7 @@ server <- function(input, output) {
         basemap
     })
     
+    
     # downloadCsv_1 ------------------------------------------------------------
     output$downloadCsv_1 <- downloadHandler(
         filename = function() {
@@ -345,27 +360,53 @@ server <- function(input, output) {
     )
     
     # rawtable_1 ---------------------------------------------------------------
-    output$rawtable_1 <- renderPrint({
-        orig <- options(width = 1000)
-        print(tail(covid19_schools_summary, input$maxrows_1), row.names = FALSE)
-        options(orig)
+    output$rawtable_1 <- renderDT({
+        df <- covid19_schools_summary
+        colnames(df) <- str_replace_all(colnames(df), '_', ' ')
+        datatable(
+            df,
+            options = list(
+                paging = TRUE,
+                searching = TRUE,
+                fixedColumns = TRUE,
+                autoWidth = TRUE,
+                ordering = TRUE,
+                dom = 'Bfrtip'
+            ),
+            rownames = FALSE,
+            class = 'display'
+        )
     })
     
     # downloadCsv_2 ------------------------------------------------------------
     output$downloadCsv_2 <- downloadHandler(
         filename = function() {
-            paste('schoolsactivecovid_', format(now(), '%Y%m%d'), '.csv', sep='')
+            paste('schoolsactivecovidwithdemographics_', format(now(), '%Y%m%d'), '.csv', sep='')
         },
         content = function(file) {
-            write.csv(covid19_schools_active, file)
+            write.csv(covid19_schools_active_with_demographics, file)
         }
     )
     
     # rawtable_2 ---------------------------------------------------------------
-    output$rawtable_2 <- renderPrint({
-        orig <- options(width = 1000)
-        print(tail(covid19_schools_active, input$maxrows_2), row.names = FALSE)
-        options(orig)
+    output$rawtable_2 <- renderDT({
+        df <- covid19_schools_active_with_demographics
+        df$board.name <- NULL
+        df$school.name <- NULL
+        colnames(df) <- str_replace_all(colnames(df), '_|\\.', ' ')
+        datatable(
+            df,
+            options = list(
+                paging = TRUE,
+                searching = TRUE,
+                fixedColumns = TRUE,
+                autoWidth = TRUE,
+                ordering = TRUE,
+                dom = 'Bfrtip'
+            ),
+            rownames = FALSE,
+            class = 'display'
+        )
     })
 }
 
