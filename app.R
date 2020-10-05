@@ -84,15 +84,12 @@ ui <- bootstrapPage(
                                           top = 75, 
                                           left = 55, 
                                           width = 250, 
-                                          fixed=TRUE,
+                                          fixed = TRUE,
                                           draggable = TRUE, 
                                           height = 'auto',
-                                          # span(tags$i(h6('Reported cases are subject to significant variation in testing policy and capacity between countries.')), style='color:#045a8d'),
                                           h3(textOutput('reactive_case_count'), align = 'right'),
-                                          # h4(textOutput('reactive_death_count'), align = 'right'),
                                           h6(textOutput('clean_date_reactive'), align = 'right'),
-                                          # plotOutput('epi_curve', height='130px', width='100%'),
-                                          plotOutput('cumulative_plot', height='130px', width='100%'),
+                                          plotOutput('cumulative_plot', height = '130px', width = '100%'),
                                           
                                           sliderInput('plot_date',
                                                       label = h5('Select mapping date'),
@@ -112,31 +109,6 @@ ui <- bootstrapPage(
                         
                         sidebarLayout(
                             sidebarPanel(
-                                
-                                # span(tags$i(h6("Reported cases are subject to significant variation in testing policy and capacity between countries.")), style="color:#045a8d"),
-                                # span(tags$i(h6("Occasional anomalies (e.g. spikes in daily case counts) are generally caused by changes in case definitions.")), style="color:#045a8d"),
-                                # 
-                                # pickerInput("level_select", "Level:",
-                                #             choices = c("Global", "Continent", "Country", "US state"),
-                                #             selected = c("Country"),
-                                #             multiple = FALSE),
-                                # 
-                                # pickerInput("region_select", "Country/Region:",
-                                #             choices = as.character(cv_today_reduced[order(-cv_today_reduced$cases),]$country),
-                                #             options = list(`actions-box` = TRUE, `none-selected-text` = "Please make a selection!"),
-                                #             selected = as.character(cv_today_reduced[order(-cv_today_reduced$cases),]$country)[1:10],
-                                #             multiple = TRUE),
-                                # 
-                                # pickerInput("outcome_select", "Outcome:",
-                                #             choices = c("Deaths per 100,000", "Cases per 100,000", "Cases (total)", "Deaths (total)"),
-                                #             selected = c("Deaths per 100,000"),
-                                #             multiple = FALSE),
-                                # 
-                                # pickerInput("start_date", "Plotting start date:",
-                                #             choices = c("Date", "Day of 100th confirmed case", "Day of 10th death"),
-                                #             options = list(`actions-box` = TRUE),
-                                #             selected = "Date",
-                                #             multiple = FALSE),
                                 
                                 sliderInput("minimum_date",
                                             "Minimum date:",
