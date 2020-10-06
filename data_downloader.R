@@ -273,9 +273,9 @@ covid19_schools_active_with_demographics <- apply(covid19_schools_active, 1, fun
 	# match on cleaned school name
 	idx <- which(school_demographics$school_clean == x[ 'school_clean' ])
 	if (length(idx) > 1) {
-		disambiguation_df <- data.frame(x[ 'school' ],
+		disambiguation_df <- data.frame(x[ 'school' ] %>% as.character,
 										school_demographics[ idx, c('school name', 'board name') ],
-										x[ 'school_board' ],
+										x[ 'school_board' ] %>% as.character,
 										stringsAsFactors = FALSE)
 		# print(disambiguation_df)
 		# if all school boards are the same it is a question of whether this is an elemtary or a high school
@@ -335,7 +335,7 @@ covid19_schools_active_with_demographics <- rbindlist(covid19_schools_active_wit
 covid19_schools_active_with_demographics <- data.frame(covid19_schools_active_with_demographics)
 
 # 12. clean combined case and demographics data --------------------------------
-str(covid19_schools_active_with_demographics)
+# str(covid19_schools_active_with_demographics)
 # 'data.frame':	1674 obs. of  62 variables:
 # 	$ collected_date                                                                          : chr  "2020-09-10" "2020-09-10" "2020-09-10" "2020-09-10" ...
 covid19_schools_active_with_demographics$collected_date <- as.Date(covid19_schools_active_with_demographics$collected_date)
@@ -491,19 +491,19 @@ covid19_schools_active_with_demographics_most_recent <- rbindlist(covid19_school
 covid19_schools_active_with_demographics_most_recent <- data.frame(covid19_schools_active_with_demographics_most_recent, 
 																   stringsAsFactors = FALSE)
 
-# schools with outbreaks by school type
-table(covid19_schools_active_with_demographics_most_recent$school.type)
-
-# schools with outbreaks by school level
-table(covid19_schools_active_with_demographics_most_recent$school.level)
-
-# schools with outbreaks by grade range
-table(covid19_schools_active_with_demographics_most_recent$grade.range)
-
-# total confirmed cases by school level
-tapply(covid19_schools_active_with_demographics_most_recent$total_confirmed_cases, 
-	   covid19_schools_active_with_demographics_most_recent$school.level, 
-	   sum)
+# # schools with outbreaks by school type
+# table(covid19_schools_active_with_demographics_most_recent$school.type)
+# 
+# # schools with outbreaks by school level
+# table(covid19_schools_active_with_demographics_most_recent$school.level)
+# 
+# # schools with outbreaks by grade range
+# table(covid19_schools_active_with_demographics_most_recent$grade.range)
+# 
+# # total confirmed cases by school level
+# tapply(covid19_schools_active_with_demographics_most_recent$total_confirmed_cases, 
+# 	   covid19_schools_active_with_demographics_most_recent$school.level, 
+# 	   sum)
 
 # 13d. plot cases by school on map ---------------------------------------------
 
@@ -518,6 +518,8 @@ school_language <- covid19_schools_active_with_demographics_most_recent$school.l
 names(school_language) <- geo_query_str
 school_enrolment <- covid19_schools_active_with_demographics_most_recent$enrolment
 names(school_enrolment) <- geo_query_str
+low_income <- covid19_schools_active_with_demographics_most_recent$percentage.of.school.aged.children.who.live.in.low.income.households
+names(low_income) <- geo_query_str
 cases_per_school <- tapply(covid19_schools_active_with_demographics_most_recent$total_confirmed_cases, geo_query_str, sum)
 cases_per_school <- data.frame(cases_per_school, geo_query_str = names(cases_per_school))
 rownames(cases_per_school) <- NULL
@@ -528,6 +530,7 @@ cases_per_school$school_board <- sapply(cases_per_school$geo_query_str, function
 cases_per_school$school_level <- sapply(cases_per_school$geo_query_str, function(x) school_level[[ x ]][ 1 ]) %>% as.character
 cases_per_school$school_language <- sapply(cases_per_school$geo_query_str, function(x) school_language[[ x ]][ 1 ]) %>% as.character
 cases_per_school$school_enrolment <- sapply(cases_per_school$geo_query_str, function(x) school_enrolment[[ x ]][ 1 ]) %>% as.integer
+cases_per_school$low_income <- sapply(cases_per_school$geo_query_str, function(x) low_income[[ x ]][ 1 ]) %>% as.integer
 # m <- leaflet() %>% setView(lng = -85.3232, lat = 49, zoom = 5)
 # m %>% addTiles() %>%
 # 	addCircleMarkers(data = cases_per_school, 
