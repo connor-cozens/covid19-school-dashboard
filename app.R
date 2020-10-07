@@ -43,7 +43,7 @@ ui <- bootstrapPage(
                             tags$head(includeCSS('styles.css')),
                             
                             # leaflet: basemap  --------------------------------
-                            leafletOutput('basemap_leaflet', width='100%', height='100%'),
+                            leafletOutput('basemap_leaflet', width = '100%', height = '100%'),
                             
                             # panel: controls ----------------------------------
                             absolutePanel(id = 'controls', 
@@ -54,9 +54,17 @@ ui <- bootstrapPage(
                                           fixed = TRUE,
                                           draggable = TRUE, 
                                           height = 'auto',
-                                          h3(textOutput('reactive_case_count'), align = 'right'),
-                                          h6(textOutput('clean_date_reactive'), align = 'right'),
+                                          
+                                          # cumulative_case_count_text ---------
+                                          h3(textOutput('cumulative_case_count_text'), align = 'right'),
+                                          
+                                          # clean_date_reactive_text -----------
+                                          h6(textOutput('clean_date_reactive_text'), align = 'right'),
+                                          
+                                          # cumulative_plot --------------------
                                           plotOutput('cumulative_plot', height = '130px', width = '100%'),
+                                          
+                                          # plot_date --------------------------
                                           sliderInput('plot_date',
                                                       label = h5('Select mapping date'),
                                                       min = as.Date(cv_min_date,'%Y-%m-%d'),
@@ -64,7 +72,9 @@ ui <- bootstrapPage(
                                                       value = as.Date(current_date),
                                                       timeFormat = '%d %b',
                                                       animate = animationOptions(interval = 3000, loop = FALSE)),
-                                          h3('daily summary', align = 'right'),
+                                          
+                                          # daily_summary ----------------------
+                                          h3('Daily Summary', align = 'right'),
                                           div(tableOutput('daily_summary'), style = 'font-size: small; width: 100%')
                             )
                             
@@ -93,17 +103,17 @@ ui <- bootstrapPage(
                                              br(), 
                                              plotlyOutput('school_related_cases_details_plot')),
                                     
-                                    tabPanel('Schools with cases', 
-                                             br(), 
-                                             plotlyOutput('schools_with_cases_plot')),
-                                    
-                                    tabPanel('Active school cases by municipality', 
+                                    tabPanel('Active school-related cases by municipality', 
                                              br(), 
                                              plotlyOutput('active_cases_by_municipality_plot')),
                                     
-                                    tabPanel('Active school cases by school board', 
+                                    tabPanel('Active school-related cases by school board', 
                                              br(), 
-                                             plotlyOutput('active_cases_by_board_plot'))
+                                             plotlyOutput('active_cases_by_board_plot')),
+                                    
+                                    tabPanel('Schools with cases', 
+                                             br(), 
+                                             plotlyOutput('schools_with_cases_plot'))
                                     
                                 )
                             )
@@ -112,28 +122,29 @@ ui <- bootstrapPage(
                
                # tab: Data -----------------------------------------------------
                tabPanel('Data',
-                        # h3('Summary of cases in schools'),
-                        # # numericInput('maxrows_1', 'Rows to show', 10),
-                        # DTOutput('school_summary_data_dt'),
-                        # downloadButton('download_csv_button_1', 'Download as CSV'),tags$br(),tags$br(),
-                        # h3('Schools with active COVID-19 cases'),
-                        # # numericInput('maxrows_2', 'Rows to show', 10),
-                        # DTOutput('school_cases_demo_data_dt'),
-                        # downloadButton('download_csv_button_2', 'Download as CSV'),tags$br(),tags$br(),
-                        # 'Adapted from data published by ', tags$a(href='https://data.ontario.ca/dataset/summary-of-cases-in-schools', 
-                        #                                           'Government of Ontario.')
-                        
                         tabsetPanel(
                             tabPanel('Summary of cases in schools', 
+                                     h3('Summary of cases in schools'),
                                      br(), 
                                      downloadButton('download_csv_button_1', 'Download as CSV'),
                                      br(),
-                                     DTOutput('school_summary_data_dt')),
+                                     DTOutput('school_summary_data_dt'),
+                                     br(),
+                                     'Adapted from data published by Government of Ontario: ', 
+                                     a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools', 'Summary of cases in schools')
+                            ),
                             tabPanel('Schools with active COVID-19 cases with demographics', 
+                                     h3('Schools with active COVID-19 cases with demographics'),
                                      br(), 
                                      downloadButton('download_csv_button_2', 'Download as CSV'),
                                      br(),
-                                     DTOutput('school_cases_demo_data_dt'))
+                                     DTOutput('school_cases_demo_data_dt'),
+                                     br(),
+                                     'Adapted from data published by Government of Ontario: ', 
+                                     a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools', 'Schools with active COVID-19 cases'),
+                                     ', ',
+                                     a(href = 'https://data.ontario.ca/dataset/school-information-and-student-demographics', 'School information and student demographics')
+                            )
                         )
                ),
                
@@ -213,12 +224,12 @@ server <- function(input, output) {
         plot_date <- input$plot_date
         dt <- as.Date(covid19_schools_summary[ , 'collected_date' ])
         d1 <- covid19_schools_summary[ , 'cumulative_school_related_cases' ]
-        plot_df <- data.frame(date = dt, cases = d1)
-        plot_df = subset(plot_df, date <= plot_date)
-        g1 = ggplot(plot_df, aes(x = date, y = cases)) + 
+        plot_df <- data.frame(Date = dt, cases = d1)
+        plot_df = subset(plot_df, Date <= plot_date)
+        g1 = ggplot(plot_df, aes(x = Date, y = cases)) + 
             geom_line() + 
             geom_point(size = 1, alpha = 0.8) +
-            ylab('cumulative cases') + 
+            ylab('Cumulative cases') + 
             theme_bw() + 
             scale_colour_manual(values = c(covid_col)) +
             scale_y_continuous(labels = function(l) { as.integer(l) }) +
@@ -267,19 +278,22 @@ server <- function(input, output) {
         colnames(df1) <- c('change', 'variable')
         df2 <- reshape2::melt(df[ 2, -1 ])
         df <- merge(df2, df1, on = 'variable', all = TRUE)
+        colnames(df) <- c('Variable', 'Count', 'Change')
+        idx <- which(df$Change > 0)
+        df[ idx, 'Change' ] <- sprintf('+%s', df[ idx, 'Change' ])
         df
     })
     
-    # clean_date_reactive ------------------------------------------------------
-    output$clean_date_reactive <- renderText({
+    # clean_date_reactive_text -------------------------------------------------
+    output$clean_date_reactive_text <- renderText({
         format(as.POSIXct(input$plot_date), '%d %B %Y')
     })
     
-    # reactive_case_count ------------------------------------------------------
-    output$reactive_case_count <- renderText({
+    # cumulative_case_count_text -----------------------------------------------
+    output$cumulative_case_count_text <- renderText({
         idx <- max(which(covid19_schools_summary$collected_date <= as.Date(input$plot_date)))
         count <- last(covid19_schools_summary[ idx, 'cumulative_school_related_cases' ])
-        paste0(prettyNum(count, big.mark = ','), ' cases')
+        paste0(prettyNum(count, big.mark = ','), ' cumulative cases')
     })
     
     # school_related_cases_details_plot ----------------------------------------
@@ -287,17 +301,17 @@ server <- function(input, output) {
         df <- covid19_schools_summary
         idx <- which(df$collected_date >= as.Date(input$minimum_date))
         df <- df[ idx, ]
-        fig <- plot_ly(df, x = ~collected_date, y = ~cumulative_school_related_cases, name = 'Cumulative School Related Cases', type = 'scatter', mode = 'lines+markers')
-        fig <- fig %>% add_trace(y = ~cumulative_school_related_student_cases, name = 'Cumulative School Related Student Cases', mode = 'lines+markers') 
-        fig <- fig %>% add_trace(y = ~cumulative_school_related_staff_cases, name = 'Cumulative School Related Staff Cases', mode = 'lines+markers') 
-        fig <- fig %>% add_trace(y = ~cumulative_school_related_unspecified_cases, name = 'Cumulative School Related Unspecified Cases', mode = 'lines+markers')
-        fig <- fig %>% add_trace(y = ~new_total_school_related_cases, name = 'New Total School Related Cases', mode = 'lines+markers')
-        fig <- fig %>% add_trace(y = ~new_school_related_student_cases, name = 'New School Related Student Cases', mode = 'lines+markers')
-        fig <- fig %>% add_trace(y = ~new_school_related_staff_cases, name = 'New School Related Staff Cases', mode = 'lines+markers')
-        fig <- fig %>% add_trace(y = ~new_school_related_unspecified_cases, name = 'New School Related Unspecified Cases', mode = 'lines+markers')
+        fig <- plot_ly(df, x = ~collected_date, y = ~cumulative_school_related_cases, name = 'Cumulative school-related cases', type = 'scatter', mode = 'lines+markers')
+        fig <- fig %>% add_trace(y = ~cumulative_school_related_student_cases, name = 'Cumulative school-related student cases', mode = 'lines+markers') 
+        fig <- fig %>% add_trace(y = ~cumulative_school_related_staff_cases, name = 'Cumulative school-related staff cases', mode = 'lines+markers') 
+        fig <- fig %>% add_trace(y = ~cumulative_school_related_unspecified_cases, name = 'Cumulative school-related unspecified cases', mode = 'lines+markers')
+        fig <- fig %>% add_trace(y = ~new_total_school_related_cases, name = 'New total school-related cases', mode = 'lines+markers')
+        fig <- fig %>% add_trace(y = ~new_school_related_student_cases, name = 'New school-related student cases', mode = 'lines+markers')
+        fig <- fig %>% add_trace(y = ~new_school_related_staff_cases, name = 'New school-related staff cases', mode = 'lines+markers')
+        fig <- fig %>% add_trace(y = ~new_school_related_unspecified_cases, name = 'New school-related unspecified cases', mode = 'lines+markers')
         fig <- fig %>% layout(title = 'Cumulative school-related cases',
-                              xaxis = list(title = 'collected date'),
-                              yaxis = list (title = 'cases'))
+                              xaxis = list(title = 'Collected date'),
+                              yaxis = list (title = 'Cumulative cases'))
         fig
     })
     
@@ -308,8 +322,8 @@ server <- function(input, output) {
         df <- df[ idx, ]
         fig <- plot_ly(df, x = ~collected_date, y = ~current_schools_w_cases, name = 'Current schools with cases', type = 'scatter', mode = 'lines+markers')
         fig <- fig %>% layout(title = 'Schools with cases',
-                              xaxis = list(title = 'collected date'),
-                              yaxis = list (title = 'schools'))
+                              xaxis = list(title = 'Collected date'),
+                              yaxis = list (title = 'Schools'))
         fig
     })
     
@@ -355,8 +369,8 @@ server <- function(input, output) {
                             nms[ 10 ], nms2[ 10 ])
         fig <- parse(text = code_str) %>% eval
         fig <- fig %>% layout(title = 'Active school cases by municipality (top 10)',
-                              xaxis = list(title = 'collected date'),
-                              yaxis = list (title = 'cases'))
+                              xaxis = list(title = 'Collected date'),
+                              yaxis = list (title = 'Active cases'))
         fig
     })
     
@@ -402,8 +416,8 @@ server <- function(input, output) {
                             nms[ 10 ], nms2[ 10 ])
         fig <- parse(text = code_str) %>% eval
         fig <- fig %>% layout(title = 'Active school cases by school board (top 10)',
-                              xaxis = list(title = 'collected date'),
-                              yaxis = list (title = 'cases'))
+                              xaxis = list(title = 'Collected date'),
+                              yaxis = list (title = 'Active cases'))
         fig
     })
     
@@ -421,6 +435,7 @@ server <- function(input, output) {
     output$school_summary_data_dt <- renderDT({
         df <- covid19_schools_summary
         colnames(df) <- str_replace_all(colnames(df), '_', ' ')
+        colnames(df) <- str_to_title(colnames(df))
         datatable(
             df,
             options = list(
@@ -452,6 +467,7 @@ server <- function(input, output) {
         df$board.name <- NULL
         df$school.name <- NULL
         colnames(df) <- str_replace_all(colnames(df), '_|\\.', ' ')
+        colnames(df) <- str_to_title(colnames(df))
         datatable(
             df,
             options = list(
