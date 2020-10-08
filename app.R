@@ -148,9 +148,77 @@ ui <- bootstrapPage(
                         )
                ),
                
-               # tab: About this site --------------------------------------------
+               # tab: Data Dictionary and Data Sources -------------------------
+               tabPanel('Data Dictionary and Data Sources',
+                        div()
+               ),
+               
+               # tab: About this site ------------------------------------------
                tabPanel('About this site',
-                        tags$div()
+                        tags$div(),
+                        h3('COVID-19 SCHOOL DASHBOARD KEY AIMS & INFORMATION'),
+                        a(href = 'COVID19SchoolDashboard.com', 'COVID19SchoolDashboard.com'), ' reports and maps confirmed school-related cases of COVID-19 in publicly funded elementary and secondary schools in Ontario, Canada, and connects this to data on school social background characteristics (school-level demographic data).',
+                        p('The main aim of this site is to provide real-time data visualization of affected schools for broad dissemination. This will help to increase transparency and understanding of the education scenario as it evolves. It will help school communities (parents, students, teachers and staff, leaders and administrators), community members and neighbours, education and health professionals, officials, researchers, media, and the general public.'),
+                        h4('Why is this important?'),
+                        p('The effects of COVID-19 are more severe on high-risk communities, populations, and schools. There are strong equity concerns. Visualizing COVID-19 case data with data on school social background characteristics will give us a better understanding of the composition of affected schools. In short, we will get closer to understanding the human dimension of COVID-19 on school populations.'),
+                        h4('Update frequency'),
+                        p('This site is automatically updated every weekday (excluding public holidays) following the release of school-related COVID-19 case data by the Ontario Ministry of Education. Cumulative totals represent all total cases reported to the Ministry of Education as of 5 September 2020, including resolved cases. The first school-related cases appeared in the dataset on 10 September 2020.'),
+                        p('This site uses the latest publicly available data on school information and student demographics released by the Ontario Ministry of Education for school background characteristics. This dataset is updated by the Ministry monthly.'),
+                        p('Click ', a(href = '', 'here'), ' for more information on data sources and definitions of terms.'),
+                        h3('CONTEXT'),
+                        p('Pandemic-related school closures in Ontario affected over 2 million elementary and secondary school students. The province’s first school closure announcement was issued on 12 March 2020 for an initial period from 14 March to 4 April 2020. This compelled all publicly funded elementary and secondary schools to close. Public school closures were extended another three times – first until 4 May, then 31 May, and finally until the end of June 2020.'),
+                        p('Phased reopening of publicly funded schools in the province began on 8 September 2020 and continued until 21 September 2020, by which time all schools should have opened.'),
+                        p('When interpreting the data, it is important to keep in mind that data on COVID-19 school-related cases prior to 21 September 2020 will reflect partial education system reopening. The first school-related cases appeared in the dataset on 10 September 2020.'),
+                        h3('HOW TO NAVIGATE THE SITE'),
+                        h4('COVID-19 School Mapper Tab'),
+                        p('The first school-related cases appeared in the dataset on 10 September 2020. Affected schools are plotted by geocode on the map.'), 
+                        h5('Bubbles'),
+                        p('The size of the bubbles indicates the magnitude of cumulative cases at specific schools relative to others. The bigger the bubble, the more cumulative cases at that school – that is, the more it has been affected relative to other schools.'),
+                        p('Hovering on a bubble reveals school-specific COVID-19 case data and school social background information. Currently, the bubbles show: cumulative cases, city, level, board, main language of instruction, enrolment, proportion of students from low-income households, ***** '),
+                        p('View the Data Dictionary for definitions of these indicators.'),
+                        h5('Quick view summary pane'),
+                        tags$ul(
+                            tags$li(tags$i('Cumulative Case Chart:'), ' Shows the number of cumulative school-related cases in Ontario. Use the slider to view the evolution since the first day of cases in the dataset. Selecting a specific date on the slider will adjust data in the Daily Summary accordingly.'),
+                            tags$li(tags$i('Daily Summary:'), ' Summarizes cumulative school-related cases, new total school-related cases, current schools with cases, and current schools closed. It also shows the count and change (+/-) from the most current date with data to the date immediately preceding. No changes will be seen on or between weekend dates (i.e., between Friday and Saturday; Saturday and Sunday) or public holidays since data are only released by the Ministry on weekdays.')
+                        ),
+                        h4('Plots Tab'),
+                        p('These graphs provide an indication of the evolution of school-related cases over time. The first school-related cases appeared in the dataset on 10 September 2020. Currently, there are four graphs.'),
+                        h5('Cumulative school-related cases'),
+                        p('Shows all cumulative school-related cases, including resolved cases in Ontario and the breakdown of student cases, staff, and unspecified individual cases.'),
+                        h5('New school-related cases'),
+                        p('Shows all new school-related cases in Ontario, and the breakdown of student, staff, and unspecified cases.'),
+                        h5('Active school-related cases by municipality'),
+                        p('Shows the top 10 municipalities with active school-related cases.'),
+                        h5('Active school-related cases by school board'),
+                        p('Shows the top 10 school boards with active school-related cases.'),
+                        h5('Slider'),
+                        p('Keep the slider to the minimum date (10 Sept) to see the full evolution of cases up to the most current date for every graph.'),
+                        h5('Tools for added functionality'),
+                        p('Hover over the legend of each graph to access tools for added functionality: download graph as .PNG image file, zoom, pan, box select, lasso select, zoom in, zoom out, autoscale, reseat axes, toggle spike lines, show closest data on hover, compare data on hover.'),
+                        p('"Compare data on hover" is especially useful to see and compare the number of cases on all lines in the graph on a specific date.'),
+                        h4('Data Tab'),
+                        h5('Summary of cases in schools'),
+                        p('Presents raw data of cases in schools. Data table can be manipulated in ascending or descending order by variable of interest. Table can be downloaded as a .CSV file for independent analysis.'),
+                        p('Variables included: collected date; reported date; current schools with cases; current schools closed; current total number of schools; new (total school-related cases; student; staff; unspecified); recent (total school-related cases; student; staff; unspecified); past (total school-related cases; student; staff; unspecified); cumulative (total school-related cases; student; staff; unspecified).'),
+                        p('Recent and past case data available as from 1 October 2020.'),
+                        p('Schools with active cases and school demographic data'),
+                        h4('Data Dictionary and Data Sources Tab'),
+                        h5('Data Dictionary'),
+                        p('Lists all definitions of variables and terms used. Extracted from data dictionaries of original datasets sourced.'),
+                        h5('Data Sources'),
+                        p('Lists all publicly available data sources used to generate the COVID-19 School Dashboard.'),
+                        h5('Source Code'),
+                        p('Source code for this site can be found ', a(href = 'https://gitlab.com/br00t/ontario-covid19-dashboard', 'here')),
+                        h3('AUTHORSHIP, ATTRIBUTIONS, CITATION'),
+                        p('Dr. Prachi Srivastava, Associate Professor, Faculty of Education, University of Western Ontario, Canada.'),
+                        p(a(href = 'mailto:prachi.srivastava@uwo.ca', 'Prachi.srivastava@uwo.ca')),
+                        p(a(href = 'https://twitter.com/PrachiSrivas', '@PrachiSrivas')),
+                        h4('ORCID iD:'),
+                        p('The technical development and design of the COVID-19 School Dashboard was done by an independent developer.'),
+                        h4('Preliminary site structure based on:'),
+                        tags$cite('Parker, E., & Leclerc, Q. (2020). COVID-19 tracker. [Web application]. ',  a(href = 'https://vac-lshtm.shinyapps.io/ncov_tracker/', 'https://vac-lshtm.shinyapps.io/ncov_tracker/')),
+                        h4('Cite the COVID-19 School Dashboard as:'),
+                        tags$cite('Srivastava, P. (2020). COVID-19 school dashboard (1.0 Oct 2020). [Web application]. ', a(href = 'http://covid19schooldashboard.com/', 'http://covid19schooldashboard.com/'))
                )
                
     )          
@@ -282,7 +350,7 @@ server <- function(input, output) {
         idx <- which(df$Change > 0)
         df[ idx, 'Change' ] <- sprintf('+%s', df[ idx, 'Change' ])
         df
-    })
+    }, align = 'r', striped = TRUE)
     
     # clean_date_reactive_text -------------------------------------------------
     output$clean_date_reactive_text <- renderText({
