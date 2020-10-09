@@ -156,7 +156,26 @@ ui <- bootstrapPage(
                
                # tab: Data Dictionary and Data Sources -------------------------
                tabPanel('Data Dictionary and Data Sources',
-                        div()
+                        tabsetPanel(
+                            tabPanel('Summary of cases in schools', 
+                                     h3('Summary of cases in schools'),
+                                     br(), 
+                                     DTOutput('school_summary_data_dictionary_dt'),
+                                     br(),
+                                     'Adapted from data published by Government of Ontario: ', 
+                                     a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools/resource/7fbdbb48-d074-45d9-93cb-f7de58950418', 'Summary of cases in schools')
+                            ),
+                            tabPanel('Schools with active cases and school demographic data', 
+                                     h3('Schools with active cases and school demographic data'),
+                                     br(), 
+                                     DTOutput('school_cases_demo_data_dictionary_dt'),
+                                     br(),
+                                     'Adapted from data published by Government of Ontario: ', 
+                                     a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools/resource/8b6d22e2-7065-4b0f-966f-02640be366f2', 'Schools with active COVID-19 cases'),
+                                     ', ',
+                                     a(href = 'https://data.ontario.ca/dataset/school-information-and-student-demographics/resource/602a5186-67f5-4faf-94f3-7c61ffc4719a', 'School information and student demographics')
+                            )
+                        )
                ),
                
                # tab: About this site ------------------------------------------
@@ -575,6 +594,101 @@ server <- function(input, output) {
             class = 'display'
         )
     })
+    
+    # school_summary_data_dictionary_dt ----------------------------------------
+    output$school_summary_data_dictionary_dt <- renderDT({
+        field <- c('Collected Date',
+                   'Reported Date',
+                   'Current Schools W Cases',
+                   'Current Schools Closed',
+                   'Current Total Number Schools', 
+                   'New Total School Related Cases',
+                   'New School Related Student Cases',
+                   'New School Related Staff Cases', 
+                   'New School Related Unspecified Cases', 
+                   'Recent Total School Related Cases', 
+                   'Recent School Related Student Cases',
+                   'Recent School Related Staff Cases',
+                   'Recent School Related Unspecified Cases', 
+                   'Past Total School Related Cases', 
+                   'Past School Related Student Cases',
+                   'Past School Related Staff Cases', 
+                   'Past School Related Unspecified Cases', 
+                   'Cumulative School Related Cases',
+                   'Cumulative School Related Student Cases',
+                   'Cumulative School Related Staff Cases',
+                   'Cumulative School Related Unspecified Cases')
+        description <- c('date results collected',
+                         'date results reported',
+                         'count of schools with active cases currently',
+                         'count of schools closed',
+                         'total number of schools in province',
+                         'total new school-related cases of all types since last reporting date',
+                         'new school-related student cases since last reporting date',
+                         'new school-related staff cases since last reporting date',
+                         'new school-related unspecified cases since last reporting date',
+                         'total recent school-related cases',
+                         'recent school-related student cases',
+                         'recent school-related staff cases',
+                         'recent school-related unspecified cases',
+                         'total past school-related cases',
+                         'past school-related student cases',
+                         'past school-related staff cases',
+                         'past school-related unspecified cases',
+                         'cumulative total school-related cases',
+                         'cumulative school-related student cases',
+                         'cumulative school-related staff cases',
+                         'cumulative school-related unspecified cases')
+        df <- data.frame(field, description)
+        datatable(
+            df,
+            options = list(
+                paging = TRUE,
+                searching = TRUE,
+                fixedColumns = TRUE,
+                autoWidth = TRUE,
+                ordering = TRUE,
+                dom = 'Bfrtip'
+            ),
+            rownames = FALSE,
+            class = 'display'
+        )
+    })
+    
+    # school_cases_demo_data_dictionary_dt -------------------------------------
+    output$school_cases_demo_data_dictionary_dt <- renderDT({
+        field <- c('Collected Date', 'Reported Date', 'School Board', 'School', 
+                   'Municipality', 'Confirmed Student Cases', 'Confirmed Staff Cases',
+                   'Confirmed Unspecified Cases', 'Total Confirmed Cases',
+                   'Board Number', 'Board Name', 'Board Type', 'School Number', 
+                   'School Name', 'School Type', 'School Special Condition Code', 
+                   'School Level', 'School Language', 'Grade Range', 'Street', 'City',
+                   'Province', 'Postal Code', 'Enrolment', 'Latitude', 'Longitude', 
+                   'Percentage Of Students Whose First Language Is Not English', 
+                   'Percentage Of Students Whose First Language Is Not French', 
+                   'Percentage Of Students Who Are New To Canada From A Non English Speaking Country',
+                   'Percentage Of Students Who Are New To Canada From A Non French Speaking Country', 
+                   'Percentage Of Students Identified As Gifted', 
+                   'Percentage Of Students Receiving Special Education Services', 
+                   'Percentage Of School Aged Children Who Live In Low Income Households', 
+                   'Percentage Of Students Whose Parents Have Some University Education')
+        description <- character(34)
+        df <- data.frame(field, description)
+        datatable(
+            df,
+            options = list(
+                paging = TRUE,
+                searching = TRUE,
+                fixedColumns = TRUE,
+                autoWidth = TRUE,
+                ordering = TRUE,
+                dom = 'Bfrtip'
+            ),
+            rownames = FALSE,
+            class = 'display'
+        )
+    })
+    
 }
 
 # RUN THE APPLICATION ----------------------------------------------------------
