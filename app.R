@@ -32,8 +32,10 @@ cv_max_date_clean = format(as.POSIXct(current_date),'%d %B %Y')
 # SHINY UI ---------------------------------------------------------------------
 ui <- bootstrapPage(
     tags$head(includeHTML('gtag.html')),
-    navbarPage(theme = shinytheme('flatly'), collapsible = TRUE,
-               'Ontario Schools COVID-19 Tracker', id='nav',
+    navbarPage(theme = shinytheme('flatly'), 
+               collapsible = TRUE,
+               'Ontario Schools COVID-19 Tracker', 
+               id = 'nav',
                
                # tab: COVID-19 Mapper ------------------------------------------
                tabPanel('COVID-19 Mapper',
@@ -103,17 +105,21 @@ ui <- bootstrapPage(
                                              br(), 
                                              plotlyOutput('school_related_cases_details_plot')),
                                     
+                                    tabPanel('New school-related cases', 
+                                             br(), 
+                                             plotlyOutput('school_related_new_cases_details_plot')),
+                                    
                                     tabPanel('Active school-related cases by municipality', 
                                              br(), 
                                              plotlyOutput('active_cases_by_municipality_plot')),
                                     
                                     tabPanel('Active school-related cases by school board', 
                                              br(), 
-                                             plotlyOutput('active_cases_by_board_plot')),
+                                             plotlyOutput('active_cases_by_board_plot'))
                                     
-                                    tabPanel('Schools with cases', 
-                                             br(), 
-                                             plotlyOutput('schools_with_cases_plot'))
+                                    # tabPanel('Schools with cases', 
+                                    #          br(), 
+                                    #          plotlyOutput('schools_with_cases_plot'))
                                     
                                 )
                             )
@@ -133,8 +139,8 @@ ui <- bootstrapPage(
                                      'Adapted from data published by Government of Ontario: ', 
                                      a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools', 'Summary of cases in schools')
                             ),
-                            tabPanel('Schools with active COVID-19 cases with demographics', 
-                                     h3('Schools with active COVID-19 cases with demographics'),
+                            tabPanel('Schools with active cases and school demographic data', 
+                                     h3('Schools with active cases and school demographic data'),
                                      br(), 
                                      downloadButton('download_csv_button_2', 'Download as CSV'),
                                      br(),
@@ -179,7 +185,7 @@ ui <- bootstrapPage(
                         h5('Quick view summary pane'),
                         tags$ul(
                             tags$li(tags$i('Cumulative Case Chart:'), ' Shows the number of cumulative school-related cases in Ontario. Use the slider to view the evolution since the first day of cases in the dataset. Selecting a specific date on the slider will adjust data in the Daily Summary accordingly.'),
-                            tags$li(tags$i('Daily Summary:'), ' Summarizes cumulative school-related cases, new total school-related cases, current schools with cases, and current schools closed. It also shows the count and change (+/-) from the most current date with data to the date immediately preceding. No changes will be seen on or between weekend dates (i.e., between Friday and Saturday; Saturday and Sunday) or public holidays since data are only released by the Ministry on weekdays.')
+                            tags$li(tags$i('Daily Summary:'), ' Summarizes cumulative school-related cases, new total school-related cases, current schools with cases, and current schools closed. It also shows the count and change (+/-) from the most current date with data to the date immediately preceding. No changes will be seen on or between weekend dates (i.e., on Saturday and Sunday and between Friday and Saturday; Saturday and Sunday) or public holidays since data are only released by the Ministry on weekdays.')
                         ),
                         h4('Plots Tab'),
                         p('These graphs provide an indication of the evolution of school-related cases over time. The first school-related cases appeared in the dataset on 10 September 2020. Currently, there are four graphs.'),
@@ -200,8 +206,9 @@ ui <- bootstrapPage(
                         h5('Summary of cases in schools'),
                         p('Presents raw data of cases in schools. Data table can be manipulated in ascending or descending order by variable of interest. Table can be downloaded as a .CSV file for independent analysis.'),
                         p('Variables included: collected date; reported date; current schools with cases; current schools closed; current total number of schools; new (total school-related cases; student; staff; unspecified); recent (total school-related cases; student; staff; unspecified); past (total school-related cases; student; staff; unspecified); cumulative (total school-related cases; student; staff; unspecified).'),
-                        p('Recent and past case data available as from 1 October 2020.'),
+                        p('Recent and past case data available as from 1 October 2020. See ', a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools/resource/7fbdbb48-d074-45d9-93cb-f7de58950418', 'Summary of cases in schools')),
                         p('Schools with active cases and school demographic data'),
+                        p('Use the search function to see if a specific school, board, or municipality has been affected.'),
                         h4('Data Dictionary and Data Sources Tab'),
                         h5('Data Dictionary'),
                         p('Lists all definitions of variables and terms used. Extracted from data dictionaries of original datasets sourced.'),
@@ -210,15 +217,16 @@ ui <- bootstrapPage(
                         h5('Source Code'),
                         p('Source code for this site can be found ', a(href = 'https://gitlab.com/br00t/ontario-covid19-dashboard', 'here')),
                         h3('AUTHORSHIP, ATTRIBUTIONS, CITATION'),
-                        p('Dr. Prachi Srivastava, Associate Professor, Faculty of Education, University of Western Ontario, Canada.'),
+                        p(a(href = 'https://www.edu.uwo.ca/faculty-profiles/prachi-srivastava.html', 'Dr. Prachi Srivastava'), ', Associate Professor, Faculty of Education, University of Western Ontario, Canada.'),
                         p(a(href = 'mailto:prachi.srivastava@uwo.ca', 'Prachi.srivastava@uwo.ca')),
                         p(a(href = 'https://twitter.com/PrachiSrivas', '@PrachiSrivas')),
-                        h4('ORCID iD:'),
+                        p(a(href = 'https://orcid.org/0000-0003-4865-8963', 'ORCID iD: 0000-0003-4865-8963')),
                         p('The technical development and design of the COVID-19 School Dashboard was done by an independent developer.'),
                         h4('Preliminary site structure based on:'),
                         tags$cite('Parker, E., & Leclerc, Q. (2020). COVID-19 tracker. [Web application]. ',  a(href = 'https://vac-lshtm.shinyapps.io/ncov_tracker/', 'https://vac-lshtm.shinyapps.io/ncov_tracker/')),
                         h4('Cite the COVID-19 School Dashboard as:'),
-                        tags$cite('Srivastava, P. (2020). COVID-19 school dashboard (1.0 Oct 2020). [Web application]. ', a(href = 'http://covid19schooldashboard.com/', 'http://covid19schooldashboard.com/'))
+                        tags$cite('Srivastava, P. (2020). COVID-19 school dashboard (1.0 Oct 2020). [Web application]. ', a(href = 'http://covid19schooldashboard.com/', 'http://covid19schooldashboard.com/')),
+                        tags$img(href = 'uwo_logo.png')
                )
                
     )          
@@ -373,13 +381,24 @@ server <- function(input, output) {
         fig <- fig %>% add_trace(y = ~cumulative_school_related_student_cases, name = 'Cumulative school-related student cases', mode = 'lines+markers') 
         fig <- fig %>% add_trace(y = ~cumulative_school_related_staff_cases, name = 'Cumulative school-related staff cases', mode = 'lines+markers') 
         fig <- fig %>% add_trace(y = ~cumulative_school_related_unspecified_cases, name = 'Cumulative school-related unspecified cases', mode = 'lines+markers')
-        fig <- fig %>% add_trace(y = ~new_total_school_related_cases, name = 'New total school-related cases', mode = 'lines+markers')
-        fig <- fig %>% add_trace(y = ~new_school_related_student_cases, name = 'New school-related student cases', mode = 'lines+markers')
-        fig <- fig %>% add_trace(y = ~new_school_related_staff_cases, name = 'New school-related staff cases', mode = 'lines+markers')
-        fig <- fig %>% add_trace(y = ~new_school_related_unspecified_cases, name = 'New school-related unspecified cases', mode = 'lines+markers')
         fig <- fig %>% layout(title = 'Cumulative school-related cases',
                               xaxis = list(title = 'Collected date'),
                               yaxis = list (title = 'Cumulative cases'))
+        fig
+    })
+    
+    # school_related_new_cases_details_plot ----------------------------------------
+    output$school_related_new_cases_details_plot <- renderPlotly({
+        df <- covid19_schools_summary
+        idx <- which(df$collected_date >= as.Date(input$minimum_date))
+        df <- df[ idx, ]
+        fig <- plot_ly(df, x = ~collected_date, y = ~new_total_school_related_cases, name = 'New total school-related cases', type = 'scatter', mode = 'lines+markers')
+        fig <- fig %>% add_trace(y = ~new_school_related_student_cases, name = 'New school-related student cases', mode = 'lines+markers')
+        fig <- fig %>% add_trace(y = ~new_school_related_staff_cases, name = 'New school-related staff cases', mode = 'lines+markers')
+        fig <- fig %>% add_trace(y = ~new_school_related_unspecified_cases, name = 'New school-related unspecified cases', mode = 'lines+markers')
+        fig <- fig %>% layout(title = 'New school-related cases',
+                              xaxis = list(title = 'Collected date'),
+                              yaxis = list (title = 'New cases'))
         fig
     })
     
