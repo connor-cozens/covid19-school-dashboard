@@ -54,6 +54,9 @@ max_file_age_hrs <- 12L
 #' function to normalize school names so we can match schools in active cases dataset
 #' with the school demographic dataset
 #' 
+#' TODO: just create a static mapping file for school and school board names, this
+#' has rapidly devolved into madness, as expected.
+#' 
 clean_school_names <- function(school_names) {
 	stopwords_en <- c('school', 'high', 'elementary', 'middle', 'secondary',
 					  'public', 'collegiate', 'institute', 'junior', 'senior',
@@ -106,6 +109,31 @@ clean_school_names <- function(school_names) {
 		str_replace_all(., '<c3><a9>lementaire catholique cardinal l<c3><a9>ger', '<c3><a9><c3><a9>c cardinal l<c3><a9>ger') %>%
 		str_replace_all(., 'david mary thomson', 'david mary thompson') %>%
 		str_replace_all(., 'david mary thomson', 'david mary thompson') %>%
+		# <c3><a9> <c3><a9>l<c3><a9>m c bernard grandma<c3><ae>tre --> <c3><a9><c3><a9>c fr<c3><a8>re andr<c3><a9>
+		# <c3><a9> <c3><a9>l<c3><a9>m c st joseph d orl<c3><a9>ans --> <c3><a9><c3><a9>c fr<c3><a8>re andr<c3><a9>
+		# <c3><a9> <c3><a9>l<c3><a9>m c ste anne --> <c3><a9><c3><a9>c ste anne
+		# <c3><a9>ep louis riel --> <c3><a9>ic renaissance
+		str_replace_all(., 'berrigan e s', 'berrigan') %>%
+		# board office --> woodroffe
+		# bowmore --> roxmore
+		str_replace_all(., 'catholique st fr<c3><a8>re andr<c3><a9>', 'catholique fr<c3><a8>re andr<c3><a9>') %>%
+		# de traitement le jour le transit --> st vincent de paul separate
+		str_replace_all(., 'emily carr md s', 'emily carr') %>%
+		str_replace_all(., 'esp l alternative', 'l alternative') %>%
+		str_replace_all(., 'longfields davidson heights ss', 'longfields davidson heights') %>%
+		str_replace_all(., 'marshall mcluhan catholic ss', 'marshall mcluhan catholic') %>%
+		# north field office --> north meadows
+		str_replace_all(., 'r mclaughlin c vi', 'r mclaughlin vocational') %>%
+		str_replace_all(., 'scarborough alternative studies', 'scarborough alternative studi') %>%
+		str_replace_all(., 'silver heights', 'silverheights') %>%
+		str_replace_all(., 'st mark hs', 'st mark') %>%
+		str_replace_all(., 'st nicolas catholic', 'st nicholas catholic') %>%
+		# st sofia separate --> st louis separate
+		str_replace_all(., 'st thomas aquinas hs intermediate', 'st thomas aquinas catholic') %>%
+		str_replace_all(., 'trillium e s', 'trillium') %>%
+		str_replace_all(., 'waverly drive', 'waverley drive') %>%
+		str_replace_all(., 'west humber ci', 'west humber') %>%
+		str_replace_all(., 'woodroffe hs', 'woodroffe') %>%
 		str_trim
 }
 
@@ -520,6 +548,12 @@ school_enrolment <- covid19_schools_active_with_demographics_most_recent$enrolme
 names(school_enrolment) <- geo_query_str
 low_income <- covid19_schools_active_with_demographics_most_recent$percentage.of.school.aged.children.who.live.in.low.income.households
 names(low_income) <- geo_query_str
+special_education <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.receiving.special.education.services
+names(special_education) <- geo_query_str
+non_english <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.whose.first.language.is.not.english
+names(non_english) <- geo_query_str
+from_non_english <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.who.are.new.to.canada.from.a.non.english.speaking.country
+names(from_non_english) <- geo_query_str
 cases_per_school <- tapply(covid19_schools_active_with_demographics_most_recent$total_confirmed_cases, geo_query_str, sum)
 cases_per_school <- data.frame(cases_per_school, geo_query_str = names(cases_per_school))
 rownames(cases_per_school) <- NULL
@@ -531,6 +565,9 @@ cases_per_school$school_level <- sapply(cases_per_school$geo_query_str, function
 cases_per_school$school_language <- sapply(cases_per_school$geo_query_str, function(x) school_language[[ x ]][ 1 ]) %>% as.character
 cases_per_school$school_enrolment <- sapply(cases_per_school$geo_query_str, function(x) school_enrolment[[ x ]][ 1 ]) %>% as.integer
 cases_per_school$low_income <- sapply(cases_per_school$geo_query_str, function(x) low_income[[ x ]][ 1 ]) %>% as.integer
+cases_per_school$special_education <- sapply(cases_per_school$geo_query_str, function(x) special_education[[ x ]][ 1 ]) %>% as.integer
+cases_per_school$non_english <- sapply(cases_per_school$geo_query_str, function(x) non_english[[ x ]][ 1 ]) %>% as.integer
+cases_per_school$from_non_english <- sapply(cases_per_school$geo_query_str, function(x) from_non_english[[ x ]][ 1 ]) %>% as.integer
 # m <- leaflet() %>% setView(lng = -85.3232, lat = 49, zoom = 5)
 # m %>% addTiles() %>%
 # 	addCircleMarkers(data = cases_per_school, 

@@ -217,16 +217,19 @@ ui <- bootstrapPage(
                         h5('Source Code'),
                         p('Source code for this site can be found ', a(href = 'https://gitlab.com/br00t/ontario-covid19-dashboard', 'here')),
                         h3('AUTHORSHIP, ATTRIBUTIONS, CITATION'),
-                        p(a(href = 'https://www.edu.uwo.ca/faculty-profiles/prachi-srivastava.html', 'Dr. Prachi Srivastava'), ', Associate Professor, Faculty of Education, University of Western Ontario, Canada.'),
-                        p(a(href = 'mailto:prachi.srivastava@uwo.ca', 'Prachi.srivastava@uwo.ca')),
-                        p(a(href = 'https://twitter.com/PrachiSrivas', '@PrachiSrivas')),
-                        p(a(href = 'https://orcid.org/0000-0003-4865-8963', 'ORCID iD: 0000-0003-4865-8963')),
+                        tags$ul(
+                            tags$li(a(href = 'https://www.edu.uwo.ca/faculty-profiles/prachi-srivastava.html', 'Dr. Prachi Srivastava'), ', Associate Professor, Faculty of Education, University of Western Ontario, Canada.'),
+                            tags$li(a(href = 'mailto:prachi.srivastava@uwo.ca', 'Prachi.srivastava@uwo.ca')),
+                            tags$li(a(href = 'https://twitter.com/PrachiSrivas', '@PrachiSrivas')),
+                            tags$li(a(href = 'https://orcid.org/0000-0003-4865-8963', 'ORCID iD: 0000-0003-4865-8963'))
+                        ),
                         p('The technical development and design of the COVID-19 School Dashboard was done by an independent developer.'),
                         h4('Preliminary site structure based on:'),
                         tags$cite('Parker, E., & Leclerc, Q. (2020). COVID-19 tracker. [Web application]. ',  a(href = 'https://vac-lshtm.shinyapps.io/ncov_tracker/', 'https://vac-lshtm.shinyapps.io/ncov_tracker/')),
                         h4('Cite the COVID-19 School Dashboard as:'),
                         tags$cite('Srivastava, P. (2020). COVID-19 school dashboard (1.0 Oct 2020). [Web application]. ', a(href = 'http://covid19schooldashboard.com/', 'http://covid19schooldashboard.com/')),
-                        tags$img(href = 'uwo_logo.png')
+                        br(), br(),
+                        a(href = 'https://www.edu.uwo.ca', tags$img(src = 'uwo_logo.png'))
                )
                
     )          
@@ -259,7 +262,7 @@ server <- function(input, output) {
                              incProgress(1, 'setting view')
                              basemap <- setView(basemap, lng = -85.3232, lat = 49, zoom = 6) 
                              incProgress(1, 'adding polygons')
-                             basemap <- addPolygons(basemap, weight = 3)
+                             basemap <- addPolygons(basemap, weight = 3, fillColor = '#696969', opacity = 0.5)
                              incProgress(1, 'adding tiles')
                              basemap <- addProviderTiles(basemap, providers$Esri.NatGeoWorldMap)
                              incProgress(1, 'caching map')
@@ -276,7 +279,7 @@ server <- function(input, output) {
                                                      weight = 1, 
                                                      color = ~covid_col,
                                                      fillOpacity = 0.3, 
-                                                     label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>Confirmed cases (cumulative): %s<br/></div>', 
+                                                     label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>Students receiving special education services: %s%%<br/>First language not english: %s%%<br/>Immigrant from non-english country: %s%%<br/>Confirmed cases (cumulative): %s<br/></div>', 
                                                                      cases_per_school$school_name, 
                                                                      cases_per_school$city, 
                                                                      cases_per_school$school_level, 
@@ -284,6 +287,9 @@ server <- function(input, output) {
                                                                      cases_per_school$school_language, 
                                                                      cases_per_school$school_enrolment, 
                                                                      cases_per_school$low_income, 
+                                                                     cases_per_school$special_education, 
+                                                                     cases_per_school$non_english, 
+                                                                     cases_per_school$from_non_english, 
                                                                      cases_per_school$cases_per_school) %>% lapply(htmltools::HTML), 
                                                      labelOptions = labelOptions(
                                                          style = list('font-weight' = 'normal', padding = '3px 8px', 'color' = covid_col),
