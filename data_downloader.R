@@ -560,8 +560,14 @@ special_education <- covid19_schools_active_with_demographics_most_recent$percen
 names(special_education) <- geo_query_str
 non_english <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.whose.first.language.is.not.english
 names(non_english) <- geo_query_str
+non_french <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.whose.first.language.is.not.french
+names(non_french) <- geo_query_str
 from_non_english <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.who.are.new.to.canada.from.a.non.english.speaking.country
 names(from_non_english) <- geo_query_str
+from_non_french <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.who.are.new.to.canada.from.a.non.french.speaking.country
+names(from_non_french) <- geo_query_str
+some_university <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.whose.parents.have.some.university.education
+names(some_university) <- geo_query_str
 cases_per_school <- tapply(covid19_schools_active_with_demographics_most_recent$total_confirmed_cases, geo_query_str, sum)
 cases_per_school <- data.frame(cases_per_school, geo_query_str = names(cases_per_school))
 rownames(cases_per_school) <- NULL
@@ -575,7 +581,10 @@ cases_per_school$school_enrolment <- sapply(cases_per_school$geo_query_str, func
 cases_per_school$low_income <- sapply(cases_per_school$geo_query_str, function(x) low_income[[ x ]][ 1 ]) %>% as.integer
 cases_per_school$special_education <- sapply(cases_per_school$geo_query_str, function(x) special_education[[ x ]][ 1 ]) %>% as.integer
 cases_per_school$non_english <- sapply(cases_per_school$geo_query_str, function(x) non_english[[ x ]][ 1 ]) %>% as.integer
+cases_per_school$non_french <- sapply(cases_per_school$geo_query_str, function(x) non_french[[ x ]][ 1 ]) %>% as.integer
 cases_per_school$from_non_english <- sapply(cases_per_school$geo_query_str, function(x) from_non_english[[ x ]][ 1 ]) %>% as.integer
+cases_per_school$from_non_french <- sapply(cases_per_school$geo_query_str, function(x) from_non_french[[ x ]][ 1 ]) %>% as.integer
+cases_per_school$some_university <- sapply(cases_per_school$geo_query_str, function(x) some_university[[ x ]][ 1 ]) %>% as.integer
 # m <- leaflet() %>% setView(lng = -85.3232, lat = 49, zoom = 5)
 # m %>% addTiles() %>%
 # 	addCircleMarkers(data = cases_per_school, 

@@ -34,7 +34,7 @@ ui <- bootstrapPage(
     tags$head(includeHTML('gtag.html')),
     navbarPage(theme = shinytheme('flatly'), 
                collapsible = TRUE,
-               'Ontario Schools COVID-19 Tracker', 
+               'COVID-19 School Dashboard', 
                id = 'nav',
                
                # tab: COVID-19 Mapper ------------------------------------------
@@ -52,7 +52,7 @@ ui <- bootstrapPage(
                                           class = 'panel panel-default',
                                           top = 75, 
                                           left = 55, 
-                                          width = 350, 
+                                          width = 750, 
                                           fixed = TRUE,
                                           draggable = TRUE, 
                                           height = 'auto',
@@ -64,70 +64,35 @@ ui <- bootstrapPage(
                                           h6(textOutput('clean_date_reactive_text'), align = 'right'),
                                           
                                           # cumulative_plot --------------------
-                                          plotOutput('cumulative_plot', height = '130px', width = '100%'),
+                                          plotlyOutput('cumulative_plot', width = '100%', height = 250),
+                                          hr(),
                                           
                                           # plot_date --------------------------
-                                          sliderInput('plot_date',
-                                                      label = h5('Select mapping date'),
-                                                      min = as.Date(cv_min_date,'%Y-%m-%d'),
-                                                      max = as.Date(current_date,'%Y-%m-%d'),
-                                                      value = as.Date(current_date),
-                                                      timeFormat = '%d %b',
-                                                      animate = animationOptions(interval = 3000, loop = FALSE)),
+                                          # sliderInput('plot_date', 
+                                          #             width = '100%',
+                                          #             label = h5('Select mapping date'),
+                                          #             min = as.Date(cv_min_date,'%Y-%m-%d'),
+                                          #             max = as.Date(current_date,'%Y-%m-%d'),
+                                          #             value = as.Date(cv_min_date,'%Y-%m-%d'),
+                                          #             timeFormat = '%d %b',
+                                          #             animate = animationOptions(interval = 3000, loop = FALSE)),
                                           
                                           # daily_summary ----------------------
                                           h3('Daily Summary', align = 'right'),
-                                          div(tableOutput('daily_summary'), style = 'font-size: small; width: 100%')
+                                          div(tableOutput('daily_summary'), style = 'font-size: small; width: 100%'),
+                                          # hr(),
+                                          
+                                          # school_details_dt ---------------------
+                                          h3('School Summary', align = 'right'),
+                                          div(DTOutput('school_details_dt'), style = 'font-size: small; width: 100%')
                             )
                             
                         )
                         
                ),
                
-               # tab: Plots ----------------------------------------------------
-               tabPanel('Plots',
-                        
-                        sidebarLayout(
-                            sidebarPanel(
-                                sliderInput("minimum_date",
-                                            "Minimum date:",
-                                            min = as.Date(cv_min_date,"%Y-%m-%d"),
-                                            max = as.Date(current_date,"%Y-%m-%d"),
-                                            value=as.Date(cv_min_date),
-                                            timeFormat="%d %b")
-                                
-                            ),
-                            
-                            mainPanel(
-                                tabsetPanel(
-                                    
-                                    tabPanel('Cumulative school-related cases', 
-                                             br(), 
-                                             plotlyOutput('school_related_cases_details_plot')),
-                                    
-                                    tabPanel('New school-related cases', 
-                                             br(), 
-                                             plotlyOutput('school_related_new_cases_details_plot')),
-                                    
-                                    tabPanel('Active school-related cases by municipality', 
-                                             br(), 
-                                             plotlyOutput('active_cases_by_municipality_plot')),
-                                    
-                                    tabPanel('Active school-related cases by school board', 
-                                             br(), 
-                                             plotlyOutput('active_cases_by_board_plot'))
-                                    
-                                    # tabPanel('Schools with cases', 
-                                    #          br(), 
-                                    #          plotlyOutput('schools_with_cases_plot'))
-                                    
-                                )
-                            )
-                        )
-               ),
-               
-               # tab: Data -----------------------------------------------------
-               tabPanel('Data',
+               # tab: Data Tables ----------------------------------------------
+               tabPanel('Data Tables',
                         tabsetPanel(
                             tabPanel('Summary of cases in schools', 
                                      h3('Summary of cases in schools'),
@@ -154,29 +119,98 @@ ui <- bootstrapPage(
                         )
                ),
                
-               # tab: Data Dictionary and Data Sources -------------------------
-               tabPanel('Data Dictionary and Data Sources',
-                        tabsetPanel(
-                            tabPanel('Summary of cases in schools', 
-                                     h3('Summary of cases in schools'),
-                                     br(), 
-                                     DTOutput('school_summary_data_dictionary_dt'),
-                                     br(),
-                                     'Adapted from data published by Government of Ontario: ', 
-                                     a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools/resource/7fbdbb48-d074-45d9-93cb-f7de58950418', 'Summary of cases in schools')
-                            ),
-                            tabPanel('Schools with active cases and school demographic data', 
-                                     h3('Schools with active cases and school demographic data'),
-                                     br(), 
-                                     DTOutput('school_cases_demo_data_dictionary_dt'),
-                                     br(),
-                                     'Adapted from data published by Government of Ontario: ', 
-                                     a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools/resource/8b6d22e2-7065-4b0f-966f-02640be366f2', 'Schools with active COVID-19 cases'),
-                                     ', ',
-                                     a(href = 'https://data.ontario.ca/dataset/school-information-and-student-demographics/resource/602a5186-67f5-4faf-94f3-7c61ffc4719a', 'School information and student demographics')
-                            )
-                        )
+               # # tab: Data Dictionary and Data Sources -------------------------
+               # tabPanel('Data Dictionary and Data Sources',
+               #          tabsetPanel(
+               #              tabPanel('Summary of cases in schools', 
+               #                       h3('Summary of cases in schools'),
+               #                       br(), 
+               #                       DTOutput('school_summary_data_dictionary_dt'),
+               #                       br(),
+               #                       'Adapted from data published by Government of Ontario: ', 
+               #                       a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools/resource/7fbdbb48-d074-45d9-93cb-f7de58950418', 'Summary of cases in schools')
+               #              ),
+               #              tabPanel('Schools with active cases and school demographic data', 
+               #                       h3('Schools with active cases and school demographic data'),
+               #                       br(), 
+               #                       DTOutput('school_cases_demo_data_dictionary_dt'),
+               #                       br(),
+               #                       'Adapted from data published by Government of Ontario: ', 
+               #                       a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools/resource/8b6d22e2-7065-4b0f-966f-02640be366f2', 'Schools with active COVID-19 cases'),
+               #                       ', ',
+               #                       a(href = 'https://data.ontario.ca/dataset/school-information-and-student-demographics/resource/602a5186-67f5-4faf-94f3-7c61ffc4719a', 'School information and student demographics')
+               #              )
+               #          )
+               # ),
+               
+               # tab: Data Sources and Source Code -----------------------------
+               tabPanel('Data Sources and Source Code',
+                        h3('Data Sources'),
+                        tags$ul(
+                            tags$li(a(href = 'https://data.ontario.ca/dataset?keywords_en=COVID-19', 'All COVID-19 datasets')),
+                            tags$li(a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools', 'Schools COVID-19 data overview')),
+                            tags$li(a(href = 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/7fbdbb48-d074-45d9-93cb-f7de58950418/download/schoolcovidsummary.csv', 'Summary of cases in schools dataset')),
+                            tags$li(a(href = 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/8b6d22e2-7065-4b0f-966f-02640be366f2/download/schoolsactivecovid.csv', 'Schools with active COVID-19 cases dataset')),
+                            # tags$li(a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-licensed-child-care-settings', 'Licensed child care settings COVID-19 data ')),
+                            # tags$li(a(href = 'https://data.ontario.ca/dataset/5bf54477-6147-413f-bab0-312f06fcb388/resource/eee282d3-01e6-43ac-9159-4ba694757aea/download/lccactivecovid.csv', 'Licensed child care centres and agencies with active COVID-19 cases')),
+                            # tags$li(a(href = 'https://data.ontario.ca/dataset/confirmed-positive-cases-of-covid-19-in-ontario', 'Confirmed positive cases of COVID-19 in Ontario ')),
+                            # tags$li(a(href = 'https://data.ontario.ca/dataset/5bf54477-6147-413f-bab0-312f06fcb388/resource/eee282d3-01e6-43ac-9159-4ba694757aea/download/lccactivecovid.csv', 'Confirmed positive cases of COVID19 in Ontario')),
+                            # tags$li(a(href = 'https://data.ontario.ca/dataset/confirmed-positive-cases-of-covid-19-in-ontario', '...')),
+                            # tags$li(a(href = 'https://data.ontario.ca/dataset/f4112442-bdc8-45d2-be3c-12efae72fb27/resource/455fd63b-603d-4608-8216-7d8647f43350/download/conposcovidloc.csv', '...')),
+                            # tags$li(a(href = 'https://data.ontario.ca/dataset/status-of-covid-19-cases-in-ontario', '...')),
+                            # tags$li(a(href = 'https://data.ontario.ca/dataset/f4f86e54-872d-43f8-8a86-3892fd3cb5e6/resource/ed270bb8-340b-41f9-a7c6-e8ef587e6d11/download/covidtesting.csv', '...')),
+                            # tags$li(a(href = 'https://data.ontario.ca/dataset/confirmed-positive-cases-of-covid-19-in-ontario', '...')),
+                            # tags$li(a(href = 'https://data.ontario.ca/dataset/f4112442-bdc8-45d2-be3c-12efae72fb27/resource/4f39b02b-47fe-4e66-95b6-e6da879c6910/download/conposcovidloc.geojson', '...')),
+                            # tags$li(a(href = 'https://data.ontario.ca/dataset/f4112442-bdc8-45d2-be3c-12efae72fb27/resource/455fd63b-603d-4608-8216-7d8647f43350/download/conposcovidloc.csv', '...'))
+                            tags$li(a(href = 'https://data.ontario.ca/dataset/school-information-and-student-demographics', ' School information and student demographics overview')),
+                            tags$li(a(href = 'https://data.ontario.ca/dataset/d85f68c5-fcb0-4b4d-aec5-3047db47dcd5/resource/602a5186-67f5-4faf-94f3-7c61ffc4719a/download/new_sif_data_table_2018_2019prelim_en_august.xlsx', ' School information and student demographics dataset'))
+                            # tags$li(a(href = '...', '...'))
+                        ),
+                        h3('Source Code'),
+                        p('Source code for this site can be found ', a(href = 'https://gitlab.com/br00t/ontario-covid19-dashboard', 'here'))
                ),
+               
+               # tab: Plots ----------------------------------------------------
+               # tabPanel('Plots',
+               #          
+               #          sidebarLayout(
+               #              sidebarPanel(
+               #                  sliderInput("minimum_date",
+               #                              "Minimum date:",
+               #                              min = as.Date(cv_min_date,"%Y-%m-%d"),
+               #                              max = as.Date(current_date,"%Y-%m-%d"),
+               #                              value=as.Date(cv_min_date),
+               #                              timeFormat="%d %b")
+               #                  
+               #              ),
+               #              
+               #              mainPanel(
+               #                  tabsetPanel(
+               #                      
+               #                      tabPanel('Cumulative school-related cases', 
+               #                               br(), 
+               #                               plotlyOutput('school_related_cases_details_plot')),
+               #                      
+               #                      tabPanel('New school-related cases', 
+               #                               br(), 
+               #                               plotlyOutput('school_related_new_cases_details_plot')),
+               #                      
+               #                      tabPanel('Active school-related cases by municipality', 
+               #                               br(), 
+               #                               plotlyOutput('active_cases_by_municipality_plot')),
+               #                      
+               #                      tabPanel('Active school-related cases by school board', 
+               #                               br(), 
+               #                               plotlyOutput('active_cases_by_board_plot'))
+               #                      
+               #                      # tabPanel('Schools with cases', 
+               #                      #          br(), 
+               #                      #          plotlyOutput('schools_with_cases_plot'))
+               #                      
+               #                  )
+               #              )
+               #          )
+               # ),
                
                # tab: About this site ------------------------------------------
                tabPanel('About this site',
@@ -279,7 +313,7 @@ server <- function(input, output) {
                              incProgress(1, 'generating map')
                              basemap <- leaflet(ontario)
                              incProgress(1, 'setting view')
-                             basemap <- setView(basemap, lng = -85.3232, lat = 49, zoom = 6) 
+                             basemap <- setView(basemap, lng = -94.4457, lat = 49, zoom = 6) 
                              incProgress(1, 'adding polygons')
                              basemap <- addPolygons(basemap, weight = 3, fillColor = '#696969', opacity = 0.5)
                              incProgress(1, 'adding tiles')
@@ -290,7 +324,7 @@ server <- function(input, output) {
                          
                          # add case data markers
                          incProgress(1, 'adding markers')
-                         basemap <- addCircleMarkers(basemap,
+                         basemap <- addCircleMarkers(basemap, 
                                                      data = cases_per_school, 
                                                      lng = ~lon, 
                                                      lat = ~lat, 
@@ -298,7 +332,7 @@ server <- function(input, output) {
                                                      weight = 1, 
                                                      color = ~covid_col,
                                                      fillOpacity = 0.3, 
-                                                     label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>Students receiving special education services: %s%%<br/>First language not english: %s%%<br/>Immigrant from non-english country: %s%%<br/>Confirmed cases (cumulative): %s<br/></div>', 
+                                                     label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>Students receiving special education services: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Parents have some university education: %s%%<br/>Confirmed cases (cumulative): %s<br/></div>', 
                                                                      cases_per_school$school_name, 
                                                                      cases_per_school$city, 
                                                                      cases_per_school$school_level, 
@@ -309,6 +343,9 @@ server <- function(input, output) {
                                                                      cases_per_school$special_education, 
                                                                      cases_per_school$non_english, 
                                                                      cases_per_school$from_non_english, 
+                                                                     cases_per_school$non_french, 
+                                                                     cases_per_school$from_non_french, 
+                                                                     cases_per_school$some_university, 
                                                                      cases_per_school$cases_per_school) %>% lapply(htmltools::HTML), 
                                                      labelOptions = labelOptions(
                                                          style = list('font-weight' = 'normal', padding = '3px 8px', 'color' = covid_col),
@@ -320,25 +357,17 @@ server <- function(input, output) {
     })
     
     # cumulative_plot ----------------------------------------------------------
-    output$cumulative_plot <- renderPlot({
-        # function to plot cumulative COVID cases by date
-        plot_date <- input$plot_date
-        dt <- as.Date(covid19_schools_summary[ , 'collected_date' ])
-        d1 <- covid19_schools_summary[ , 'cumulative_school_related_cases' ]
-        plot_df <- data.frame(Date = dt, cases = d1)
-        plot_df = subset(plot_df, Date <= plot_date)
-        g1 = ggplot(plot_df, aes(x = Date, y = cases)) + 
-            geom_line() + 
-            geom_point(size = 1, alpha = 0.8) +
-            ylab('Cumulative cases') + 
-            theme_bw() + 
-            scale_colour_manual(values = c(covid_col)) +
-            scale_y_continuous(labels = function(l) { as.integer(l) }) +
-            theme(legend.title = element_blank(), 
-                  legend.position = '', 
-                  plot.title = element_text(size = 10), 
-                  plot.margin = margin(5, 12, 5, 5))
-        g1
+    output$cumulative_plot <- renderPlotly({
+        df <- covid19_schools_summary
+        fig <- plot_ly(df, x = ~collected_date, y = ~cumulative_school_related_cases, name = 'Cumulative school-related cases', type = 'scatter', mode = 'lines+markers')
+        fig <- fig %>% add_trace(y = ~cumulative_school_related_student_cases, name = 'Cumulative school-related student cases', mode = 'lines+markers') 
+        fig <- fig %>% add_trace(y = ~cumulative_school_related_staff_cases, name = 'Cumulative school-related staff cases', mode = 'lines+markers') 
+        fig <- fig %>% add_trace(y = ~cumulative_school_related_unspecified_cases, name = 'Cumulative school-related unspecified cases', mode = 'lines+markers')
+        fig <- fig %>% layout(title = 'Cumulative school-related cases', 
+                              legend = list(x = 0.1, y = 0.9),
+                              xaxis = list(title = 'Collected date'),
+                              yaxis = list (title = 'Cumulative cases'))
+        fig
     })
     
     # daily_summary ------------------------------------------------------------
@@ -348,29 +377,13 @@ server <- function(input, output) {
         df <- df[ idx, ]
         cn <- c(
             'collected_date', 
-            # 'reported_date', 
-            'current_schools_w_cases', 
-            'current_schools_closed', 
-            # 'current_total_number_schools',
+            'cumulative_school_related_cases', 
             'new_total_school_related_cases', 
-            # 'new_school_related_student_cases', 
-            # 'new_school_related_staff_cases', 
-            # 'new_school_related_unspecified_cases',
-            # 'recent_total_school_related_cases', 
-            # 'recent_school_related_student_cases',
-            # 'recent_school_related_staff_cases', 
-            # 'recent_school_related_unspecified_cases', 
-            # 'past_total_school_related_cases', 
-            # 'past_school_related_student_cases', 
-            # 'past_school_related_staff_cases', 
-            # 'past_school_related_unspecified_cases', 
-            'cumulative_school_related_cases' 
-            # 'cumulative_school_related_student_cases', 
-            # 'cumulative_school_related_staff_cases', 
-            # 'cumulative_school_related_unspecified_cases'
+            'current_schools_w_cases', 
+            'current_schools_closed'
         )
         df <- df[ , cn ]
-        idx <- which(df$collected_date <= as.Date(input$plot_date))
+        idx <- which(df$collected_date <= as.Date(now())) # as.Date(input$plot_date))
         idx <- max(idx)
         df <- df[ (idx - 1):idx, ]
         colnames(df) <- str_replace_all(colnames(df), '_', ' ')
@@ -382,17 +395,42 @@ server <- function(input, output) {
         colnames(df) <- c('Variable', 'Count', 'Change')
         idx <- which(df$Change > 0)
         df[ idx, 'Change' ] <- sprintf('+%s', df[ idx, 'Change' ])
+        df$Variable <- str_to_sentence(df$Variable)
+        df$Variable <- str_replace_all(df$Variable, ' w ', ' with ')
+        df$Variable <- str_replace_all(df$Variable, 'school related', 'school\\-related')
         df
-    }, align = 'r', striped = TRUE)
+    }, align = 'r', striped = TRUE, width = '100%')
+    
+    # school_details_dt -----------------------------------------------------------
+    output$school_details_dt <- renderDT({
+        df <- covid19_schools_active_with_demographics_most_recent[ , 3:9 ]
+        colnames(df) <- str_replace_all(colnames(df), '_', ' ')
+        colnames(df) <- str_to_title(colnames(df))
+        datatable(
+            df,
+            options = list(
+                pageLength = 1,
+                paging = TRUE,
+                searching = TRUE,
+                fixedColumns = TRUE,
+                autoWidth = TRUE,
+                ordering = TRUE,
+                dom = 'Bfrtip'
+            ),
+            rownames = FALSE,
+            class = 'display'
+        )
+    })
     
     # clean_date_reactive_text -------------------------------------------------
     output$clean_date_reactive_text <- renderText({
-        format(as.POSIXct(input$plot_date), '%d %B %Y')
+        # format(as.POSIXct(input$plot_date), '%d %B %Y')
+        format(as.POSIXct(now()), '%d %B %Y')
     })
     
     # cumulative_case_count_text -----------------------------------------------
     output$cumulative_case_count_text <- renderText({
-        idx <- max(which(covid19_schools_summary$collected_date <= as.Date(input$plot_date)))
+        idx <- max(which(covid19_schools_summary$collected_date <= as.Date(now()))) # as.Date(input$plot_date)))
         count <- last(covid19_schools_summary[ idx, 'cumulative_school_related_cases' ])
         paste0(prettyNum(count, big.mark = ','), ' cumulative cases')
     })
