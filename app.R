@@ -381,10 +381,8 @@ server <- function(input, output) {
                          } else {
                              incProgress(1, 'loading shapes')
                              # regenerate the basemap
-                             # https://www12.statcan.gc.ca/census-recensement/alternative_alternatif.cfm?archived=1&l=eng&dispext=zip&teng=gpr_000b11a_e.zip&k=%20%20%20%2040968&loc=http://www12.statcan.gc.ca/census-recensement/2011/geo/bound-limit/files-fichiers/gpr_000b11a_e.zip
-                             # https://stackoverflow.com/questions/43093712/draw-a-map-of-a-specific-country-with-leaflet
-                             canada <- readOGR(dsn = 'data', layer = 'gpr_000b11a_e')
-                             ontario <- subset(canada, PRNAME == 'Ontario')
+                             # https://geohub.lio.gov.on.ca/datasets/province/data
+                             ontario <- readOGR(dsn = 'data/shapefiles', layer = 'PROVINCE')
                              incProgress(1, 'generating map')
                              basemap <- leaflet(ontario)
                              incProgress(1, 'setting view')
