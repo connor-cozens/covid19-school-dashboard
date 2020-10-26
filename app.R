@@ -63,34 +63,22 @@ ui <- bootstrapPage(
                                           # clean_date_reactive_text -----------
                                           h6(textOutput('clean_date_reactive_text'), align = 'right'),
                                           
-                                          # cumulative_plot --------------------
-                                          plotlyOutput('cumulative_plot', width = '100%', height = 250),
-                                          hr(),
-                                          
-                                          # plot_date --------------------------
-                                          # sliderInput('plot_date', 
-                                          #             width = '100%',
-                                          #             label = h5('Select mapping date'),
-                                          #             min = as.Date(cv_min_date,'%Y-%m-%d'),
-                                          #             max = as.Date(current_date,'%Y-%m-%d'),
-                                          #             value = as.Date(cv_min_date,'%Y-%m-%d'),
-                                          #             timeFormat = '%d %b',
-                                          #             animate = animationOptions(interval = 3000, loop = FALSE)),
-                                          
-                                          # daily_summary ----------------------
-                                          h3('Daily Summary', align = 'right'),
-                                          div(tableOutput('daily_summary'), style = 'font-size: small; width: 100%'),
-                                          # hr(),
-                                          
-                                          # school_details_dt ------------------
-                                          h3('School Summary', align = 'right'),
-                                          div(DTOutput('school_details_dt'), style = 'font-size: small; width: 100%'),
-                                          
-                                          div('drag this panel to move it', style = 'font-size: small; width: 100%; color: blue')
+                                          # clean_date_reactive_text -----------
+                                          div(tableOutput('daily_summary'), style = 'font-size: small; width: 100%')
                             )
                             
                         )
                         
+               ),
+               
+               # tab: Overview -------------------------------------------------
+               tabPanel('Overview',
+                        # cumulative_plot --------------------
+                        plotlyOutput('cumulative_plot', width = '100%'),
+                        hr(),
+                        # school_details_dt ------------------
+                        h3('School Summary', align = 'right'),
+                        div(DTOutput('school_details_dt'), style = 'font-size: small; width: 100%')
                ),
                
                # tab: Data Tables ----------------------------------------------
@@ -213,6 +201,45 @@ ui <- bootstrapPage(
                #              )
                #          )
                # ),
+               
+               # tab: Risk assessment ------------------------------------------               
+               tabPanel('Risk assessment',
+                        
+                        h3('Reducing COVID-19 Transmission Upon School Reopening: Identifying High-Risk Neighbourhoods'),
+                        ('Prepared by: Toronto Public Health'),
+                        br(),
+                        ('Prepared date: August 20, 2020'),
+                        br(),
+                        ('Prepared for the Toronto Catholic District School Board (TCDSB)'),
+                        br(),
+                        h3('Background'),
+                        p('Toronto elementary schools are set to re-open for in-person learning in September. This document outlines a method that can be used to inform decisions about areas of the city to prioritize for mitigation strategies in order to reduce the spread of COVID-19. Neighbourhood-level data is used to produce a risk score based on case information in combination with select socioeconomic indicators. This analysis can be used in conjunction with other considerations when deciding about COVID-19 risk mitigation strategies in schools. Since the evidence around COVID-19 is ever-changing, our method allows for flexibility and continuous updates based on available data.'),
+                        h3('Methods'),
+                        p('A composite index score was generated in order to rank neighbourhoods in terms of their risk for increased COVID-19 transmission when schools reopen.'),
+                        h4('Rankings were generated using the following steps:'),
+                        tags$ol(
+                            tags$li('For each neighbourhood with TCDSB schools, confirmed/probable COVID-19 case counts were obtained from May 29 (the date where widespread testing was announced in the province) to Aug 16, 2020 (most recent available data). Cases associated with outbreaks in long-term care or retirement homes among individuals aged 65+ were excluded from case rates, as they represent institutionalized individuals. Rates proportionate to neighbourhood population size were used. Select sociodemographic indicators were obtained using Census 2016 data (Table 1).'),
+                            tags$li('To generate the risk score, each variable was assigned a weight. Case rates were assigned a higher weight than other variables. Effects of each socioeconomic indicator on COVID-19 transmission are difficult to tease out and therefore they have been assigned the same weight.'),
+                            tags$li('Indicators within each neighbourhood were then multiplied by the assigned weight to generate a composite score. All neighbourhood scores (unique on neighbourhood level) were then subdivided into quintiles based on percentile score; higher quintiles indicate higher-risk.'),
+                            tags$li('sociodemographic indicators were available at the neighbourhood level only, all schools within the neighbourhood are considered of similar risk.')    
+                        ),
+                        h4('Table 1: Variables used to generate neighbourhood risk scores'),
+                        
+                        # variables_details_dt ---------------------------------
+                        div(DTOutput('variables_details_dt'), style = 'font-size: small; width: 100%'),
+                        
+                        h3('Results'),
+                        # p('Note: An initial list for elementary schools was produced on August 17, 2020 that included all case dates and without the additional exclusions indicated in Step 1. Tab B shows the revised table. The "Comparison" tab illustrates the differences between the two.'),
+                        
+                        # risk_assessment_elementary_dt ------------------------
+                        h4('Elementary School Risk Assessment'),
+                        DTOutput('risk_assessment_elementary_dt'),
+                        
+                        # risk_assessment_secondary_dt -------------------------
+                        h4('Secondary School Risk Assessment'),
+                        DTOutput('risk_assessment_secondary_dt')
+                        
+               ),
                
                # tab: About this site ------------------------------------------
                tabPanel('About This Site',
@@ -444,7 +471,7 @@ server <- function(input, output) {
                               legend = list(x = 0.1, y = 0.9),
                               xaxis = list(title = 'Collected date'),
                               yaxis = list (title = 'Cumulative cases'))
-        fig <- config(fig, displayModeBar = FALSE)
+        # fig <- config(fig, displayModeBar = FALSE)
         fig
     })
     
@@ -485,13 +512,13 @@ server <- function(input, output) {
     
     # school_details_dt --------------------------------------------------------
     output$school_details_dt <- renderDT({
-        df <- covid19_schools_active_with_demographics_most_recent[ , 3:9 ]
+        df <- covid19_schools_active_with_demographics_most_recent[ , 2:9 ]
         colnames(df) <- str_replace_all(colnames(df), '_', ' ')
         colnames(df) <- str_to_title(colnames(df))
         datatable(
             df,
             options = list(
-                pageLength = 1,
+                pageLength = 5,
                 paging = TRUE,
                 searching = TRUE,
                 fixedColumns = TRUE,
@@ -813,6 +840,82 @@ server <- function(input, output) {
         )
     })
     
+    # risk_assessment_elementary_dt --------------------------------------------
+    output$risk_assessment_elementary_dt <- renderDT({
+        df <- risk_rank_elementary
+        colnames(df) <- str_to_title(colnames(df))
+        datatable(
+            df,
+            options = list(
+                paging = TRUE,
+                searching = TRUE,
+                fixedColumns = TRUE,
+                autoWidth = TRUE,
+                ordering = TRUE,
+                dom = 'Bfrtip'
+            ),
+            rownames = FALSE,
+            class = 'display'
+        )
+    })
+    
+    # risk_assessment_secondary_dt ---------------------------------------------
+    output$risk_assessment_secondary_dt <- renderDT({
+        df <- risk_rank_secondary
+        colnames(df) <- str_to_title(colnames(df))
+        datatable(
+            df,
+            options = list(
+                paging = TRUE,
+                searching = TRUE,
+                fixedColumns = TRUE,
+                autoWidth = TRUE,
+                ordering = TRUE,
+                dom = 'Bfrtip'
+            ),
+            rownames = FALSE,
+            class = 'display'
+        )
+    })
+    
+    # variables_details_dt -----------------------------------------------------
+    output$variables_details_dt <- renderDT({
+        c1 <- c('COVID-19 Case Rate',
+                '% Low-income',
+                '% Living in multigenerational homes',
+                '% Visible minority'
+        )
+        c2 <- c(2,
+                1,
+                1,
+                1
+        )
+        c3 <- c('Number of COVID-19 cases in the neighbourhood (confirmed/probable cases, regardless of whether they were associated with an outbreak), per 100,000 neighbourhood population',
+                'Low-income measure after tax (LIM-AT, see Statistics Canada4 for further details, Census, 2016)',
+                'Multigenerational households include at least three generations of the same family (Census, 2016).',
+                'Visible minority population as defined by the Employment Equity Act (Census, 2016)'
+        )
+        c4 <- c('Areas with a high concentration of cases, proportionate to area population, would result in a higher risk of transmission.',
+                'Based on recent analysis, areas with a higher proportion of lower-income households have shown disproportional impacts of COVID-19.',
+                'Multigenerational homes may put older adults at higher risk.',
+                'Based on recent analysis, areas with more visible minorities how disproportional impacts of COVID-19.'
+                
+        )
+        df <- data.frame(Indicator = c1, Weight = c2, Definition = c3, Rationale = c4)
+        datatable(
+            df,
+            options = list(
+                paging = FALSE,
+                searching = FALSE,
+                fixedColumns = TRUE,
+                autoWidth = TRUE,
+                ordering = FALSE,
+                dom = 'Bfrti'
+            ),
+            rownames = FALSE,
+            class = 'display'
+        )
+    })
 }
 
 # RUN THE APPLICATION ----------------------------------------------------------

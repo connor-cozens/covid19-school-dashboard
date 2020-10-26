@@ -256,6 +256,12 @@ if (needs_refresh | is.na(needs_refresh)) {
 	school_demographics <- read_xlsx(fname_demographics)
 	school_demographics <- as.data.frame(school_demographics, stringsAsFactors = FALSE)
 	
+	# 5. load neighborhood risk rank data --------------------------------------
+	
+	fname_neighborhood_risk_rank <- file.path(data_dir, 'COVID19NeighbRiskRank_TCDSBElemSecond_2020-08-20.xlsx')
+	risk_rank_elementary <- read_xlsx(fname_neighborhood_risk_rank, sheet = 2, skip = 3, col_names = TRUE)
+	risk_rank_secondary <- read_xlsx(fname_neighborhood_risk_rank, sheet = 4, skip = 3, col_names = TRUE)
+	
 	# 5. clean active cases data -----------------------------------------------
 	
 	colnames(covid19_schools_active) <- tolower(colnames(covid19_schools_active))
@@ -294,6 +300,18 @@ if (needs_refresh | is.na(needs_refresh)) {
 	school_demographics$municipality <- str_squish(school_demographics$municipality)
 	fn <- file.path(data_dir, 'school_demographics.rdata')
 	save('school_demographics', file = fn)
+	
+	# 9. clean risk assessment data --------------------------------------------
+	
+	risk_rank_elementary <- risk_rank_elementary[ , c(1:9, 13) ]
+	colnames(risk_rank_elementary) <- tolower(colnames(risk_rank_elementary))
+	fn <- file.path(data_dir, 'risk_rank_elementary.rdata')
+	save('risk_rank_elementary', file = fn)
+	
+	risk_rank_secondary <- risk_rank_secondary[ , c(1:9, 13) ]
+	colnames(risk_rank_secondary) <- tolower(colnames(risk_rank_secondary))
+	fn <- file.path(data_dir, 'risk_rank_secondary.rdata')
+	save('risk_rank_secondary', file = fn)
 	
 	# 9. build/refresh school geocodes db --------------------------------------
 	
@@ -758,6 +776,10 @@ if (needs_refresh | is.na(needs_refresh)) {
 	fn <- file.path(data_dir, 'covid19_schools_active_with_demographics_most_recent.rdata')
 	load(file = fn, envir = .GlobalEnv)
 	fn <- file.path(data_dir, 'cases_per_school.rdata')
+	load(file = fn, envir = .GlobalEnv)
+	fn <- file.path(data_dir, 'risk_rank_elementary.rdata')
+	load(file = fn, envir = .GlobalEnv)
+	fn <- file.path(data_dir, 'risk_rank_secondary.rdata')
 	load(file = fn, envir = .GlobalEnv)
 }
 
