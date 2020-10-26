@@ -444,6 +444,7 @@ server <- function(input, output) {
                               legend = list(x = 0.1, y = 0.9),
                               xaxis = list(title = 'Collected date'),
                               yaxis = list (title = 'Cumulative cases'))
+        fig <- config(fig, displayModeBar = FALSE)
         fig
     })
     
