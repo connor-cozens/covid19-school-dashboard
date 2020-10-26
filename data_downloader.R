@@ -47,94 +47,153 @@ geocodes_cache_file <- file.path(data_dir, 'geocode_cache.rdata')
 
 max_file_age_hrs <- 12L
 
+debug <- FALSE
+
 # UTILITY FUNCTIONS ------------------------------------------------------------
 
-#' clean_school_names
+#' clean_all_names
 #' 
-#' function to normalize school names so we can match schools in active cases dataset
+#' function to normalize school and school board names so we can match schools in active cases dataset
 #' with the school demographic dataset
 #' 
 #' TODO: just create a static mapping file for school and school board names, this
-#' has rapidly devolved into madness, as expected.
+#' has rapidly devolved into madness... as expected. *sigh*
 #' 
-clean_school_names <- function(school_names) {
-	stopwords_en <- c('school', 'high', 'elementary', 'middle', 'secondary',
-					  'public', 'collegiate', 'institute', 'junior', 'senior',
-					  'jr', 'sr', 'learning', 'centre', 'adult', 'intstitute',
-					  'elemenary', '&', '\'', ' for ', ' of ', ' and ', 'academy',
-					  'p\\.s\\.') %>% 
-		paste0(., collapse = '|')
-	stopwords_fr <- c('école', 'l\'', 'secondaire', 'élémentaire', 'publique', 'ecole') %>% 
-		paste0(., collapse = '|')
-	tolower(school_names) %>% 
-		str_replace_all(.,  stopwords_en, ' ') %>% 
-		str_replace_all(.,  stopwords_fr, ' ') %>% 
-		str_replace_all(.,  '\\.', ' ') %>% 
-		str_replace_all(., '’', ' ') %>%
-		str_replace_all(., '\\-', ' ') %>%
-		str_replace_all(., ' s ', ' ') %>%
-		str_replace_all(., '\'', ' ') %>%
+clean_all_names <- function(dirty_names) {
+	
+	# clean up 1
+	clean_names <- str_replace_all(dirty_names, '[0-9]+', ' ') %>%
+		iconv(., 'ASCII//TRANSLIT', sub = 'byte') %>%
+		tolower %>% 
+		str_replace_all(., '<c2><a0>', ' ') %>%
+		str_replace_all(., '\\s+', ' ') %>%
+		str_replace_all(., ',', ' ') %>%
+		str_replace_all(., '\\.', '') %>%
 		str_replace_all(., '\\(', ' ') %>%
 		str_replace_all(., '\\)', ' ') %>%
-		str_replace_all(., 'saint', 'st') %>%
-		str_replace_all(., ' ps', ' ') %>%
-		iconv(., 'ASCII//TRANSLIT', sub = 'byte') %>% 
-		str_replace_all(., '\\<c2\\>\\<a0\\>', ' ') %>%
-		str_replace_all(.,  '\\s+', ' ') %>%
-		str_trim %>%
-		# normalize misspelled and otherwise mangled names
-		str_replace_all(., 'carleton village sports wellness', 'carleton village') %>%
-		str_replace_all(., 'catholique renaissance', 'catholique la renaissance') %>%
-		str_replace_all(., 'catholique riverside sud ii jonathan pitre', 'catholique riverside sud ii') %>%
-		str_replace_all(., 'clemens mills', 'clemens mill') %>%
-		str_replace_all(., 'eden rose', 'edenrose') %>%
-		str_replace_all(., 'father f x o reilly catholic', 'father f x o reilly') %>%
-		str_replace_all(., 'guardian angel catholic es', 'guardian angels catholic') %>%
-		str_replace_all(., '^humewood$', 'humewood community') %>%
-		str_replace_all(., 'kidsability authority', 'kidsability') %>%
-		str_replace_all(., 'l <c3><a9>lementaire catholique sacr<c3><a9> c<c5><93>ur', 's<c3><a9>par<c3><a9>e sacr<c3><a9> coeur') %>%
-		str_replace_all(., 'l catholique st charles garnier', '<c3><a9>ic st charles garnier') %>%
-		str_replace_all(., 'martine grove', 'martingrove') %>%
-		str_replace_all(., 'north field fice', 'north field office') %>%
-		str_replace_all(., 'oodeenawi', 'oodenawi') %>%
-		str_replace_all(., 'saint columba catholic', 'st columba catholic') %>%
-		str_replace_all(., 'saint francis de sales catholic', 'st francis de sales catholic') %>%
-		str_replace_all(., 'st alberts catholic', 'st albert catholic') %>%
-		str_replace_all(., 'st jean brebeuf', 'st jean de brebeuf separate') %>% # disambiguate!!!
-		str_replace_all(., 'st luke ottawa', 'st luke ottawa nepean') %>% # disambiguate
-		str_replace_all(., 'st luke nepean', 'st luke ottawa nepean') %>% # disambiguate
-		str_replace_all(., 'st luke', 'st luke ottawa nepean') %>% # disambiguate
-		str_replace_all(., '^st luke ottawa nepean$', 'st luke ottawa nepean catholic') %>% # disambiguate
-		str_replace_all(., 'william parkway', 'williams parkway') %>%
-		str_replace_all(., '<c3><a9>lementaire catholique cardinal l<c3><a9>ger', '<c3><a9><c3><a9>c cardinal l<c3><a9>ger') %>%
-		str_replace_all(., 'david mary thomson', 'david mary thompson') %>%
-		str_replace_all(., 'david mary thomson', 'david mary thompson') %>%
-		# <c3><a9> <c3><a9>l<c3><a9>m c bernard grandma<c3><ae>tre --> <c3><a9><c3><a9>c fr<c3><a8>re andr<c3><a9>
-		# <c3><a9> <c3><a9>l<c3><a9>m c st joseph d orl<c3><a9>ans --> <c3><a9><c3><a9>c fr<c3><a8>re andr<c3><a9>
-		# <c3><a9> <c3><a9>l<c3><a9>m c ste anne --> <c3><a9><c3><a9>c ste anne
-		# <c3><a9>ep louis riel --> <c3><a9>ic renaissance
-		str_replace_all(., 'berrigan e s', 'berrigan') %>%
-		# board office --> woodroffe
-		# bowmore --> roxmore
-		str_replace_all(., 'catholique st fr<c3><a8>re andr<c3><a9>', 'catholique fr<c3><a8>re andr<c3><a9>') %>%
-		# de traitement le jour le transit --> st vincent de paul separate
-		str_replace_all(., 'emily carr md s', 'emily carr') %>%
-		str_replace_all(., 'esp l alternative', 'l alternative') %>%
-		str_replace_all(., 'longfields davidson heights ss', 'longfields davidson heights') %>%
-		str_replace_all(., 'marshall mcluhan catholic ss', 'marshall mcluhan catholic') %>%
-		# north field office --> north meadows
-		str_replace_all(., 'r mclaughlin c vi', 'r mclaughlin vocational') %>%
-		str_replace_all(., 'scarborough alternative studies', 'scarborough alternative studi') %>%
-		str_replace_all(., 'silver heights', 'silverheights') %>%
-		str_replace_all(., 'st mark hs', 'st mark') %>%
-		str_replace_all(., 'st nicolas catholic', 'st nicholas catholic') %>%
-		# st sofia separate --> st louis separate
-		str_replace_all(., 'st thomas aquinas hs intermediate', 'st thomas aquinas catholic') %>%
-		str_replace_all(., 'trillium e s', 'trillium') %>%
-		str_replace_all(., 'waverly drive', 'waverley drive') %>%
-		str_replace_all(., 'west humber ci', 'west humber') %>%
-		str_replace_all(., 'woodroffe hs', 'woodroffe') %>%
-		str_trim
+		str_replace_all(., '/', ' ') %>%
+		str_replace_all(., '@', ' ') %>%
+		str_replace_all(., '\\+', ' ') %>%
+		str_replace_all(., '\\-', ' ') %>%
+		str_replace_all(., '&', ' ') %>%
+		str_replace_all(., '<e2><80><99>', '\'') %>%
+		str_replace_all(., '<c5><93>', 'oe') %>%
+		str_squish
+	
+	stopwords <- c('<c3><89><c3><89>c', 
+				   '<c3><89>a', 
+				   '<c3><89>cole', 
+				   '<c3><89>ducation', 
+				   '<c3><89>ep', 
+				   '<c3><89>ic', 
+				   '<c3><89> <c3><89>l<c3><a9>m c ',
+				   '<c3><89>l<c3><a9>mentaire',
+				   '<c3><89>lementaire',
+				   '<c3><89>p',
+				   '<c3><89>sac',
+				   '<c3><89>sc',
+				   '<c3><a9>coles', 
+				   '<c3><a9>l<c3><a9>mentaire', 
+				   'aaec\'s',
+				   'acad<c3><a9>mie',
+				   'academy', 
+				   'academy-', 
+				   'adolescent', 
+				   'adult',
+				   'adultes', 
+				   # 'alternate',
+				   # 'alternative',
+				   # 'alternatives', 
+				   ' and\\s?',
+				   ' at ',
+				   'authority',
+				   'c<c3><89>p',
+				   'catholic',
+				   'catholique',
+				   'catholiques', 
+				   'c elem s',
+				   'centre',
+				   ' ces',
+				   ' ci$',
+				   'coll<c3><a8>ge', 
+				   'college',
+				   'collegiate', 
+				   'community',
+				   'conted', 
+				   'continuing',
+				   ' cvi\\s?',
+				   'c vi\\s?',
+				   'ecole', 
+				   'education', 
+				   'elementaire', 
+				   'elemenary', 
+				   'elementary',
+				   ' e s$',
+				   ' es$',
+				   '^esp ',
+				   ' hs\\s?',
+				   ' high\\s?', 
+				   'highschool', 
+				   'instititue', 
+				   'institute', 
+				   'institute-secondary',
+				   'interm<c3><a9>diaire', 
+				   'intermediate', 
+				   'intstitute',
+				   'junior',
+				   'jr',
+				   'jonathan pitre',
+				   'l\'<c3><89>cole', 
+				   'l\'acad<c3><a9>mie', 
+				   'learning',
+				   ' md\\s?', 
+				   'middle ', 
+				   ' ps\\s?', 
+				   'pssb', 
+				   'pte',
+				   'public', 
+				   'publique',
+				   'publiques', 
+				   'school', 
+				   'schools', 
+				   'scolaire', 
+				   'secondaire', 
+				   'secondary',
+				   'senior',
+				   'separate',
+				   'sports',
+				   ' sr\\s?',
+				   ' ss\\s?',
+				   '\'s',
+				   ' the',
+				   'vocational',
+				   'wellness')
+	
+	# clean up 2: remove stopwords
+	stopwords_regex <- paste0(stopwords, collapse = '|')
+	clean_names <- lapply(clean_names, str_replace_all, stopwords_regex, '')
+	clean_names <- unlist(clean_names)
+	
+	# clean up 3
+	clean_names <- str_replace_all(clean_names, 'saint([ |\\-])', 'st\\1')
+	clean_names <- str_replace_all(clean_names, 'sainte([ |\\-])', 'ste\\1')
+	clean_names <- str_replace_all(clean_names, 'monsignor', 'msgr')
+	clean_names <- str_replace_all(clean_names, 'monseigneur', 'msgr')
+	clean_names <- str_squish(clean_names)
+	
+	# clean up 4 
+	clean_names <- str_replace_all(clean_names, 'frank panabaker north ancaster', 'frank panabaker north')
+	clean_names <- str_replace_all(clean_names, 'ursuline chatham', 'ursuline')
+	clean_names <- str_replace_all(clean_names, 'pope st francis', 'pope francis')
+	clean_names <- str_replace_all(clean_names, 'st john xxlll', 'st john xxiii')
+	clean_names <- str_replace_all(clean_names, 'john clarke richardson', 'j clarke richardson')
+	clean_names <- str_replace_all(clean_names, 'notre dame de la jeunesse ajax', 'notre dame de la jeunesse')
+	clean_names <- str_replace_all(clean_names, 'notre dame de la jeunesse niagraf', 'notre dame de la jeunesse')
+	clean_names <- str_replace_all(clean_names, 'western techcommercial', 'western technical commercial')
+	clean_names <- str_replace_all(clean_names, 'nora frances henderson', 'nora henderson')
+	
+	
+	clean_names
 }
 
 # MAIN -------------------------------------------------------------------------
@@ -177,426 +236,578 @@ if (needs_refresh | is.na(needs_refresh)) {
 	GET(url, write_disk(fname_demographics, overwrite = TRUE))
 }
 
-# 2. load school summary data into memory --------------------------------------
 
-covid19_schools_summary <- read.csv(fname_summary, fileEncoding = 'Windows-1252', stringsAsFactors = FALSE)
-
-# 3. load school active cases data into memory ---------------------------------
-
-covid19_schools_active <- read.csv(fname_active, fileEncoding = 'Windows-1252', stringsAsFactors = FALSE)
-
-# 4. load all cases data into memory -------------------------------------------
-
-covid19_all_cases <- read.csv(fname_all_cases, fileEncoding = 'Windows-1252', stringsAsFactors = FALSE)
-
-# 5. load school demographic data into memory ----------------------------------
-
-school_demographics <- read_xlsx(fname_demographics)
-school_demographics <- as.data.frame(school_demographics, stringsAsFactors = FALSE)
-
-# 6. clean active cases data ---------------------------------------------------
-
-colnames(covid19_schools_active) <- tolower(colnames(covid19_schools_active))
-covid19_schools_active$collected_date <- as.Date(covid19_schools_active$collected_date)
-covid19_schools_active$reported_date <- as.Date(covid19_schools_active$reported_date)
-
-# 7. clean summary data --------------------------------------------------------
-
-colnames(covid19_schools_summary) <- tolower(colnames(covid19_schools_summary))
-covid19_schools_summary$collected_date <- as.Date(covid19_schools_summary$collected_date)
-covid19_schools_summary$reported_date <- as.Date(covid19_schools_summary$reported_date)
-
-# 8. clean all cases data -----------------------------------------------------
-
-colnames(covid19_all_cases) <- tolower(colnames(covid19_all_cases))
-covid19_all_cases$accurate_episode_date <- as.Date(covid19_all_cases$accurate_episode_date)
-covid19_all_cases$case_reported_date <- as.Date(covid19_all_cases$case_reported_date)
-covid19_all_cases$test_reported_date <- as.Date(covid19_all_cases$test_reported_date)
-
-# 9. clean school demographics data --------------------------------------------
-
-colnames(school_demographics) <- tolower(colnames(school_demographics))
-school_demographics$`board name` <- str_replace_all(school_demographics$`board name`, '’', '\'')
-covid19_schools_active$school_board <- str_replace_all(covid19_schools_active$school_board, '’', '\'')
-
-# 10. build/refresh school geocodes db -----------------------------------------
-
-cached_geocodes <- data.frame(geo_query_str = NA, lon = NA, lat = NA)
-if (file.exists(geocodes_cache_file)) load(file = geocodes_cache_file)
-# create query strings
-geo_query_str <- sprintf('%s,%s,Ontario,Canada', 
-						 str_trim(covid19_schools_active$school), 
-						 covid19_schools_active$municipality)
-geo_query_str <- unique(geo_query_str)
-message(sprintf('we have %s geocode queries to make', length(geo_query_str)))
-idx <- which(geo_query_str %in% cached_geocodes$geo_query_str)
-message(sprintf('we have %s cached geocode entries', length(idx)))
-if (length(idx) > 0) geo_query_str <- geo_query_str[ -idx ]
-if (length(geo_query_str) > 0) {
-	# we have queries to do
-	message('processing geocoding requests')
-	geo_query_str <- data.frame(geo_query_str, stringsAsFactors = FALSE)
-	register_google(google_api_key)
-	school_geocodes <- mutate_geocode(geo_query_str, geo_query_str)
-	school_geocodes <- rbind(school_geocodes, cached_geocodes)
-	# save known geocodes to local db to save api calls
-	idx <- which(!is.na(school_geocodes$lon))
-	cached_geocodes <- school_geocodes[ idx, ] 
-	save('cached_geocodes', file = geocodes_cache_file)
-	school_geocodes <- cached_geocodes
+if (needs_refresh | is.na(needs_refresh)) {
+	# REFRESH ALL DATA ---------------------------------------------------------
+	# 1. load school summary data into memory ----------------------------------
+	
+	covid19_schools_summary <- read.csv(fname_summary, fileEncoding = 'Windows-1252', stringsAsFactors = FALSE)
+	
+	# 2. load school active cases data into memory -----------------------------
+	
+	covid19_schools_active <- read.csv(fname_active, fileEncoding = 'Windows-1252', stringsAsFactors = FALSE)
+	
+	# 3. load all cases data into memory ---------------------------------------
+	
+	covid19_all_cases <- read.csv(fname_all_cases, fileEncoding = 'Windows-1252', stringsAsFactors = FALSE)
+	
+	# 4. load school demographic data into memory ------------------------------
+	
+	school_demographics <- read_xlsx(fname_demographics)
+	school_demographics <- as.data.frame(school_demographics, stringsAsFactors = FALSE)
+	
+	# 5. clean active cases data -----------------------------------------------
+	
+	colnames(covid19_schools_active) <- tolower(colnames(covid19_schools_active))
+	covid19_schools_active$collected_date <- as.Date(covid19_schools_active$collected_date)
+	covid19_schools_active$reported_date <- as.Date(covid19_schools_active$reported_date)
+	covid19_schools_active$school <- str_squish(covid19_schools_active$school)
+	covid19_schools_active$school_board <- str_squish(covid19_schools_active$school_board)
+	covid19_schools_active$municipality <- str_squish(covid19_schools_active$municipality)
+	fn <- file.path(data_dir, 'covid19_schools_active.rdata')
+	save('covid19_schools_active', file = fn)
+	
+	# 6. clean summary data ----------------------------------------------------
+	
+	colnames(covid19_schools_summary) <- tolower(colnames(covid19_schools_summary))
+	covid19_schools_summary$collected_date <- as.Date(covid19_schools_summary$collected_date)
+	covid19_schools_summary$reported_date <- as.Date(covid19_schools_summary$reported_date)
+	fn <- file.path(data_dir, 'covid19_schools_summary.rdata')
+	save('covid19_schools_summary', file = fn)
+	
+	# 7. clean all cases data --------------------------------------------------
+	
+	colnames(covid19_all_cases) <- tolower(colnames(covid19_all_cases))
+	covid19_all_cases$accurate_episode_date <- as.Date(covid19_all_cases$accurate_episode_date)
+	covid19_all_cases$case_reported_date <- as.Date(covid19_all_cases$case_reported_date)
+	covid19_all_cases$test_reported_date <- as.Date(covid19_all_cases$test_reported_date)
+	fn <- file.path(data_dir, 'covid19_all_cases.rdata')
+	save('covid19_all_cases', file = fn)
+	
+	# 8. clean school demographics data ----------------------------------------
+	
+	colnames(school_demographics) <- tolower(colnames(school_demographics))
+	school_demographics$`board name` <- str_replace_all(school_demographics$`board name`, '’', '\'')
+	covid19_schools_active$school_board <- str_replace_all(covid19_schools_active$school_board, '’', '\'')
+	school_demographics$`board name` <- str_squish(school_demographics$`board name`)
+	school_demographics$`school name` <- str_squish(school_demographics$`school name`)
+	school_demographics$municipality <- str_squish(school_demographics$municipality)
+	fn <- file.path(data_dir, 'school_demographics.rdata')
+	save('school_demographics', file = fn)
+	
+	# 9. build/refresh school geocodes db --------------------------------------
+	
+	cached_geocodes <- data.frame(geo_query_str = NA, lon = NA, lat = NA)
+	if (file.exists(geocodes_cache_file)) load(file = geocodes_cache_file)
+	# create query strings
+	geo_query_str <- sprintf('%s,%s,Ontario,Canada', 
+							 str_trim(covid19_schools_active$school), 
+							 covid19_schools_active$municipality)
+	geo_query_str <- unique(geo_query_str)
+	message(sprintf('we have %s geocode queries to make', length(geo_query_str)))
+	idx <- which(geo_query_str %in% cached_geocodes$geo_query_str)
+	message(sprintf('we have %s cached geocode entries', length(idx)))
+	if (length(idx) > 0) geo_query_str <- geo_query_str[ -idx ]
+	if (length(geo_query_str) > 0) {
+		# we have queries to do
+		message('processing geocoding requests')
+		geo_query_str <- data.frame(geo_query_str, stringsAsFactors = FALSE)
+		register_google(google_api_key)
+		school_geocodes <- mutate_geocode(geo_query_str, geo_query_str)
+		school_geocodes <- rbind(school_geocodes, cached_geocodes)
+		# save known geocodes to local db to save api calls
+		idx <- which(!is.na(school_geocodes$lon))
+		cached_geocodes <- school_geocodes[ idx, ] 
+		save('cached_geocodes', file = geocodes_cache_file)
+		school_geocodes <- cached_geocodes
+	} else {
+		# all of our data is already in cache
+		message('all geocodes already in cache!')
+		school_geocodes <- cached_geocodes
+	}
+	
+	# 10. combine active school cases with demographic data --------------------
+	
+	# note: this whole section is still a work in progress!
+	
+	# all schools with active cases
+	# covid19_schools_active$school %>% unique %>% str_trim %>% sort
+	
+	# find all mismatched school names
+	idx <- which(covid19_schools_active$school %in% school_demographics$`school name` == FALSE)
+	covid19_schools_active$school[ idx ] %>% unique %>% str_trim %>% sort
+	
+	# clean school names in demographic dataset
+	sn1 <- clean_all_names(school_demographics$`school name`)
+	
+	# clean school names in active cases dataset
+	sn2 <- clean_all_names(covid19_schools_active$school)
+	
+	# let's see how well our cleaning function does...
+	idx <- which(sn2 %in% sn1 == FALSE)
+	mismatched_school_names <- sn2[ idx ] %>% unique %>% str_trim %>% sort
+	# (mismatched_school_names)
+	# cat(mismatched_school_names, sep = '\n')
+	# (length(mismatched_school_names))
+	
+	# use stringdist fuzzy matching to resolve mismatched names
+	sdm <- stringdistmatrix(mismatched_school_names, sn1)
+	
+	# visually inspect the quality of our fuzzy matches
+	sprintf('%s --> %s', mismatched_school_names, sn1[ apply(sdm, 1, which.min) ]) %>% cat(., sep = '\n')
+	
+	# use this code for string matching diagnostics
+	# View(data.frame(sn1 %>% sort))
+	# View(data.frame(sn2 %>% sort))
+	# View(data.frame(covid19_schools_active$school))
+	# View(data.frame(school_demographics$`school name`))
+	
+	# add cleaned names to demographic and active cases datasets
+	covid19_schools_active$school_clean <- sn2
+	school_demographics$school_clean <- sn1
+	
+	# merge demographic and activ cases datasets
+	# merge does not work we have to use school name and board name
+	# covid19_schools_active_with_demographics <- merge(covid19_schools_active, school_demographics, by = 'school_clean', all.y = FALSE)
+	# summary(covid19_schools_active_with_demographics)
+	
+	covid19_schools_active_with_demographics <- apply(covid19_schools_active, 1, function(x) {
+		# print(x)
+		# browser()
+		# match on cleaned school name
+		idx <- which(school_demographics$school_clean == x[ 'school_clean' ])
+		if (length(idx) > 1) {
+			disambiguation_df <- data.frame(x[ 'school' ] %>% as.character,
+											school_demographics[ idx, c('school name', 'board name') ],
+											x[ 'school_board' ] %>% as.character,
+											stringsAsFactors = FALSE)
+			# print(disambiguation_df)
+			# if all school boards are the same it is a question of whether this is an elementary or a high school
+			if (length(unique(disambiguation_df[ , 3 ])) == 1) {
+				# are we looking at the high school or the elementary school?
+				# message('disambiguated by school type')
+				# browser()
+				idx <- stringdistmatrix(disambiguation_df[ 1, 1 ], disambiguation_df[ , 2 ])
+				idx <- which.min(idx)
+				# message(sprintf('chose entry %s', idx))
+				idx2 <- which(school_demographics$`school name` == disambiguation_df[ idx, 'school.name' ] & 
+							  	school_demographics$`board name` == disambiguation_df[ idx, 'board.name' ])
+				result <- data.frame(t(x), school_demographics[ idx2, ])
+			} else {
+				# fuzzy match the board names
+				# message('disambiguated by school board name')
+				bn <- disambiguation_df[ 1, 4 ]
+				bn <- str_replace(bn, 'Conseil des écoles catholiques', 'CSDC')
+				bn <- str_replace(bn, '\\(.*\\)', '')
+				bn <- str_trim(bn)
+				idx <- stringdistmatrix(bn, disambiguation_df[ , 3 ])
+				idx <- which.min(idx)
+				idx2 <- which(school_demographics$`school name` == disambiguation_df[ idx, 'school.name' ] & 
+							  	school_demographics$`board name` == disambiguation_df[ idx, 'board.name' ])
+				# message(sprintf('chose entry %s', idx))
+				result <- data.frame(t(x), school_demographics[ idx2, ])
+				# print(x)
+				# print(result)
+				# browser()
+			}
+		} else if (length(idx) == 1) {
+			# we have a perfect match
+			result <- data.frame(t(x), school_demographics[ idx, ])
+		} else if (length(idx) == 0) {
+			# this is one of the cleaned school names that is mismatched
+			# browser()
+			# before we give up let's see if we have any fuzzy matches...
+			sdm <- stringdistmatrix(x[ 'school_clean'], school_demographics$school_clean)
+			sdm <- as.integer(sdm)
+			idx1 <- which(sdm < 3)
+			if (length(idx1) > 0) {
+				if (length(idx1) > 1) {
+					# break ties 
+					# disambiguate by school board
+					sdm2 <- stringdistmatrix(x[ 'school_board' ], school_demographics[ idx1, 'board name'])
+					sdm2 <- as.integer(sdm2)
+					idx2 <- which.min(sdm2)
+					idx1 <- idx1[ idx2 ]
+					result <- data.frame(t(x), school_demographics[ idx1, ])	
+					# browser()
+				} else {
+					# message(sprintf('found fuzzy match for school name "%s"', x[ 'school_clean' ]))
+					result <- data.frame(t(x), school_demographics[ idx1, ])	
+				}
+			} else {
+				if (debug) message(sprintf('no corresponding school name found for "%s" using dummy data', x[ 'school_clean' ]))
+				dummy_df <- data.frame(t(rep('', 52)))
+				colnames(dummy_df) <- colnames(school_demographics)
+				result <- data.frame(t(x))	
+			}
+		}
+		if (nrow(result) > 1) { 
+			# use municipality to disambiguate
+			idx <- which(tolower(str_trim(result$municipality)) == tolower(str_trim(result$municipality.1)))
+			if (length(idx) == 1) {
+				if (debug) message(sprintf('disambiguated by municipality for %s!', x[ 'school_clean' ]))
+				result <- result[ idx, ]
+			} else {
+				if (debug) message(sprintf('sloppy disambiguation for %s!', x[ 'school_clean' ]))
+				result <- result[ 1, ]
+			}
+		}
+		return(result)
+	})
+	covid19_schools_active_with_demographics <- rbindlist(covid19_schools_active_with_demographics, use.names = TRUE, fill = TRUE)
+	covid19_schools_active_with_demographics <- data.frame(covid19_schools_active_with_demographics)
+	
+	# 11. clean combined case and demographics data ----------------------------
+	# str(covid19_schools_active_with_demographics)
+	# 'data.frame':	1674 obs. of  62 variables:
+	# 	$ collected_date                                                                          : chr  "2020-09-10" "2020-09-10" "2020-09-10" "2020-09-10" ...
+	covid19_schools_active_with_demographics$collected_date <- as.Date(covid19_schools_active_with_demographics$collected_date)
+	# $ reported_date                                                                             : chr  "2020-09-11" "2020-09-11" "2020-09-11" "2020-09-11" ...
+	covid19_schools_active_with_demographics$reported_date <- as.Date(covid19_schools_active_with_demographics$reported_date)
+	# $ school_board                                                                            : chr  "Conseil des écoles catholiques du Centre-Est (CECCE)" "Conseil des écoles catholiques du Centre-Est (CECCE)" "Conseil des écoles catholiques du Centre-Est (CECCE)" "Conseil des écoles catholiques du Centre-Est (CECCE)" ...
+	# $ school                                                                                  : chr  "École élémentaire catholique Roger-Saint-Denis" "École élémentaire catholique Saint-François-d’Assise" "École élémentaire catholique Sainte-Anne" "École élémentaire catholique Laurier-Carrière" ...
+	# $ municipality                                                                            : chr  "Ottawa" "Ottawa" "Ottawa" "Ottawa" ...
+	# $ confirmed_student_cases                                                                 : chr  "0" "1" "1" "1" ...
+	covid19_schools_active_with_demographics$confirmed_student_cases <- as.integer(covid19_schools_active_with_demographics$confirmed_student_cases)
+	# $ confirmed_staff_cases                                                                   : chr  "1" "0" "0" "0" ...
+	covid19_schools_active_with_demographics$confirmed_staff_cases <- as.integer(covid19_schools_active_with_demographics$confirmed_staff_cases)
+	# $ confirmed_unspecified_cases                                                             : chr  NA NA NA NA ...
+	covid19_schools_active_with_demographics$confirmed_unspecified_cases <- as.integer(covid19_schools_active_with_demographics$confirmed_unspecified_cases)
+	# $ total_confirmed_cases                                                                   : chr  "1" "1" "1" "1" ...
+	covid19_schools_active_with_demographics$total_confirmed_cases <- as.integer(covid19_schools_active_with_demographics$total_confirmed_cases)
+	# $ school_clean                                                                            : chr  "catholique roger saint denis" "catholique saint fran<c3><a7>ois d assise" "catholique sainte anne" "catholique laurier carri<c3><a8>re" ...
+	covid19_schools_active_with_demographics$school_clean <- NULL
+	# $ board.number                                                                            : chr  "B67334" "B67334" "B67334" "B67334" ...
+	# $ board.name                                                                              : chr  "CSDC du Centre-Est de l'Ontario" "CSDC du Centre-Est de l'Ontario" "CSDC du Centre-Est de l'Ontario" "CSDC du Centre-Est de l'Ontario" ...
+	# $ board.type                                                                              : chr  "Cath Dist Sch Brd (E/F)" "Cath Dist Sch Brd (E/F)" "Cath Dist Sch Brd (E/F)" "Cath Dist Sch Brd (E/F)" ...
+	# $ school.number                                                                           : chr  "753203" "793027" "860573" "734314" ...
+	# $ school.name                                                                             : chr  "École élémentaire catholique Roger-Saint-Denis" "École élémentaire catholique Saint-François-d'Assise" "École élémentaire catholique Sainte-Anne" "École élémentaire catholique Laurier-Carrière" ...
+	# $ school.type                                                                             : chr  "Catholic" "Catholic" "Catholic" "Catholic" ...
+	# $ school.special.condition.code                                                           : chr  "Not applicable" "Not applicable" "Not applicable" "Not applicable" ...
+	# $ school.level                                                                            : chr  "Elementary" "Elementary" "Elementary" "Elementary" ...
+	# $ school.language                                                                         : chr  "French" "French" "French" "French" ...
+	# $ grade.range                                                                             : chr  "JK-6" "JK-6" "JK-8" "JK-6" ...
+	# $ building.suite                                                                          : chr  NA NA NA NA ...
+	covid19_schools_active_with_demographics$building.suite <- NULL
+	# $ p.o..box                                                                                : chr  NA NA NA NA ...
+	covid19_schools_active_with_demographics$p.o..box <- NULL
+	# $ street                                                                                  : chr  "186 Barrow crois." "35 Melrose av." "235 Beausoleil promenade" "14 Four Seasons prom." ...
+	# $ municipality.1                                                                          : chr  "Ottawa" "Ottawa" "Ottawa" "Ottawa" ...
+	covid19_schools_active_with_demographics$municipality.1 <- NULL
+	# $ city                                                                                    : chr  "Kanata" "Ottawa" "Ottawa" "Nepean" ...
+	# $ province                                                                                : chr  "Ontario" "Ontario" "Ontario" "Ontario" ...
+	# $ postal.code                                                                             : chr  "K2L2C7" "K1Y1T8" "K1N0C1" "K2E7P8" ...
+	# $ phone.number                                                                            : chr  "613-521-3815" "613-729-1463" "613-789-3933" "613-224-3211" ...
+	covid19_schools_active_with_demographics$phone.number <- NULL
+	# $ fax.number                                                                              : chr  "613-592-8275" "613-729-2291" "613-789-1265" "613-225-3783" ...
+	covid19_schools_active_with_demographics$fax.number <- NULL
+	# $ school.website                                                                          : chr  "http://www.roger-saint-denis.ecolecatholique.ca/" "http://www.saint-francois-dassise.ecolecatholique.ca/" "http://www.sainte-anne.ecolecatholique.ca/" "http://www.laurier-carriere.ecolecatholique.ca/" ...
+	covid19_schools_active_with_demographics$school.website <- NULL
+	# $ board.website                                                                           : chr  "www.ecolecatholique.ca/fr/" "www.ecolecatholique.ca/fr/" "www.ecolecatholique.ca/fr/" "www.ecolecatholique.ca/fr/" ...
+	covid19_schools_active_with_demographics$board.website <- NULL
+	# $ Enrolment                                                                               : chr  "190" "345" "220" "400" ...
+	# $ latitude                                                                                : num  45.3 45.4 45.4 45.4 45.3 ...
+	# $ longitude                                                                               : num  -75.9 -75.7 -75.7 -75.7 -75.8 ...
+	# $ percentage.of.students.whose.first.language.is.not.english                              : chr  "65" "60" "80" "60" ...
+	covid19_schools_active_with_demographics$percentage.of.students.whose.first.language.is.not.english <- as.integer(covid19_schools_active_with_demographics$percentage.of.students.whose.first.language.is.not.english)
+	# $ percentage.of.students.whose.first.language.is.not.french                               : chr  "55" "45" "40" "50" ...
+	covid19_schools_active_with_demographics$percentage.of.students.whose.first.language.is.not.french <- as.integer(covid19_schools_active_with_demographics$percentage.of.students.whose.first.language.is.not.french)
+	# $ percentage.of.students.who.are.new.to.canada.from.a.non.english.speaking.country        : chr  "10" "10" "20" "5" ...
+	covid19_schools_active_with_demographics$percentage.of.students.who.are.new.to.canada.from.a.non.english.speaking.country <- as.integer(covid19_schools_active_with_demographics$percentage.of.students.who.are.new.to.canada.from.a.non.english.speaking.country)
+	# $ percentage.of.students.who.are.new.to.canada.from.a.non.french.speaking.country         : chr  "10" "10" "20" "10" ...
+	covid19_schools_active_with_demographics$percentage.of.students.who.are.new.to.canada.from.a.non.french.speaking.country <- as.integer(covid19_schools_active_with_demographics$percentage.of.students.who.are.new.to.canada.from.a.non.french.speaking.country)
+	# $ percentage.of.students.identified.as.gifted                                             : chr  "25" "10" "20" "15" ...
+	covid19_schools_active_with_demographics$percentage.of.students.identified.as.gifted <- as.integer(covid19_schools_active_with_demographics$percentage.of.students.identified.as.gifted)
+	# $ percentage.of.students.receiving.special.education.services                             : chr  "0" "0" "0" "0" ...
+	covid19_schools_active_with_demographics$percentage.of.students.receiving.special.education.services <- as.integer(covid19_schools_active_with_demographics$percentage.of.students.receiving.special.education.services)
+	# $ percentage.of.grade.3.students.achieving.the.provincial.standard.in.reading             : chr  "67%" "83%" "65%" "92%" ...
+	covid19_schools_active_with_demographics$percentage.of.grade.3.students.achieving.the.provincial.standard.in.reading <- NULL
+	# $ change.in.grade.3.reading.achievement.over.three.years                                  : chr  "0" "-12" "-23" "5" ...
+	covid19_schools_active_with_demographics$change.in.grade.3.reading.achievement.over.three.years <- NULL
+	# $ percentage.of.grade.3.students.achieving.the.provincial.standard.in.writing             : chr  "54%" "73%" "71%" "81%" ...
+	covid19_schools_active_with_demographics$percentage.of.grade.3.students.achieving.the.provincial.standard.in.writing <- NULL
+	# $ change.in.grade.3.writing.achievement.over.three.years                                  : chr  "-17" "-17" "-17" "-3" ...
+	covid19_schools_active_with_demographics$change.in.grade.3.writing.achievement.over.three.years <- NULL
+	# $ percentage.of.grade.3.students.achieving.the.provincial.standard.in.mathematics         : chr  "58%" "71%" "47%" "73%" ...
+	covid19_schools_active_with_demographics$percentage.of.grade.3.students.achieving.the.provincial.standard.in.mathematics <- NULL
+	# $ change.in.grade.3.mathematics.achievement.over.three.years                              : chr  "-9" "-9" "-41" "-6" ...
+	covid19_schools_active_with_demographics$change.in.grade.3.mathematics.achievement.over.three.years <- NULL
+	# $ percentage.of.grade.6.students.achieving.the.provincial.standard.in.reading             : chr  "96%" "96%" "97%" "79%" ...
+	covid19_schools_active_with_demographics$percentage.of.grade.6.students.achieving.the.provincial.standard.in.reading <- NULL
+	# $ change.in.grade.6.reading.achievement.over.three.years                                  : chr  "13" "1" "14" "-13" ...
+	covid19_schools_active_with_demographics$change.in.grade.6.reading.achievement.over.three.years <- NULL
+	# $ percentage.of.grade.6.students.achieving.the.provincial.standard.in.writing             : chr  "96%" "89%" "85%" "67%" ...
+	covid19_schools_active_with_demographics$percentage.of.grade.6.students.achieving.the.provincial.standard.in.writing <- NULL
+	# $ change.in.grade.6.writing.achievement.over.three.years                                  : chr  "13" "3" "38" "-16" ...
+	covid19_schools_active_with_demographics$change.in.grade.6.writing.achievement.over.three.years <- NULL
+	# $ percentage.of.grade.6.students.achieving.the.provincial.standard.in.mathematics         : chr  "96%" "91%" "82%" "67%" ...
+	covid19_schools_active_with_demographics$percentage.of.grade.6.students.achieving.the.provincial.standard.in.mathematics <- NULL
+	# $ change.in.grade.6.mathematics.achievement.over.three.years                              : chr  "13" "9" "35" "-18" ...
+	covid19_schools_active_with_demographics$change.in.grade.6.mathematics.achievement.over.three.years <- NULL
+	# $ percentage.of.grade.9.students.achieving.the.provincial.standard.in.academic.mathematics: chr  "na" "na" "na" "na" ...
+	covid19_schools_active_with_demographics$percentage.of.grade.9.students.achieving.the.provincial.standard.in.academic.mathematics <- NULL
+	# $ change.in.grade.9.academic.mathematics.achievement.over.three.years                     : chr  "na" "na" "na" "na" ...
+	covid19_schools_active_with_demographics$change.in.grade.9.academic.mathematics.achievement.over.three.years <- NULL
+	# $ percentage.of.grade.9.students.achieving.the.provincial.standard.in.applied.mathematics : chr  "na" "na" "na" "na" ...
+	covid19_schools_active_with_demographics$percentage.of.grade.9.students.achieving.the.provincial.standard.in.applied.mathematics <- NULL
+	# $ change.in.grade.9.applied.mathematics.achievement.over.three.years                      : chr  "na" "na" "na" "na" ...
+	covid19_schools_active_with_demographics$change.in.grade.9.applied.mathematics.achievement.over.three.years <- NULL
+	# $ percentage.of.students.that.passed.the.grade.10.osslt.on.their.first.attempt            : chr  "na" "na" "na" "na" ...
+	covid19_schools_active_with_demographics$percentage.of.students.that.passed.the.grade.10.osslt.on.their.first.attempt <- NULL
+	# $ change.in.grade.10.osslt.literacy.achievement.over.three.years                          : chr  "na" "na" "na" "na" ...
+	covid19_schools_active_with_demographics$change.in.grade.10.osslt.literacy.achievement.over.three.years <- NULL
+	# $ percentage.of.school.aged.children.who.live.in.low.income.households                    : chr  "10" "30" "50" "20" ...
+	covid19_schools_active_with_demographics$percentage.of.school.aged.children.who.live.in.low.income.households <- as.integer(covid19_schools_active_with_demographics$percentage.of.school.aged.children.who.live.in.low.income.households)
+	# $ percentage.of.students.whose.parents.have.some.university.education                     : chr  "55" "55" "35" "60" ...
+	covid19_schools_active_with_demographics$percentage.of.students.whose.parents.have.some.university.education <- as.integer(covid19_schools_active_with_demographics$percentage.of.students.whose.parents.have.some.university.education)
+	# $ extract.date                                                                            : POSIXct, format: "2020-09-04" "2020-09-04" "2020-09-04" "2020-09-04" ...
+	covid19_schools_active_with_demographics$extract.date <- NULL
+	# $ school_clean.1                                                                          : chr  "catholique roger saint denis" "catholique saint fran<c3><a7>ois d assise" "catholique sainte anne" "catholique laurier carri<c3><a8>re" ...
+	covid19_schools_active_with_demographics$school_clean.1 <- NULL
+	fn <- file.path(data_dir, 'covid19_schools_active_with_demographics.rdata')
+	save('covid19_schools_active_with_demographics', file = fn)
+	
+	# 12. exploratory data analysis --------------------------------------------
+	
+	# 13a. summary data exploration --------------------------------------------
+	# (covid19_schools_summary)
+	# 
+	# dt <- as.Date(covid19_schools_summary[ , 'collected_date' ])
+	# 
+	# d1 <- covid19_schools_summary[ , 'current_schools_w_cases' ]
+	# current_schools_w_cases <- xts(d1, order.by = dt)
+	# plot(current_schools_w_cases, main = 'current schools with cases')
+	# 
+	# d1 <- covid19_schools_summary[ , 'current_schools_w_cases' ] / covid19_schools_summary[ , 'current_total_number_schools' ] * 1e2
+	# current_schools_w_cases_percent <- xts(d1, order.by = dt)
+	# plot(current_schools_w_cases_percent, main = 'current schools with cases percent')
+	# 
+	# d1 <- covid19_schools_summary[ , 'cumulative_school_related_cases' ]
+	# cumulative_school_related_cases <- xts(d1, order.by = dt)
+	# plot(cumulative_school_related_cases, main = 'cumulative school related cases')
+	
+	# 13b. active cases data exploration ---------------------------------------
+	# (covid19_schools_active)
+	# 
+	# dt <- as.Date(covid19_schools_active[ , 'collected_date' ])
+	# idx <- which(!is.na(dt))
+	# covid19_schools_active <- covid19_schools_active[ idx, ]
+	# dt <- dt[ idx ]
+	# 
+	# active_cases_by_municipality <- tapply(covid19_schools_active$municipality,
+	# 									   list(covid19_schools_active$collected_date,
+	# 									   	 covid19_schools_active$municipality),
+	# 									   length)
+	# active_cases_by_municipality <- as.xts(active_cases_by_municipality)
+	# plot(active_cases_by_municipality, type = 'b',
+	# 	 main = 'cases in schools by municipality',
+	# 	 legend.loc = 'topleft',
+	# 	 grid.ticks.lwd = 0.25)
+	
+	# 13c. active cases with demographic data exploration ----------------------
+	
+	# extract data frame with only most recent observations per school
+	idx <- sprintf('%s%s', 
+				   covid19_schools_active_with_demographics$school, 
+				   covid19_schools_active_with_demographics$school_board) %>% 
+		unique
+	covid19_schools_active_with_demographics_most_recent <- lapply(idx, function(x) {
+		idx2 <- sprintf('%s%s',
+						covid19_schools_active_with_demographics$school,
+						covid19_schools_active_with_demographics$school_board)
+		idx2 <- which(idx2 == x)
+		df <- covid19_schools_active_with_demographics[ idx2, ]
+		idx2 <- which.max(df$collected_date)
+		df <- df[ idx2, ]
+	})
+	covid19_schools_active_with_demographics_most_recent <- rbindlist(covid19_schools_active_with_demographics_most_recent)
+	covid19_schools_active_with_demographics_most_recent <- data.frame(covid19_schools_active_with_demographics_most_recent, 
+																	   stringsAsFactors = FALSE)
+	fn <- file.path(data_dir, 'covid19_schools_active_with_demographics_most_recent.rdata')
+	save('covid19_schools_active_with_demographics_most_recent', file = fn)
+	
+	# # schools with outbreaks by school type
+	# table(covid19_schools_active_with_demographics_most_recent$school.type)
+	# 
+	# # schools with outbreaks by school level
+	# table(covid19_schools_active_with_demographics_most_recent$school.level)
+	# 
+	# # schools with outbreaks by grade range
+	# table(covid19_schools_active_with_demographics_most_recent$grade.range)
+	# 
+	# # total confirmed cases by school level
+	# tapply(covid19_schools_active_with_demographics_most_recent$total_confirmed_cases, 
+	# 	   covid19_schools_active_with_demographics_most_recent$school.level, 
+	# 	   sum)
+	
+	# 13d. plot cases by school on map -----------------------------------------
+	geo_query_str <- sprintf('%s,%s,Ontario,Canada', 
+							 str_trim(covid19_schools_active_with_demographics_most_recent$school), 
+							 covid19_schools_active_with_demographics_most_recent$municipality)
+	school_board <- covid19_schools_active_with_demographics_most_recent$board.name
+	names(school_board) <- geo_query_str
+	school_level <- covid19_schools_active_with_demographics_most_recent$school.level
+	names(school_level) <- geo_query_str
+	school_language <- covid19_schools_active_with_demographics_most_recent$school.language
+	names(school_language) <- geo_query_str
+	school_enrolment <- covid19_schools_active_with_demographics_most_recent$enrolment
+	names(school_enrolment) <- geo_query_str
+	low_income <- covid19_schools_active_with_demographics_most_recent$percentage.of.school.aged.children.who.live.in.low.income.households
+	names(low_income) <- geo_query_str
+	special_education <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.receiving.special.education.services
+	names(special_education) <- geo_query_str
+	non_english <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.whose.first.language.is.not.english
+	names(non_english) <- geo_query_str
+	non_french <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.whose.first.language.is.not.french
+	names(non_french) <- geo_query_str
+	from_non_english <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.who.are.new.to.canada.from.a.non.english.speaking.country
+	names(from_non_english) <- geo_query_str
+	from_non_french <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.who.are.new.to.canada.from.a.non.french.speaking.country
+	names(from_non_french) <- geo_query_str
+	some_university <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.whose.parents.have.some.university.education
+	names(some_university) <- geo_query_str
+	cases_per_school <- tapply(covid19_schools_active_with_demographics_most_recent$total_confirmed_cases, geo_query_str, sum)
+	cases_per_school <- data.frame(cases_per_school, geo_query_str = names(cases_per_school))
+	rownames(cases_per_school) <- NULL
+	cases_per_school <- merge(cases_per_school, school_geocodes, by = 'geo_query_str')
+	cases_per_school$school_name <- str_split(cases_per_school$geo_query_str, ',') %>% sapply('[', 1)
+	cases_per_school$city <- str_split(cases_per_school$geo_query_str, ',') %>% sapply('[', 2)
+	cases_per_school$school_board <- sapply(cases_per_school$geo_query_str, function(x) school_board[[ x ]][ 1 ]) %>% as.character
+	cases_per_school$school_level <- sapply(cases_per_school$geo_query_str, function(x) school_level[[ x ]][ 1 ]) %>% as.character
+	cases_per_school$school_language <- sapply(cases_per_school$geo_query_str, function(x) school_language[[ x ]][ 1 ]) %>% as.character
+	cases_per_school$school_enrolment <- sapply(cases_per_school$geo_query_str, function(x) school_enrolment[[ x ]][ 1 ]) %>% as.integer
+	cases_per_school$low_income <- sapply(cases_per_school$geo_query_str, function(x) low_income[[ x ]][ 1 ]) %>% as.integer
+	cases_per_school$special_education <- sapply(cases_per_school$geo_query_str, function(x) special_education[[ x ]][ 1 ]) %>% as.integer
+	cases_per_school$non_english <- sapply(cases_per_school$geo_query_str, function(x) non_english[[ x ]][ 1 ]) %>% as.integer
+	cases_per_school$non_french <- sapply(cases_per_school$geo_query_str, function(x) non_french[[ x ]][ 1 ]) %>% as.integer
+	cases_per_school$from_non_english <- sapply(cases_per_school$geo_query_str, function(x) from_non_english[[ x ]][ 1 ]) %>% as.integer
+	cases_per_school$from_non_french <- sapply(cases_per_school$geo_query_str, function(x) from_non_french[[ x ]][ 1 ]) %>% as.integer
+	cases_per_school$some_university <- sapply(cases_per_school$geo_query_str, function(x) some_university[[ x ]][ 1 ]) %>% as.integer
+	fn <- file.path(data_dir, 'cases_per_school.rdata')
+	save('cases_per_school', file = fn)
+	
+	# 14. school and school board names word analysis ------------------------------
+	
+	# # want to find all stopwords for removal in school and school board names
+	# all_names <- c(covid19_schools_active$school, 
+	# 			   covid19_schools_active$school_board,
+	# 			   school_demographics$`board name`, 
+	# 			   school_demographics$`school name`)
+	# 
+	# # all characters contained in school names
+	# lapply(all_names, str_split, '') %>% 
+	# 	unlist %>% 
+	# 	tolower %>% 
+	# 	unique %>% 
+	# 	iconv(., 'ASCII//TRANSLIT', sub = 'byte') %>%
+	# 	sort
+	# 
+	# # function to normalize all names
+	# str_replace_all(all_names, '[0-9]+', ' ') %>%
+	# 	iconv(., 'ASCII//TRANSLIT', sub = 'byte') %>%
+	# 	tolower %>% 
+	# 	str_replace_all(., '<c2><a0>', ' ') %>%
+	# 	str_replace_all(., '\\s+', ' ') %>%
+	# 	str_replace_all(., ',', ' ') %>%
+	# 	str_replace_all(., '\\.', ' ') %>%
+	# 	str_replace_all(., '\\(', ' ') %>%
+	# 	str_replace_all(., '\\)', ' ') %>%
+	# 	str_replace_all(., '/', ' ') %>%
+	# 	str_replace_all(., '@', ' ') %>%
+	# 	str_replace_all(., '\\+', ' ') %>%
+	# 	str_replace_all(., '&', 'and') %>%
+	# 	str_replace_all(., '<e2><80><99>', '\'') %>%
+	# 	lapply(., str_split, ' ') %>% 
+	# 	unlist %>% 
+	# 	unique %>% 
+	# 	str_replace_all(., '\\s+', ' ') %>%
+	# 	str_trim %>%
+	# 	unique %>% 
+	# 	sort %>% paste0(., collapse = '\', \'') %>% sprintf('c(\'%s\')', .) # extract stopwords
+	# 
+	# school_names_stopwords <- c('<c3><89><c3><89>c', 
+	# 							'<c3><89>a', 
+	# 							'<c3><89>cole', 
+	# 							'<c3><89>ducation', 
+	# 							'<c3><89>ep', 
+	# 							'<c3><89>ic', 
+	# 							'<c3><89>l<c3><a9>m', 
+	# 							'<c3><89>l<c3><a9>mentaire',
+	# 							'<c3><89>lementaire',
+	# 							'<c3><89>p',
+	# 							'<c3><89>sac',
+	# 							'<c3><89>sc',
+	# 							'<c3><a9>coles', 
+	# 							'<c3><a9>l<c3><a9>mentaire', 
+	# 							'aaec\'s',
+	# 							'acad<c3><a9>mie',
+	# 							'academy', 
+	# 							'academy-', 
+	# 							'adolescent', 
+	# 							'adult',
+	# 							'adultes', 
+	# 							'alternate',
+	# 							'alternative',
+	# 							'alternatives', 
+	# 							'c<c3><89>p',
+	# 							'catholic',
+	# 							'catholique',
+	# 							'catholiques', 
+	# 							'coll<c3><a8>ge', 
+	# 							'college',
+	# 							'collegiate', 
+	# 							'conted', 
+	# 							'continuing',
+	# 							'education', 
+	# 							'elemenary', 
+	# 							'elementary',
+	# 							'high', 
+	# 							'highschool', 
+	# 							'instititue', 
+	# 							'institute', 
+	# 							'institute-secondary',
+	# 							'interm<c3><a9>diaire', 
+	# 							'intermediate', 
+	# 							'intstitute', 
+	# 							'l\'<c3><89>cole', 
+	# 							'l\'acad<c3><a9>mie', 
+	# 							'middle', 
+	# 							' ps\\s?', 
+	# 							'pssb', 
+	# 							'pte',
+	# 							'public', 
+	# 							'publique',
+	# 							'publiques', 
+	# 							'school', 
+	# 							'schools', 
+	# 							'scolaire', 
+	# 							'secondaire', 
+	# 							'secondary',
+	# 							'senior')
+	
+	# debugging
+	# df1 <- data.frame(school_name = sort(unique(covid19_schools_active$school)), 
+	# 		   clean_name = clean_all_names(sort(unique(covid19_schools_active$school))))
+	# View(df1)
+	# df2 <- data.frame(school_name = school_demographics$`school name`, 
+	# 		   clean_name = clean_all_names(school_demographics$`school name`))
+	# View(df2)
+	
 } else {
-	# all of our data is already in cache
-	message('all geocodes already in cache!')
-	school_geocodes <- cached_geocodes
+	# LOAD ALL CACHED DATA -----------------------------------------------------
+	fn <- file.path(data_dir, 'covid19_schools_active.rdata')
+	load(file = fn, envir = .GlobalEnv)
+	fn <- file.path(data_dir, 'covid19_schools_summary.rdata')
+	load(file = fn, envir = .GlobalEnv)
+	fn <- file.path(data_dir, 'covid19_all_cases.rdata')
+	load(file = fn, envir = .GlobalEnv)
+	fn <- file.path(data_dir, 'school_demographics.rdata')
+	load(file = fn, envir = .GlobalEnv)
+	fn <- file.path(data_dir, 'covid19_schools_active_with_demographics.rdata')
+	load(file = fn, envir = .GlobalEnv)
+	fn <- file.path(data_dir, 'covid19_schools_active_with_demographics_most_recent.rdata')
+	load(file = fn, envir = .GlobalEnv)
+	fn <- file.path(data_dir, 'cases_per_school.rdata')
+	load(file = fn, envir = .GlobalEnv)
 }
 
-# 11. combine active school cases with demographic data ------------------------
-
-# note: this whole section is still a work in progress!
-
-# all schools with active cases
-# covid19_schools_active$school %>% unique %>% str_trim %>% sort
-
-# find all mismatched school names
-idx <- which(covid19_schools_active$school %in% school_demographics$`school name` == FALSE)
-covid19_schools_active$school[ idx ] %>% unique %>% str_trim %>% sort
-
-# clean school names in demographic dataset
-sn1 <- clean_school_names(school_demographics$`school name`)
-
-# clean school names in active cases dataset
-sn2 <- clean_school_names(covid19_schools_active$school)
-
-# let's see how well our cleaning function does...
-idx <- which(sn2 %in% sn1 == FALSE)
-mismatched_school_names <- sn2[ idx ] %>% unique %>% str_trim %>% sort
-# (mismatched_school_names)
-# cat(mismatched_school_names, sep = '\n')
-# (length(mismatched_school_names))
-
-# use stringdist fuzzy matching to resolve mismatched names
-sdm <- stringdistmatrix(mismatched_school_names, sn1)
-
-# visually inspect the quality of our fuzzy matches
-sprintf('%s --> %s', mismatched_school_names, sn1[ apply(sdm, 1, which.min) ]) %>% cat(., sep = '\n')
-
-# use this code for string matching diagnostics
-# View(data.frame(sn1 %>% sort))
-# View(data.frame(sn2 %>% sort))
-# View(data.frame(covid19_schools_active$school))
-# View(data.frame(school_demographics$`school name`))
-
-# add cleaned names to demographic and active cases datasets
-covid19_schools_active$school_clean <- sn2
-school_demographics$school_clean <- sn1
-
-# merge demographic and activ cases datasets
-# merge does not work we have to use school name and board name
-# covid19_schools_active_with_demographics <- merge(covid19_schools_active, school_demographics, by = 'school_clean', all.y = FALSE)
-# summary(covid19_schools_active_with_demographics)
-
-covid19_schools_active_with_demographics <- apply(covid19_schools_active, 1, function(x) {
-	# print(x)
-	# browser()
-	# match on cleaned school name
-	idx <- which(school_demographics$school_clean == x[ 'school_clean' ])
-	if (length(idx) > 1) {
-		disambiguation_df <- data.frame(x[ 'school' ] %>% as.character,
-										school_demographics[ idx, c('school name', 'board name') ],
-										x[ 'school_board' ] %>% as.character,
-										stringsAsFactors = FALSE)
-		# print(disambiguation_df)
-		# if all school boards are the same it is a question of whether this is an elemtary or a high school
-		if (length(unique(disambiguation_df[ , 3 ])) == 1) {
-			# are we looking at the high school or the elementary school?
-			# message('disambiguated by school type')
-			# browser()
-			idx <- stringdistmatrix(disambiguation_df[ 1, 1 ], disambiguation_df[ , 2 ])
-			idx <- which.min(idx)
-			# message(sprintf('chose entry %s', idx))
-			idx2 <- which(school_demographics$`school name` == disambiguation_df[ idx, 'school.name' ] & 
-						  	school_demographics$`board name` == disambiguation_df[ idx, 'board.name' ])
-			result <- data.frame(t(x), school_demographics[ idx2, ])
-		} else {
-			# fuzzy match the board names
-			# message('disambiguated by school board name')
-			bn <- disambiguation_df[ 1, 4 ]
-			bn <- str_replace(bn, 'Conseil des écoles catholiques', 'CSDC')
-			bn <- str_replace(bn, '\\(.*\\)', '')
-			bn <- str_trim(bn)
-			idx <- stringdistmatrix(bn, disambiguation_df[ , 3 ])
-			idx <- which.min(idx)
-			idx2 <- which(school_demographics$`school name` == disambiguation_df[ idx, 'school.name' ] & 
-						  	school_demographics$`board name` == disambiguation_df[ idx, 'board.name' ])
-			# message(sprintf('chose entry %s', idx))
-			result <- data.frame(t(x), school_demographics[ idx2, ])
-			# print(x)
-			# print(result)
-			# browser()
-		}
-	} else if (length(idx) == 1) {
-		# we have a perfect match
-		result <- data.frame(t(x), school_demographics[ idx, ])
-	} else if (length(idx) == 0) {
-		# this is one of the cleaned school names that is mismatched
-		# browser()
-		# message('disambiguated by fuzzy matching of cleaned school')
-		# 
-		# sn1 <- clean_school_names(school_demographics$`school name`)
-		# sn2 <- clean_school_names(covid19_schools_active$school)
-		# idx2 <- which(sn2 %in% sn1 == FALSE)
-		# mismatched_school_names <- sn2[ idx2 ] %>% unique %>% str_trim %>% sort
-		# 
-		# sdm <- stringdistmatrix(mismatched_school_names, sn1)
-		# idx <- which.min(idx)
-		# 
-		# # visually inspect the quality of our fuzzy matches
-		# sprintf('%s --> %s', mismatched_school_names, sn1[ apply(sdm, 1, which.min) ]) %>% cat(., sep = '\n')
-		message(sprintf('no corresponding school name found for "%s" using dummy data', x[ 'school_clean' ]))
-		dummy_df <- data.frame(t(rep('', 52)))
-		colnames(dummy_df) <- colnames(school_demographics)
-		result <- data.frame(t(x))
-	}
-	return(result)
-})
-covid19_schools_active_with_demographics <- rbindlist(covid19_schools_active_with_demographics, use.names = TRUE, fill = TRUE)
-covid19_schools_active_with_demographics <- data.frame(covid19_schools_active_with_demographics)
-
-# 12. clean combined case and demographics data --------------------------------
-# str(covid19_schools_active_with_demographics)
-# 'data.frame':	1674 obs. of  62 variables:
-# 	$ collected_date                                                                          : chr  "2020-09-10" "2020-09-10" "2020-09-10" "2020-09-10" ...
-covid19_schools_active_with_demographics$collected_date <- as.Date(covid19_schools_active_with_demographics$collected_date)
-# $ reported_date                                                                             : chr  "2020-09-11" "2020-09-11" "2020-09-11" "2020-09-11" ...
-covid19_schools_active_with_demographics$reported_date <- as.Date(covid19_schools_active_with_demographics$reported_date)
-# $ school_board                                                                            : chr  "Conseil des écoles catholiques du Centre-Est (CECCE)" "Conseil des écoles catholiques du Centre-Est (CECCE)" "Conseil des écoles catholiques du Centre-Est (CECCE)" "Conseil des écoles catholiques du Centre-Est (CECCE)" ...
-# $ school                                                                                  : chr  "École élémentaire catholique Roger-Saint-Denis" "École élémentaire catholique Saint-François-d’Assise" "École élémentaire catholique Sainte-Anne" "École élémentaire catholique Laurier-Carrière" ...
-# $ municipality                                                                            : chr  "Ottawa" "Ottawa" "Ottawa" "Ottawa" ...
-# $ confirmed_student_cases                                                                 : chr  "0" "1" "1" "1" ...
-covid19_schools_active_with_demographics$confirmed_student_cases <- as.integer(covid19_schools_active_with_demographics$confirmed_student_cases)
-# $ confirmed_staff_cases                                                                   : chr  "1" "0" "0" "0" ...
-covid19_schools_active_with_demographics$confirmed_staff_cases <- as.integer(covid19_schools_active_with_demographics$confirmed_staff_cases)
-# $ confirmed_unspecified_cases                                                             : chr  NA NA NA NA ...
-covid19_schools_active_with_demographics$confirmed_unspecified_cases <- as.integer(covid19_schools_active_with_demographics$confirmed_unspecified_cases)
-# $ total_confirmed_cases                                                                   : chr  "1" "1" "1" "1" ...
-covid19_schools_active_with_demographics$total_confirmed_cases <- as.integer(covid19_schools_active_with_demographics$total_confirmed_cases)
-# $ school_clean                                                                            : chr  "catholique roger saint denis" "catholique saint fran<c3><a7>ois d assise" "catholique sainte anne" "catholique laurier carri<c3><a8>re" ...
-covid19_schools_active_with_demographics$school_clean <- NULL
-# $ board.number                                                                            : chr  "B67334" "B67334" "B67334" "B67334" ...
-# $ board.name                                                                              : chr  "CSDC du Centre-Est de l'Ontario" "CSDC du Centre-Est de l'Ontario" "CSDC du Centre-Est de l'Ontario" "CSDC du Centre-Est de l'Ontario" ...
-# $ board.type                                                                              : chr  "Cath Dist Sch Brd (E/F)" "Cath Dist Sch Brd (E/F)" "Cath Dist Sch Brd (E/F)" "Cath Dist Sch Brd (E/F)" ...
-# $ school.number                                                                           : chr  "753203" "793027" "860573" "734314" ...
-# $ school.name                                                                             : chr  "École élémentaire catholique Roger-Saint-Denis" "École élémentaire catholique Saint-François-d'Assise" "École élémentaire catholique Sainte-Anne" "École élémentaire catholique Laurier-Carrière" ...
-# $ school.type                                                                             : chr  "Catholic" "Catholic" "Catholic" "Catholic" ...
-# $ school.special.condition.code                                                           : chr  "Not applicable" "Not applicable" "Not applicable" "Not applicable" ...
-# $ school.level                                                                            : chr  "Elementary" "Elementary" "Elementary" "Elementary" ...
-# $ school.language                                                                         : chr  "French" "French" "French" "French" ...
-# $ grade.range                                                                             : chr  "JK-6" "JK-6" "JK-8" "JK-6" ...
-# $ building.suite                                                                          : chr  NA NA NA NA ...
-covid19_schools_active_with_demographics$building.suite <- NULL
-# $ p.o..box                                                                                : chr  NA NA NA NA ...
-covid19_schools_active_with_demographics$p.o..box <- NULL
-# $ street                                                                                  : chr  "186 Barrow crois." "35 Melrose av." "235 Beausoleil promenade" "14 Four Seasons prom." ...
-# $ municipality.1                                                                          : chr  "Ottawa" "Ottawa" "Ottawa" "Ottawa" ...
-covid19_schools_active_with_demographics$municipality.1 <- NULL
-# $ city                                                                                    : chr  "Kanata" "Ottawa" "Ottawa" "Nepean" ...
-# $ province                                                                                : chr  "Ontario" "Ontario" "Ontario" "Ontario" ...
-# $ postal.code                                                                             : chr  "K2L2C7" "K1Y1T8" "K1N0C1" "K2E7P8" ...
-# $ phone.number                                                                            : chr  "613-521-3815" "613-729-1463" "613-789-3933" "613-224-3211" ...
-covid19_schools_active_with_demographics$phone.number <- NULL
-# $ fax.number                                                                              : chr  "613-592-8275" "613-729-2291" "613-789-1265" "613-225-3783" ...
-covid19_schools_active_with_demographics$fax.number <- NULL
-# $ school.website                                                                          : chr  "http://www.roger-saint-denis.ecolecatholique.ca/" "http://www.saint-francois-dassise.ecolecatholique.ca/" "http://www.sainte-anne.ecolecatholique.ca/" "http://www.laurier-carriere.ecolecatholique.ca/" ...
-covid19_schools_active_with_demographics$school.website <- NULL
-# $ board.website                                                                           : chr  "www.ecolecatholique.ca/fr/" "www.ecolecatholique.ca/fr/" "www.ecolecatholique.ca/fr/" "www.ecolecatholique.ca/fr/" ...
-covid19_schools_active_with_demographics$board.website <- NULL
-# $ Enrolment                                                                               : chr  "190" "345" "220" "400" ...
-# $ latitude                                                                                : num  45.3 45.4 45.4 45.4 45.3 ...
-# $ longitude                                                                               : num  -75.9 -75.7 -75.7 -75.7 -75.8 ...
-# $ percentage.of.students.whose.first.language.is.not.english                              : chr  "65" "60" "80" "60" ...
-covid19_schools_active_with_demographics$percentage.of.students.whose.first.language.is.not.english <- as.integer(covid19_schools_active_with_demographics$percentage.of.students.whose.first.language.is.not.english)
-# $ percentage.of.students.whose.first.language.is.not.french                               : chr  "55" "45" "40" "50" ...
-covid19_schools_active_with_demographics$percentage.of.students.whose.first.language.is.not.french <- as.integer(covid19_schools_active_with_demographics$percentage.of.students.whose.first.language.is.not.french)
-# $ percentage.of.students.who.are.new.to.canada.from.a.non.english.speaking.country        : chr  "10" "10" "20" "5" ...
-covid19_schools_active_with_demographics$percentage.of.students.who.are.new.to.canada.from.a.non.english.speaking.country <- as.integer(covid19_schools_active_with_demographics$percentage.of.students.who.are.new.to.canada.from.a.non.english.speaking.country)
-# $ percentage.of.students.who.are.new.to.canada.from.a.non.french.speaking.country         : chr  "10" "10" "20" "10" ...
-covid19_schools_active_with_demographics$percentage.of.students.who.are.new.to.canada.from.a.non.french.speaking.country <- as.integer(covid19_schools_active_with_demographics$percentage.of.students.who.are.new.to.canada.from.a.non.french.speaking.country)
-# $ percentage.of.students.identified.as.gifted                                             : chr  "25" "10" "20" "15" ...
-covid19_schools_active_with_demographics$percentage.of.students.identified.as.gifted <- as.integer(covid19_schools_active_with_demographics$percentage.of.students.identified.as.gifted)
-# $ percentage.of.students.receiving.special.education.services                             : chr  "0" "0" "0" "0" ...
-covid19_schools_active_with_demographics$percentage.of.students.receiving.special.education.services <- as.integer(covid19_schools_active_with_demographics$percentage.of.students.receiving.special.education.services)
-# $ percentage.of.grade.3.students.achieving.the.provincial.standard.in.reading             : chr  "67%" "83%" "65%" "92%" ...
-covid19_schools_active_with_demographics$percentage.of.grade.3.students.achieving.the.provincial.standard.in.reading <- NULL
-# $ change.in.grade.3.reading.achievement.over.three.years                                  : chr  "0" "-12" "-23" "5" ...
-covid19_schools_active_with_demographics$change.in.grade.3.reading.achievement.over.three.years <- NULL
-# $ percentage.of.grade.3.students.achieving.the.provincial.standard.in.writing             : chr  "54%" "73%" "71%" "81%" ...
-covid19_schools_active_with_demographics$percentage.of.grade.3.students.achieving.the.provincial.standard.in.writing <- NULL
-# $ change.in.grade.3.writing.achievement.over.three.years                                  : chr  "-17" "-17" "-17" "-3" ...
-covid19_schools_active_with_demographics$change.in.grade.3.writing.achievement.over.three.years <- NULL
-# $ percentage.of.grade.3.students.achieving.the.provincial.standard.in.mathematics         : chr  "58%" "71%" "47%" "73%" ...
-covid19_schools_active_with_demographics$percentage.of.grade.3.students.achieving.the.provincial.standard.in.mathematics <- NULL
-# $ change.in.grade.3.mathematics.achievement.over.three.years                              : chr  "-9" "-9" "-41" "-6" ...
-covid19_schools_active_with_demographics$change.in.grade.3.mathematics.achievement.over.three.years <- NULL
-# $ percentage.of.grade.6.students.achieving.the.provincial.standard.in.reading             : chr  "96%" "96%" "97%" "79%" ...
-covid19_schools_active_with_demographics$percentage.of.grade.6.students.achieving.the.provincial.standard.in.reading <- NULL
-# $ change.in.grade.6.reading.achievement.over.three.years                                  : chr  "13" "1" "14" "-13" ...
-covid19_schools_active_with_demographics$change.in.grade.6.reading.achievement.over.three.years <- NULL
-# $ percentage.of.grade.6.students.achieving.the.provincial.standard.in.writing             : chr  "96%" "89%" "85%" "67%" ...
-covid19_schools_active_with_demographics$percentage.of.grade.6.students.achieving.the.provincial.standard.in.writing <- NULL
-# $ change.in.grade.6.writing.achievement.over.three.years                                  : chr  "13" "3" "38" "-16" ...
-covid19_schools_active_with_demographics$change.in.grade.6.writing.achievement.over.three.years <- NULL
-# $ percentage.of.grade.6.students.achieving.the.provincial.standard.in.mathematics         : chr  "96%" "91%" "82%" "67%" ...
-covid19_schools_active_with_demographics$percentage.of.grade.6.students.achieving.the.provincial.standard.in.mathematics <- NULL
-# $ change.in.grade.6.mathematics.achievement.over.three.years                              : chr  "13" "9" "35" "-18" ...
-covid19_schools_active_with_demographics$change.in.grade.6.mathematics.achievement.over.three.years <- NULL
-# $ percentage.of.grade.9.students.achieving.the.provincial.standard.in.academic.mathematics: chr  "na" "na" "na" "na" ...
-covid19_schools_active_with_demographics$percentage.of.grade.9.students.achieving.the.provincial.standard.in.academic.mathematics <- NULL
-# $ change.in.grade.9.academic.mathematics.achievement.over.three.years                     : chr  "na" "na" "na" "na" ...
-covid19_schools_active_with_demographics$change.in.grade.9.academic.mathematics.achievement.over.three.years <- NULL
-# $ percentage.of.grade.9.students.achieving.the.provincial.standard.in.applied.mathematics : chr  "na" "na" "na" "na" ...
-covid19_schools_active_with_demographics$percentage.of.grade.9.students.achieving.the.provincial.standard.in.applied.mathematics <- NULL
-# $ change.in.grade.9.applied.mathematics.achievement.over.three.years                      : chr  "na" "na" "na" "na" ...
-covid19_schools_active_with_demographics$change.in.grade.9.applied.mathematics.achievement.over.three.years <- NULL
-# $ percentage.of.students.that.passed.the.grade.10.osslt.on.their.first.attempt            : chr  "na" "na" "na" "na" ...
-covid19_schools_active_with_demographics$percentage.of.students.that.passed.the.grade.10.osslt.on.their.first.attempt <- NULL
-# $ change.in.grade.10.osslt.literacy.achievement.over.three.years                          : chr  "na" "na" "na" "na" ...
-covid19_schools_active_with_demographics$change.in.grade.10.osslt.literacy.achievement.over.three.years <- NULL
-# $ percentage.of.school.aged.children.who.live.in.low.income.households                    : chr  "10" "30" "50" "20" ...
-covid19_schools_active_with_demographics$percentage.of.school.aged.children.who.live.in.low.income.households <- as.integer(covid19_schools_active_with_demographics$percentage.of.school.aged.children.who.live.in.low.income.households)
-# $ percentage.of.students.whose.parents.have.some.university.education                     : chr  "55" "55" "35" "60" ...
-covid19_schools_active_with_demographics$percentage.of.students.whose.parents.have.some.university.education <- as.integer(covid19_schools_active_with_demographics$percentage.of.students.whose.parents.have.some.university.education)
-# $ extract.date                                                                            : POSIXct, format: "2020-09-04" "2020-09-04" "2020-09-04" "2020-09-04" ...
-covid19_schools_active_with_demographics$extract.date <- NULL
-# $ school_clean.1                                                                          : chr  "catholique roger saint denis" "catholique saint fran<c3><a7>ois d assise" "catholique sainte anne" "catholique laurier carri<c3><a8>re" ...
-covid19_schools_active_with_demographics$school_clean.1 <- NULL
-
-# 13. exploratory data analysis ------------------------------------------------
-
-# 13a. summary data exploration ------------------------------------------------
-# (covid19_schools_summary)
-# 
-# dt <- as.Date(covid19_schools_summary[ , 'collected_date' ])
-# 
-# d1 <- covid19_schools_summary[ , 'current_schools_w_cases' ]
-# current_schools_w_cases <- xts(d1, order.by = dt)
-# plot(current_schools_w_cases, main = 'current schools with cases')
-# 
-# d1 <- covid19_schools_summary[ , 'current_schools_w_cases' ] / covid19_schools_summary[ , 'current_total_number_schools' ] * 1e2
-# current_schools_w_cases_percent <- xts(d1, order.by = dt)
-# plot(current_schools_w_cases_percent, main = 'current schools with cases percent')
-# 
-# d1 <- covid19_schools_summary[ , 'cumulative_school_related_cases' ]
-# cumulative_school_related_cases <- xts(d1, order.by = dt)
-# plot(cumulative_school_related_cases, main = 'cumulative school related cases')
-
-# 13b. active cases data exploration -------------------------------------------
-# (covid19_schools_active)
-# 
-# dt <- as.Date(covid19_schools_active[ , 'collected_date' ])
-# idx <- which(!is.na(dt))
-# covid19_schools_active <- covid19_schools_active[ idx, ]
-# dt <- dt[ idx ]
-# 
-# active_cases_by_municipality <- tapply(covid19_schools_active$municipality,
-# 									   list(covid19_schools_active$collected_date,
-# 									   	 covid19_schools_active$municipality),
-# 									   length)
-# active_cases_by_municipality <- as.xts(active_cases_by_municipality)
-# plot(active_cases_by_municipality, type = 'b',
-# 	 main = 'cases in schools by municipality',
-# 	 legend.loc = 'topleft',
-# 	 grid.ticks.lwd = 0.25)
-
-# 13c. active cases with demographic data exploration --------------------------
-
-# extract data frame with only most recent observations per school
-idx <- sprintf('%s%s', 
-			   covid19_schools_active_with_demographics$school, 
-			   covid19_schools_active_with_demographics$school_board) %>% 
-	unique
-covid19_schools_active_with_demographics_most_recent <- lapply(idx, function(x) {
-	idx2 <- sprintf('%s%s',
-					covid19_schools_active_with_demographics$school,
-					covid19_schools_active_with_demographics$school_board)
-	idx2 <- which(idx2 == x)
-	df <- covid19_schools_active_with_demographics[ idx2, ]
-	idx2 <- which.max(df$collected_date)
-	df <- df[ idx2, ]
-})
-covid19_schools_active_with_demographics_most_recent <- rbindlist(covid19_schools_active_with_demographics_most_recent)
-covid19_schools_active_with_demographics_most_recent <- data.frame(covid19_schools_active_with_demographics_most_recent, 
-																   stringsAsFactors = FALSE)
-
-# # schools with outbreaks by school type
-# table(covid19_schools_active_with_demographics_most_recent$school.type)
-# 
-# # schools with outbreaks by school level
-# table(covid19_schools_active_with_demographics_most_recent$school.level)
-# 
-# # schools with outbreaks by grade range
-# table(covid19_schools_active_with_demographics_most_recent$grade.range)
-# 
-# # total confirmed cases by school level
-# tapply(covid19_schools_active_with_demographics_most_recent$total_confirmed_cases, 
-# 	   covid19_schools_active_with_demographics_most_recent$school.level, 
-# 	   sum)
-
-# 13d. plot cases by school on map ---------------------------------------------
-
-geo_query_str <- sprintf('%s,%s,Ontario,Canada', 
-						 str_trim(covid19_schools_active_with_demographics_most_recent$school), 
-						 covid19_schools_active_with_demographics_most_recent$municipality)
-school_board <- covid19_schools_active_with_demographics_most_recent$board.name
-names(school_board) <- geo_query_str
-school_level <- covid19_schools_active_with_demographics_most_recent$school.level
-names(school_level) <- geo_query_str
-school_language <- covid19_schools_active_with_demographics_most_recent$school.language
-names(school_language) <- geo_query_str
-school_enrolment <- covid19_schools_active_with_demographics_most_recent$enrolment
-names(school_enrolment) <- geo_query_str
-low_income <- covid19_schools_active_with_demographics_most_recent$percentage.of.school.aged.children.who.live.in.low.income.households
-names(low_income) <- geo_query_str
-special_education <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.receiving.special.education.services
-names(special_education) <- geo_query_str
-non_english <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.whose.first.language.is.not.english
-names(non_english) <- geo_query_str
-non_french <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.whose.first.language.is.not.french
-names(non_french) <- geo_query_str
-from_non_english <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.who.are.new.to.canada.from.a.non.english.speaking.country
-names(from_non_english) <- geo_query_str
-from_non_french <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.who.are.new.to.canada.from.a.non.french.speaking.country
-names(from_non_french) <- geo_query_str
-some_university <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.whose.parents.have.some.university.education
-names(some_university) <- geo_query_str
-cases_per_school <- tapply(covid19_schools_active_with_demographics_most_recent$total_confirmed_cases, geo_query_str, sum)
-cases_per_school <- data.frame(cases_per_school, geo_query_str = names(cases_per_school))
-rownames(cases_per_school) <- NULL
-cases_per_school <- merge(cases_per_school, school_geocodes, by = 'geo_query_str')
-cases_per_school$school_name <- str_split(cases_per_school$geo_query_str, ',') %>% sapply('[', 1)
-cases_per_school$city <- str_split(cases_per_school$geo_query_str, ',') %>% sapply('[', 2)
-cases_per_school$school_board <- sapply(cases_per_school$geo_query_str, function(x) school_board[[ x ]][ 1 ]) %>% as.character
-cases_per_school$school_level <- sapply(cases_per_school$geo_query_str, function(x) school_level[[ x ]][ 1 ]) %>% as.character
-cases_per_school$school_language <- sapply(cases_per_school$geo_query_str, function(x) school_language[[ x ]][ 1 ]) %>% as.character
-cases_per_school$school_enrolment <- sapply(cases_per_school$geo_query_str, function(x) school_enrolment[[ x ]][ 1 ]) %>% as.integer
-cases_per_school$low_income <- sapply(cases_per_school$geo_query_str, function(x) low_income[[ x ]][ 1 ]) %>% as.integer
-cases_per_school$special_education <- sapply(cases_per_school$geo_query_str, function(x) special_education[[ x ]][ 1 ]) %>% as.integer
-cases_per_school$non_english <- sapply(cases_per_school$geo_query_str, function(x) non_english[[ x ]][ 1 ]) %>% as.integer
-cases_per_school$non_french <- sapply(cases_per_school$geo_query_str, function(x) non_french[[ x ]][ 1 ]) %>% as.integer
-cases_per_school$from_non_english <- sapply(cases_per_school$geo_query_str, function(x) from_non_english[[ x ]][ 1 ]) %>% as.integer
-cases_per_school$from_non_french <- sapply(cases_per_school$geo_query_str, function(x) from_non_french[[ x ]][ 1 ]) %>% as.integer
-cases_per_school$some_university <- sapply(cases_per_school$geo_query_str, function(x) some_university[[ x ]][ 1 ]) %>% as.integer
-# m <- leaflet() %>% setView(lng = -85.3232, lat = 49, zoom = 5)
-# m %>% addTiles() %>%
-# 	addCircleMarkers(data = cases_per_school, 
-# 					 lng = ~lon, 
-# 					 lat = ~lat, 
-# 					 radius = ~(cases_per_school), # ~(cases_per_school)^(1/5), 
-# 					 weight = 1, 
-# 					 # color = covid_col, 
-# 					 fillOpacity = 0.1, 
-# 					 label = sprintf('<strong>%s</strong><br/>Confirmed cases (cumulative): %s<br/>', 
-# 					 				cases_per_school$school_name, 
-# 					 				cases_per_school$cases_per_school) %>% lapply(htmltools::HTML), 
-# 					 labelOptions = labelOptions(
-# 					 	style = list("font-weight" = "normal", padding = "3px 8px"),
-# 					 	textsize = "15px", direction = "auto"))

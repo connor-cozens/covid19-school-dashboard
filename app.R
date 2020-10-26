@@ -34,7 +34,7 @@ ui <- bootstrapPage(
     tags$head(includeHTML('gtag.html')),
     navbarPage(theme = shinytheme('flatly'), 
                collapsible = TRUE,
-               'COVID-19 School Dashboard', 
+               div('COVID-19 School Dashboard', style = 'pointer-events: none'), 
                id = 'nav',
                
                # tab: COVID-19 Mapper ------------------------------------------
@@ -386,7 +386,7 @@ server <- function(input, output) {
                              incProgress(1, 'generating map')
                              basemap <- leaflet(ontario)
                              incProgress(1, 'setting view')
-                             basemap <- setView(basemap, lng = -94.4457, lat = 49, zoom = 6) 
+                             basemap <- setView(basemap, lng = -79.7, lat = 44.39, zoom = 8) 
                              incProgress(1, 'adding polygons')
                              basemap <- addPolygons(basemap, weight = 3, fillColor = '#696969', opacity = 0.5)
                              incProgress(1, 'adding tiles')
