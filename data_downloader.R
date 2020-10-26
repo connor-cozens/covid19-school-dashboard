@@ -457,7 +457,7 @@ if (needs_refresh | is.na(needs_refresh)) {
 	covid19_schools_active_with_demographics <- rbindlist(covid19_schools_active_with_demographics, use.names = TRUE, fill = TRUE)
 	covid19_schools_active_with_demographics <- data.frame(covid19_schools_active_with_demographics)
 	
-	# 11. clean combined case and demographics data ----------------------------
+	# 11. clean covid19_schools_active_with_demographics -----------------------
 	# str(covid19_schools_active_with_demographics)
 	# 'data.frame':	1674 obs. of  62 variables:
 	# 	$ collected_date                                                                          : chr  "2020-09-10" "2020-09-10" "2020-09-10" "2020-09-10" ...
@@ -567,58 +567,15 @@ if (needs_refresh | is.na(needs_refresh)) {
 	fn <- file.path(data_dir, 'covid19_schools_active_with_demographics.rdata')
 	save('covid19_schools_active_with_demographics', file = fn)
 	
-	# 12. exploratory data analysis --------------------------------------------
-	
-	# 13a. summary data exploration --------------------------------------------
-	# (covid19_schools_summary)
-	# 
-	# dt <- as.Date(covid19_schools_summary[ , 'collected_date' ])
-	# 
-	# d1 <- covid19_schools_summary[ , 'current_schools_w_cases' ]
-	# current_schools_w_cases <- xts(d1, order.by = dt)
-	# plot(current_schools_w_cases, main = 'current schools with cases')
-	# 
-	# d1 <- covid19_schools_summary[ , 'current_schools_w_cases' ] / covid19_schools_summary[ , 'current_total_number_schools' ] * 1e2
-	# current_schools_w_cases_percent <- xts(d1, order.by = dt)
-	# plot(current_schools_w_cases_percent, main = 'current schools with cases percent')
-	# 
-	# d1 <- covid19_schools_summary[ , 'cumulative_school_related_cases' ]
-	# cumulative_school_related_cases <- xts(d1, order.by = dt)
-	# plot(cumulative_school_related_cases, main = 'cumulative school related cases')
-	
-	# 13b. active cases data exploration ---------------------------------------
-	# (covid19_schools_active)
-	# 
-	# dt <- as.Date(covid19_schools_active[ , 'collected_date' ])
-	# idx <- which(!is.na(dt))
-	# covid19_schools_active <- covid19_schools_active[ idx, ]
-	# dt <- dt[ idx ]
-	# 
-	# active_cases_by_municipality <- tapply(covid19_schools_active$municipality,
-	# 									   list(covid19_schools_active$collected_date,
-	# 									   	 covid19_schools_active$municipality),
-	# 									   length)
-	# active_cases_by_municipality <- as.xts(active_cases_by_municipality)
-	# plot(active_cases_by_municipality, type = 'b',
-	# 	 main = 'cases in schools by municipality',
-	# 	 legend.loc = 'topleft',
-	# 	 grid.ticks.lwd = 0.25)
-	
-	# 13c. active cases with demographic data exploration ----------------------
-	
-	# extract data frame with only most recent observations per school
+	# 12. covid19_schools_active_with_demographics_most_recent -----------------
 	idx <- sprintf('%s%s', 
-				   covid19_schools_active_with_demographics$school, 
-				   covid19_schools_active_with_demographics$school_board) %>% 
-		unique
-	covid19_schools_active_with_demographics_most_recent <- lapply(idx, function(x) {
-		idx2 <- sprintf('%s%s',
-						covid19_schools_active_with_demographics$school,
-						covid19_schools_active_with_demographics$school_board)
-		idx2 <- which(idx2 == x)
+				   clean_all_names(covid19_schools_active_with_demographics$school), 
+				   clean_all_names(covid19_schools_active_with_demographics$school_board))
+	covid19_schools_active_with_demographics_most_recent <- lapply(unique(idx), function(x) {
+		idx2 <- which(idx == x)
 		df <- covid19_schools_active_with_demographics[ idx2, ]
-		idx2 <- which.max(df$collected_date)
-		df <- df[ idx2, ]
+		idx3 <- which.max(df$collected_date)
+		df <- df[ idx3, ]
 	})
 	covid19_schools_active_with_demographics_most_recent <- rbindlist(covid19_schools_active_with_demographics_most_recent)
 	covid19_schools_active_with_demographics_most_recent <- data.frame(covid19_schools_active_with_demographics_most_recent, 
@@ -626,21 +583,7 @@ if (needs_refresh | is.na(needs_refresh)) {
 	fn <- file.path(data_dir, 'covid19_schools_active_with_demographics_most_recent.rdata')
 	save('covid19_schools_active_with_demographics_most_recent', file = fn)
 	
-	# # schools with outbreaks by school type
-	# table(covid19_schools_active_with_demographics_most_recent$school.type)
-	# 
-	# # schools with outbreaks by school level
-	# table(covid19_schools_active_with_demographics_most_recent$school.level)
-	# 
-	# # schools with outbreaks by grade range
-	# table(covid19_schools_active_with_demographics_most_recent$grade.range)
-	# 
-	# # total confirmed cases by school level
-	# tapply(covid19_schools_active_with_demographics_most_recent$total_confirmed_cases, 
-	# 	   covid19_schools_active_with_demographics_most_recent$school.level, 
-	# 	   sum)
-	
-	# 13d. plot cases by school on map -----------------------------------------
+	# 13. create cases_per_school to plot cases by school on map ---------------
 	geo_query_str <- sprintf('%s,%s,Ontario,Canada', 
 							 str_trim(covid19_schools_active_with_demographics_most_recent$school), 
 							 covid19_schools_active_with_demographics_most_recent$municipality)
@@ -666,8 +609,15 @@ if (needs_refresh | is.na(needs_refresh)) {
 	names(from_non_french) <- geo_query_str
 	some_university <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.whose.parents.have.some.university.education
 	names(some_university) <- geo_query_str
+	cases_per_school_staff <- tapply(covid19_schools_active_with_demographics_most_recent$confirmed_staff_cases, geo_query_str, sum)
+	cases_per_school_student <- tapply(covid19_schools_active_with_demographics_most_recent$confirmed_student_cases, geo_query_str, sum)
+	cases_per_school_unspecified <- tapply(covid19_schools_active_with_demographics_most_recent$confirmed_unspecified_cases, geo_query_str, sum)
 	cases_per_school <- tapply(covid19_schools_active_with_demographics_most_recent$total_confirmed_cases, geo_query_str, sum)
-	cases_per_school <- data.frame(cases_per_school, geo_query_str = names(cases_per_school))
+	cases_per_school <- data.frame(cases_per_school, 
+								   cases_per_school_staff,
+								   cases_per_school_student,
+								   cases_per_school_unspecified,
+								   geo_query_str = names(cases_per_school))
 	rownames(cases_per_school) <- NULL
 	cases_per_school <- merge(cases_per_school, school_geocodes, by = 'geo_query_str')
 	cases_per_school$school_name <- str_split(cases_per_school$geo_query_str, ',') %>% sapply('[', 1)
@@ -686,7 +636,7 @@ if (needs_refresh | is.na(needs_refresh)) {
 	fn <- file.path(data_dir, 'cases_per_school.rdata')
 	save('cases_per_school', file = fn)
 	
-	# 14. school and school board names word analysis ------------------------------
+	# 14. diagnostics: school and school board names word analysis -------------
 	
 	# # want to find all stopwords for removal in school and school board names
 	# all_names <- c(covid19_schools_active$school, 
