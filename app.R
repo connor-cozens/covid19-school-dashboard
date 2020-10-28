@@ -15,19 +15,9 @@ source('data_downloader.R')
 
 # SETTINGS ---------------------------------------------------------------------
 
-covid_col = '#d62728'
-
-basemap_cache_file <- 'data/basemap.rdata'
-
-use_cached_basemap <- FALSE
-
 # FUNCTIONS --------------------------------------------------------------------
 
 # INITIALIZATION ---------------------------------------------------------------
-
-cv_min_date = min(covid19_schools_summary$collected_date)
-current_date = max(covid19_schools_summary$collected_date)
-cv_max_date_clean = format(as.POSIXct(current_date),'%d %B %Y')
 
 # SHINY UI ---------------------------------------------------------------------
 ui <- bootstrapPage(
@@ -397,31 +387,22 @@ server <- function(input, output) {
     
     # basemap_leaflet ----------------------------------------------------------
     output$basemap_leaflet <- renderLeaflet({
-        if (use_cached_basemap) progress_max <- 2 else progress_max <- 7
-        withProgress(max = progress_max, 
+        withProgress(max = 6, 
                      value = 0, 
                      message = 'please wait...', 
                      expr = {
-                         if (use_cached_basemap) {
-                             incProgress(1, 'loading map')
-                             # use cached version of basemap
-                             load(file = basemap_cache_file, envir = .GlobalEnv)    
-                         } else {
-                             incProgress(1, 'loading shapes')
-                             # regenerate the basemap
-                             # https://geohub.lio.gov.on.ca/datasets/province/data
-                             ontario <- readOGR(dsn = 'data/shapefiles', layer = 'PROVINCE')
-                             incProgress(1, 'generating map')
-                             basemap <- leaflet(ontario)
-                             incProgress(1, 'setting view')
-                             basemap <- setView(basemap, lng = -79.7, lat = 44.39, zoom = 8) 
-                             incProgress(1, 'adding polygons')
-                             basemap <- addPolygons(basemap, weight = 3, fillColor = '#696969', opacity = 0.5)
-                             incProgress(1, 'adding tiles')
-                             basemap <- addProviderTiles(basemap, providers$Esri.NatGeoWorldMap)
-                             incProgress(1, 'caching map')
-                             save('basemap', file = basemap_cache_file)
-                         }
+                         incProgress(1, 'loading shapes')
+                         # regenerate the basemap
+                         # https://geohub.lio.gov.on.ca/datasets/province/data
+                         ontario <- readOGR(dsn = 'data/shapefiles', layer = 'PROVINCE')
+                         incProgress(1, 'generating map')
+                         basemap <- leaflet(ontario)
+                         incProgress(1, 'setting view')
+                         basemap <- setView(basemap, lng = -79.7, lat = 44.39, zoom = 8) 
+                         incProgress(1, 'adding polygons')
+                         basemap <- addPolygons(basemap, weight = 3, fillColor = '#696969', opacity = 0.5)
+                         incProgress(1, 'adding tiles')
+                         basemap <- addProviderTiles(basemap, providers$Esri.NatGeoWorldMap)
                          
                          # add case data markers
                          incProgress(1, 'adding markers')
@@ -431,7 +412,7 @@ server <- function(input, output) {
                                                      lat = ~lat, 
                                                      radius = ~(cases_per_school) * 2, # ~(cases_per_school)^(1/5), 
                                                      weight = 1, 
-                                                     color = ~covid_col,
+                                                     color = '#d62728',
                                                      fillOpacity = 0.1, 
                                                      label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>Students receiving special education services: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Parents have some university education: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unspecified (cumulative): %s<br/></div>', 
                                                                      cases_per_school$school_name, 
@@ -452,7 +433,7 @@ server <- function(input, output) {
                                                                      cases_per_school$cases_per_school_student,
                                                                      cases_per_school$cases_per_school_unspecified) %>% lapply(htmltools::HTML), 
                                                      labelOptions = labelOptions(
-                                                         style = list('font-weight' = 'normal', padding = '3px 8px', 'color' = covid_col),
+                                                         style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
                                                          textsize = '15px', direction = 'auto'))
                          
                          basemap
