@@ -58,6 +58,14 @@ debug <- FALSE
 #' 
 #' TODO: just create a static mapping file for school and school board names, this
 #' has rapidly devolved into madness... as expected. *sigh*
+#' 	
+#' debugging
+#' df1 <- data.frame(school_name = sort(unique(covid19_schools_active$school)), 
+#' 		   clean_name = clean_all_names(sort(unique(covid19_schools_active$school))))
+#' View(df1)
+#' df2 <- data.frame(school_name = school_demographics$`school name`, 
+#' 		   clean_name = clean_all_names(school_demographics$`school name`))
+#' View(df2)
 #' 
 clean_all_names <- function(dirty_names) {
 	
@@ -128,9 +136,11 @@ clean_all_names <- function(dirty_names) {
 				   'elementaire', 
 				   'elemenary', 
 				   'elementary',
+				   'elementry',
 				   ' e s$',
 				   ' es$',
 				   '^esp ',
+				   ' for ',
 				   ' hs\\s?',
 				   ' high\\s?', 
 				   'highschool', 
@@ -175,26 +185,39 @@ clean_all_names <- function(dirty_names) {
 	clean_names <- unlist(clean_names)
 	
 	# clean up 3
-	clean_names <- str_replace_all(clean_names, 'saint([ |\\-])', 'st\\1')
-	clean_names <- str_replace_all(clean_names, 'sainte([ |\\-])', 'ste\\1')
 	clean_names <- str_replace_all(clean_names, 'monsignor', 'msgr')
 	clean_names <- str_replace_all(clean_names, 'monseigneur', 'msgr')
+	clean_names <- str_replace_all(clean_names, 'saint([ |\\-])', 'st\\1')
+	clean_names <- str_replace_all(clean_names, 'sainte([ |\\-])', 'ste\\1')
 	clean_names <- str_squish(clean_names)
 	
 	# clean up 4 
+	clean_names <- str_replace_all(clean_names, '^city calc$', 'calc')
+	clean_names <- str_replace_all(clean_names, '^de hearst$', 'hearst')
 	clean_names <- str_replace_all(clean_names, 'frank panabaker north ancaster', 'frank panabaker north')
-	clean_names <- str_replace_all(clean_names, 'ursuline chatham', 'ursuline')
-	clean_names <- str_replace_all(clean_names, 'pope st francis', 'pope francis')
-	clean_names <- str_replace_all(clean_names, 'st john xxlll', 'st john xxiii')
 	clean_names <- str_replace_all(clean_names, 'john clarke richardson', 'j clarke richardson')
+	clean_names <- str_replace_all(clean_names, '^msgr fraser$', 'msgr fraser midland')
+	clean_names <- str_replace_all(clean_names, 'nora frances henderson', 'nora henderson')
 	clean_names <- str_replace_all(clean_names, 'notre dame de la jeunesse ajax', 'notre dame de la jeunesse')
 	clean_names <- str_replace_all(clean_names, 'notre dame de la jeunesse niagraf', 'notre dame de la jeunesse')
+	clean_names <- str_replace_all(clean_names, '^of experiential$', 'experiential')
+	clean_names <- str_replace_all(clean_names, 'pope st francis', 'pope francis')
+	clean_names <- str_replace_all(clean_names, 'st john xxlll', 'st john xxiii')
+	clean_names <- str_replace_all(clean_names, 'ursuline chatham', 'ursuline')
+	clean_names <- str_replace_all(clean_names, '^unnamed formerly known as vaughan$', 'vaughan')
 	clean_names <- str_replace_all(clean_names, 'western techcommercial', 'western technical commercial')
-	clean_names <- str_replace_all(clean_names, 'nora frances henderson', 'nora henderson')
-	
+	clean_names <- str_replace_all(clean_names, '^western technical$', 'western technical commercial')
 	
 	clean_names
 }
+
+#' df1 <- data.frame(school_name = sort(unique(covid19_schools_active$school)), 
+#' 		   clean_name = clean_all_names(sort(unique(covid19_schools_active$school))))
+#' View(df1)
+#' df2 <- data.frame(school_name = school_demographics$`school name`, 
+#' 		   clean_name = clean_all_names(school_demographics$`school name`))
+#' View(df2)
+#' 
 
 # MAIN -------------------------------------------------------------------------
 
@@ -653,113 +676,6 @@ if (needs_refresh | is.na(needs_refresh)) {
 	cases_per_school$some_university <- sapply(cases_per_school$geo_query_str, function(x) some_university[[ x ]][ 1 ]) %>% as.integer
 	fn <- file.path(data_dir, 'cases_per_school.rdata')
 	save('cases_per_school', file = fn)
-	
-	# 14. diagnostics: school and school board names word analysis -------------
-	
-	# # want to find all stopwords for removal in school and school board names
-	# all_names <- c(covid19_schools_active$school, 
-	# 			   covid19_schools_active$school_board,
-	# 			   school_demographics$`board name`, 
-	# 			   school_demographics$`school name`)
-	# 
-	# # all characters contained in school names
-	# lapply(all_names, str_split, '') %>% 
-	# 	unlist %>% 
-	# 	tolower %>% 
-	# 	unique %>% 
-	# 	iconv(., 'ASCII//TRANSLIT', sub = 'byte') %>%
-	# 	sort
-	# 
-	# # function to normalize all names
-	# str_replace_all(all_names, '[0-9]+', ' ') %>%
-	# 	iconv(., 'ASCII//TRANSLIT', sub = 'byte') %>%
-	# 	tolower %>% 
-	# 	str_replace_all(., '<c2><a0>', ' ') %>%
-	# 	str_replace_all(., '\\s+', ' ') %>%
-	# 	str_replace_all(., ',', ' ') %>%
-	# 	str_replace_all(., '\\.', ' ') %>%
-	# 	str_replace_all(., '\\(', ' ') %>%
-	# 	str_replace_all(., '\\)', ' ') %>%
-	# 	str_replace_all(., '/', ' ') %>%
-	# 	str_replace_all(., '@', ' ') %>%
-	# 	str_replace_all(., '\\+', ' ') %>%
-	# 	str_replace_all(., '&', 'and') %>%
-	# 	str_replace_all(., '<e2><80><99>', '\'') %>%
-	# 	lapply(., str_split, ' ') %>% 
-	# 	unlist %>% 
-	# 	unique %>% 
-	# 	str_replace_all(., '\\s+', ' ') %>%
-	# 	str_trim %>%
-	# 	unique %>% 
-	# 	sort %>% paste0(., collapse = '\', \'') %>% sprintf('c(\'%s\')', .) # extract stopwords
-	# 
-	# school_names_stopwords <- c('<c3><89><c3><89>c', 
-	# 							'<c3><89>a', 
-	# 							'<c3><89>cole', 
-	# 							'<c3><89>ducation', 
-	# 							'<c3><89>ep', 
-	# 							'<c3><89>ic', 
-	# 							'<c3><89>l<c3><a9>m', 
-	# 							'<c3><89>l<c3><a9>mentaire',
-	# 							'<c3><89>lementaire',
-	# 							'<c3><89>p',
-	# 							'<c3><89>sac',
-	# 							'<c3><89>sc',
-	# 							'<c3><a9>coles', 
-	# 							'<c3><a9>l<c3><a9>mentaire', 
-	# 							'aaec\'s',
-	# 							'acad<c3><a9>mie',
-	# 							'academy', 
-	# 							'academy-', 
-	# 							'adolescent', 
-	# 							'adult',
-	# 							'adultes', 
-	# 							'alternate',
-	# 							'alternative',
-	# 							'alternatives', 
-	# 							'c<c3><89>p',
-	# 							'catholic',
-	# 							'catholique',
-	# 							'catholiques', 
-	# 							'coll<c3><a8>ge', 
-	# 							'college',
-	# 							'collegiate', 
-	# 							'conted', 
-	# 							'continuing',
-	# 							'education', 
-	# 							'elemenary', 
-	# 							'elementary',
-	# 							'high', 
-	# 							'highschool', 
-	# 							'instititue', 
-	# 							'institute', 
-	# 							'institute-secondary',
-	# 							'interm<c3><a9>diaire', 
-	# 							'intermediate', 
-	# 							'intstitute', 
-	# 							'l\'<c3><89>cole', 
-	# 							'l\'acad<c3><a9>mie', 
-	# 							'middle', 
-	# 							' ps\\s?', 
-	# 							'pssb', 
-	# 							'pte',
-	# 							'public', 
-	# 							'publique',
-	# 							'publiques', 
-	# 							'school', 
-	# 							'schools', 
-	# 							'scolaire', 
-	# 							'secondaire', 
-	# 							'secondary',
-	# 							'senior')
-	
-	# debugging
-	# df1 <- data.frame(school_name = sort(unique(covid19_schools_active$school)), 
-	# 		   clean_name = clean_all_names(sort(unique(covid19_schools_active$school))))
-	# View(df1)
-	# df2 <- data.frame(school_name = school_demographics$`school name`, 
-	# 		   clean_name = clean_all_names(school_demographics$`school name`))
-	# View(df2)
 	
 } else {
 	# LOAD ALL CACHED DATA -----------------------------------------------------
