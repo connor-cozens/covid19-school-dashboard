@@ -22,7 +22,7 @@ source('data_downloader.R')
 # SHINY UI ---------------------------------------------------------------------
 ui <- bootstrapPage(
     tags$head(includeHTML('gtag.html')),
-    navbarPage(theme = shinytheme('flatly'), 
+    navbarPage(theme = shinytheme('united'), 
                collapsible = TRUE,
                'COVID-19 School Dashboard', 
                id = 'nav',
