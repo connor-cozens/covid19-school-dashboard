@@ -191,45 +191,49 @@ ui <- bootstrapPage(
                #              )
                #          )
                # ),
-               
-               # tab: Risk assessment ------------------------------------------               
-               # tabPanel('Risk assessment',
-               #          
-               #          h3('Reducing COVID-19 Transmission Upon School Reopening: Identifying High-Risk Neighbourhoods'),
-               #          ('Prepared by: Toronto Public Health'),
-               #          br(),
-               #          ('Prepared date: August 20, 2020'),
-               #          br(),
-               #          ('Prepared for the Toronto Catholic District School Board (TCDSB)'),
-               #          br(),
-               #          h3('Background'),
-               #          p('Toronto elementary schools are set to re-open for in-person learning in September. This document outlines a method that can be used to inform decisions about areas of the city to prioritize for mitigation strategies in order to reduce the spread of COVID-19. Neighbourhood-level data is used to produce a risk score based on case information in combination with select socioeconomic indicators. This analysis can be used in conjunction with other considerations when deciding about COVID-19 risk mitigation strategies in schools. Since the evidence around COVID-19 is ever-changing, our method allows for flexibility and continuous updates based on available data.'),
-               #          h3('Methods'),
-               #          p('A composite index score was generated in order to rank neighbourhoods in terms of their risk for increased COVID-19 transmission when schools reopen.'),
-               #          h4('Rankings were generated using the following steps:'),
-               #          tags$ol(
-               #              tags$li('For each neighbourhood with TCDSB schools, confirmed/probable COVID-19 case counts were obtained from May 29 (the date where widespread testing was announced in the province) to Aug 16, 2020 (most recent available data). Cases associated with outbreaks in long-term care or retirement homes among individuals aged 65+ were excluded from case rates, as they represent institutionalized individuals. Rates proportionate to neighbourhood population size were used. Select sociodemographic indicators were obtained using Census 2016 data (Table 1).'),
-               #              tags$li('To generate the risk score, each variable was assigned a weight. Case rates were assigned a higher weight than other variables. Effects of each socioeconomic indicator on COVID-19 transmission are difficult to tease out and therefore they have been assigned the same weight.'),
-               #              tags$li('Indicators within each neighbourhood were then multiplied by the assigned weight to generate a composite score. All neighbourhood scores (unique on neighbourhood level) were then subdivided into quintiles based on percentile score; higher quintiles indicate higher-risk.'),
-               #              tags$li('sociodemographic indicators were available at the neighbourhood level only, all schools within the neighbourhood are considered of similar risk.')    
-               #          ),
-               #          h4('Table 1: Variables used to generate neighbourhood risk scores'),
-               #          
-               #          # variables_details_dt ---------------------------------
-               #          div(DTOutput('variables_details_dt'), style = 'font-size: small; width: 100%'),
-               #          
-               #          h3('Results'),
-               #          # p('Note: An initial list for elementary schools was produced on August 17, 2020 that included all case dates and without the additional exclusions indicated in Step 1. Tab B shows the revised table. The "Comparison" tab illustrates the differences between the two.'),
-               #          
-               #          # risk_assessment_elementary_dt ------------------------
-               #          h4('Elementary School Risk Assessment'),
-               #          DTOutput('risk_assessment_elementary_dt'),
-               #          
-               #          # risk_assessment_secondary_dt -------------------------
-               #          h4('Secondary School Risk Assessment'),
-               #          DTOutput('risk_assessment_secondary_dt')
-               #          
-               # ),
+
+               # tab: Risk assessment ------------------------------------------
+               tabPanel('Risk assessment',
+
+                        # h3('Reducing COVID-19 Transmission Upon School Reopening: Identifying High-Risk Neighbourhoods'),
+                        # ('Prepared by: Toronto Public Health'),
+                        # br(),
+                        # ('Prepared date: August 20, 2020'),
+                        # br(),
+                        # ('Prepared for the Toronto Catholic District School Board (TCDSB)'),
+                        # br(),
+                        # h3('Background'),
+                        # p('Toronto elementary schools are set to re-open for in-person learning in September. This document outlines a method that can be used to inform decisions about areas of the city to prioritize for mitigation strategies in order to reduce the spread of COVID-19. Neighbourhood-level data is used to produce a risk score based on case information in combination with select socioeconomic indicators. This analysis can be used in conjunction with other considerations when deciding about COVID-19 risk mitigation strategies in schools. Since the evidence around COVID-19 is ever-changing, our method allows for flexibility and continuous updates based on available data.'),
+                        # h3('Methods'),
+                        # p('A composite index score was generated in order to rank neighbourhoods in terms of their risk for increased COVID-19 transmission when schools reopen.'),
+                        # h4('Rankings were generated using the following steps:'),
+                        # tags$ol(
+                        #     tags$li('For each neighbourhood with TCDSB schools, confirmed/probable COVID-19 case counts were obtained from May 29 (the date where widespread testing was announced in the province) to Aug 16, 2020 (most recent available data). Cases associated with outbreaks in long-term care or retirement homes among individuals aged 65+ were excluded from case rates, as they represent institutionalized individuals. Rates proportionate to neighbourhood population size were used. Select sociodemographic indicators were obtained using Census 2016 data (Table 1).'),
+                        #     tags$li('To generate the risk score, each variable was assigned a weight. Case rates were assigned a higher weight than other variables. Effects of each socioeconomic indicator on COVID-19 transmission are difficult to tease out and therefore they have been assigned the same weight.'),
+                        #     tags$li('Indicators within each neighbourhood were then multiplied by the assigned weight to generate a composite score. All neighbourhood scores (unique on neighbourhood level) were then subdivided into quintiles based on percentile score; higher quintiles indicate higher-risk.'),
+                        #     tags$li('sociodemographic indicators were available at the neighbourhood level only, all schools within the neighbourhood are considered of similar risk.')
+                        # ),
+                        # h4('Table 1: Variables used to generate neighbourhood risk scores'),
+                        # 
+                        # # variables_details_dt ---------------------------------
+                        # div(DTOutput('variables_details_dt'), style = 'font-size: small; width: 100%'),
+                        # 
+                        # h3('Results'),
+                        # p('Note: An initial list for elementary schools was produced on August 17, 2020 that included all case dates and without the additional exclusions indicated in Step 1. Tab B shows the revised table. The "Comparison" tab illustrates the differences between the two.'),
+
+                        # # risk_assessment_elementary_dt ------------------------
+                        # h4('Elementary School Risk Assessment'),
+                        # DTOutput('risk_assessment_elementary_dt'),
+                        # 
+                        # # risk_assessment_secondary_dt -------------------------
+                        # h4('Secondary School Risk Assessment'),
+                        # DTOutput('risk_assessment_secondary_dt')
+                        
+                        # risk_assessment_secondary_dt -------------------------
+                        h3('Neighborhood Risk Assessment'),
+                        DTOutput('risk_assessment_neighborhood_dt')
+
+               ),
                
                # tab: About this site ------------------------------------------
                tabPanel('About This Site',
@@ -857,6 +861,34 @@ server <- function(input, output) {
             rownames = FALSE,
             class = 'display'
         )
+    })
+    
+    # risk_assessment_neighborhood_dt ------------------------------------------
+    output$risk_assessment_neighborhood_dt <- renderDT({
+        df <- risk_rank_neighborhood
+        colnames(df) <- str_replace_all(colnames(df), '_', ' ')
+        colnames(df) <- str_to_title(colnames(df))
+        brks <- seq(0, 1, by = 0.05)
+        clrs <- round(seq(255, 40, length.out = length(brks) + 1), 0) %>%
+            { paste0('rgb(255,', ., ',', ., ')') }
+        datatable(
+            df, 
+            callback = JS(sprintf('var tips = [ %s],
+                            firstRow = $("#risk_assessment_neighborhood_dt thead tr th");
+                            for (var i = 1; i < tips.length; i++) {
+                              $(firstRow[i]).attr("title", tips[i]);
+                            }', paste0(rep('"Chance of Encountering a Transmissible COVID-19 Infection in a Group Of..."', 19), collapse = ', '))),
+            options = list(
+                paging = TRUE,
+                searching = TRUE,
+                fixedColumns = TRUE,
+                autoWidth = TRUE,
+                ordering = TRUE
+                # dom = 'Bfrtip'
+            ),
+            rownames = FALSE,
+            class = 'display'
+        ) %>% formatCurrency(2:27, '') %>% formatStyle(names(df)[ 2:20 ], backgroundColor = styleInterval(brks, clrs))
     })
     
     # variables_details_dt -----------------------------------------------------

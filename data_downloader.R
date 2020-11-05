@@ -86,6 +86,7 @@ clean_all_names <- function(dirty_names) {
 		str_replace_all(., '&', ' ') %>%
 		str_replace_all(., '<e2><80><99>', '\'') %>%
 		str_replace_all(., '<c5><93>', 'oe') %>%
+		str_replace_all(., '<c3><a1>', 'a') %>%
 		str_squish
 	
 	stopwords <- c('<c3><89><c3><89>c', 
@@ -181,42 +182,50 @@ clean_all_names <- function(dirty_names) {
 	
 	# clean up 2: remove stopwords
 	stopwords_regex <- paste0(stopwords, collapse = '|')
-	clean_names <- lapply(clean_names, str_replace_all, stopwords_regex, '')
+	clean_names <- lapply(clean_names, str_replace_all, stopwords_regex, ' ')
+	clean_names <- lapply(clean_names, str_squish)
 	clean_names <- unlist(clean_names)
 	
-	# clean up 3
+	# clean up 3: consistent formatting for catholic school names
 	clean_names <- str_replace_all(clean_names, 'monsignor', 'msgr')
 	clean_names <- str_replace_all(clean_names, 'monseigneur', 'msgr')
 	clean_names <- str_replace_all(clean_names, 'saint([ |\\-])', 'st\\1')
 	clean_names <- str_replace_all(clean_names, 'sainte([ |\\-])', 'ste\\1')
 	clean_names <- str_squish(clean_names)
 	
-	# clean up 4 
+	# clean up 4: hard-coded disambiguations
+	clean_names <- str_replace_all(clean_names, 'banting memorial district', 'banting memorial')
+	clean_names <- str_replace_all(clean_names, 'blessed margherita of citta castello', 'blessed margherita of citta di castello')
 	clean_names <- str_replace_all(clean_names, '^city calc$', 'calc')
 	clean_names <- str_replace_all(clean_names, '^de hearst$', 'hearst')
+	clean_names <- str_replace_all(clean_names, 'dunrankin drive', 'dunrankin')
+	clean_names <- str_replace_all(clean_names, 'fisher park summit as', 'fisher park summit alternative')
 	clean_names <- str_replace_all(clean_names, 'frank panabaker north ancaster', 'frank panabaker north')
+	clean_names <- str_replace_all(clean_names, 'jean vanier formerly known as our lady queen of world', 'our lady queen of world ca')
+	clean_names <- str_replace_all(clean_names, 'jean vanier renamed st joan of arc', 'our lady queen of world ca')
 	clean_names <- str_replace_all(clean_names, 'john clarke richardson', 'j clarke richardson')
+	clean_names <- str_replace_all(clean_names, 'mcnaughton avenue', 'mcnaughton ave')
 	clean_names <- str_replace_all(clean_names, '^msgr fraser$', 'msgr fraser midland')
+	clean_names <- str_replace_all(clean_names, '^msgr fraser isabella$', 'msgr fraser isabella campus')
+	clean_names <- str_replace_all(clean_names, '^msgr fraser norfinch$', 'msgr fraser norfinch campus')
 	clean_names <- str_replace_all(clean_names, 'nora frances henderson', 'nora henderson')
 	clean_names <- str_replace_all(clean_names, 'notre dame de la jeunesse ajax', 'notre dame de la jeunesse')
 	clean_names <- str_replace_all(clean_names, 'notre dame de la jeunesse niagraf', 'notre dame de la jeunesse')
 	clean_names <- str_replace_all(clean_names, '^of experiential$', 'experiential')
+	clean_names <- str_replace_all(clean_names, 'ottawa technical storefront special', 'ottawa technical')
+	clean_names <- str_replace_all(clean_names, 'pavillon l\'escale', 'l\'escale')
 	clean_names <- str_replace_all(clean_names, 'pope st francis', 'pope francis')
+	clean_names <- str_replace_all(clean_names, 'sarborough alternative studies', 'scarborough alternative studi')
 	clean_names <- str_replace_all(clean_names, 'st john xxlll', 'st john xxiii')
 	clean_names <- str_replace_all(clean_names, 'ursuline chatham', 'ursuline')
 	clean_names <- str_replace_all(clean_names, '^unnamed formerly known as vaughan$', 'vaughan')
-	clean_names <- str_replace_all(clean_names, 'western techcommercial', 'western technical commercial')
+	clean_names <- str_replace_all(clean_names, '^unnamed formerly know as vaughan$', 'vaughan')
+	clean_names <- str_replace_all(clean_names, 'western tech commercial', 'western technical commercial')
 	clean_names <- str_replace_all(clean_names, '^western technical$', 'western technical commercial')
 	
 	clean_names
 }
 
-#' df1 <- data.frame(school_name = sort(unique(covid19_schools_active$school)), 
-#' 		   clean_name = clean_all_names(sort(unique(covid19_schools_active$school))))
-#' View(df1)
-#' df2 <- data.frame(school_name = school_demographics$`school name`, 
-#' 		   clean_name = clean_all_names(school_demographics$`school name`))
-#' View(df2)
 #' 
 
 # MAIN -------------------------------------------------------------------------
@@ -279,13 +288,48 @@ if (needs_refresh | is.na(needs_refresh)) {
 	school_demographics <- read_xlsx(fname_demographics)
 	school_demographics <- as.data.frame(school_demographics, stringsAsFactors = FALSE)
 	
-	# 5. load neighborhood risk rank data --------------------------------------
+	# 5. load school risk rank data --------------------------------------------
 	
-	fname_neighborhood_risk_rank <- file.path(data_dir, 'COVID19NeighbRiskRank_TCDSBElemSecond_2020-08-20.xlsx')
-	risk_rank_elementary <- read_xlsx(fname_neighborhood_risk_rank, sheet = 2, skip = 3, col_names = TRUE)
-	risk_rank_secondary <- read_xlsx(fname_neighborhood_risk_rank, sheet = 4, skip = 3, col_names = TRUE)
+	fname_school_risk_rank <- file.path(data_dir, 'COVID19NeighbRiskRank_TCDSBElemSecond_2020-08-20.xlsx')
+	risk_rank_elementary <- read_xlsx(fname_school_risk_rank, sheet = 2, skip = 3, col_names = TRUE)
+	risk_rank_secondary <- read_xlsx(fname_school_risk_rank, sheet = 4, skip = 3, col_names = TRUE)
 	
-	# 5. clean active cases data -----------------------------------------------
+	# 6. load neighborhood risk rank data --------------------------------------
+	
+	fname_neighborhood_risk_rank <- file.path(data_dir, '11042020 with Demographics WALLACE.xlsx')
+	risk_rank_neighborhood <- read_xlsx(fname_neighborhood_risk_rank, sheet = 1, skip = 2, col_names = FALSE)
+	risk_rank_neighborhood <- risk_rank_neighborhood[ , setdiff(1:29, c(21, 26))]
+	colnames(risk_rank_neighborhood) <- c('neighborhood_name',
+										  'of_10',	
+										  'of_15',	
+										  'of_17',	
+										  'of_19',	
+										  'of_21',	
+										  'of_23',	
+										  'of_25',	
+										  'of_30',	
+										  'of_33',	
+										  'of_50',	
+										  'of_100',	
+										  'of_250',	
+										  'of_500',	
+										  'of_750',	
+										  'of_1000',	
+										  'of_1250',
+										  'of_1500',	
+										  'of_1750',	
+										  'of_2000',
+										  'Population',
+										  '7-Day Count',
+										  'One Infection Per',
+										  'Transmissible Cases before Isolation and Seroprevalence',
+										  'Population Density Per Square Kilometre',
+										  'Average Household Size',
+										  'Prevalence of low income based on the Low-income cut-offs, after tax (LICO-AT) (%)')
+	fn <- file.path(data_dir, 'risk_rank_neighborhood.rdata')
+	save('risk_rank_neighborhood', file = fn)
+	
+	# 7. clean active cases data -----------------------------------------------
 	
 	colnames(covid19_schools_active) <- tolower(colnames(covid19_schools_active))
 	covid19_schools_active$collected_date <- as.Date(covid19_schools_active$collected_date)
@@ -296,7 +340,7 @@ if (needs_refresh | is.na(needs_refresh)) {
 	fn <- file.path(data_dir, 'covid19_schools_active.rdata')
 	save('covid19_schools_active', file = fn)
 	
-	# 6. clean summary data ----------------------------------------------------
+	# 8. clean summary data ----------------------------------------------------
 	
 	colnames(covid19_schools_summary) <- tolower(colnames(covid19_schools_summary))
 	covid19_schools_summary$collected_date <- as.Date(covid19_schools_summary$collected_date)
@@ -403,14 +447,12 @@ if (needs_refresh | is.na(needs_refresh)) {
 	# View(data.frame(covid19_schools_active$school))
 	# View(data.frame(school_demographics$`school name`))
 	
-	# add cleaned names to demographic and active cases datasets
+	# add cleaned names to school demographics and school active cases datasets
 	covid19_schools_active$school_clean <- sn2
 	school_demographics$school_clean <- sn1
 	
-	# merge demographic and activ cases datasets
-	# merge does not work we have to use school name and board name
-	# covid19_schools_active_with_demographics <- merge(covid19_schools_active, school_demographics, by = 'school_clean', all.y = FALSE)
-	# summary(covid19_schools_active_with_demographics)
+	# combine school demographics and school active cases datasets
+	ambiguous_school_names <- character(0)
 	
 	covid19_schools_active_with_demographics <- apply(covid19_schools_active, 1, function(x) {
 		# print(x)
@@ -476,7 +518,12 @@ if (needs_refresh | is.na(needs_refresh)) {
 					result <- data.frame(t(x), school_demographics[ idx1, ])	
 				}
 			} else {
-				if (debug) message(sprintf('no corresponding school name found for "%s" using dummy data', x[ 'school_clean' ]))
+				# if (debug) message(sprintf('no corresponding school name found for "%s" using dummy data', x[ 'school_clean' ]))
+				ambiguous_school_names <- get('ambiguous_school_names', envir = .GlobalEnv)
+				ambiguous_school_names <- c(ambiguous_school_names, x[ 'school_clean' ])
+				ambiguous_school_names <- unique(ambiguous_school_names)
+				ambiguous_school_names <- sort(ambiguous_school_names)
+				assign('ambiguous_school_names', ambiguous_school_names, envir = .GlobalEnv)
 				dummy_df <- data.frame(t(rep('', 52)))
 				colnames(dummy_df) <- colnames(school_demographics)
 				result <- data.frame(t(x))	
@@ -486,15 +533,35 @@ if (needs_refresh | is.na(needs_refresh)) {
 			# use municipality to disambiguate
 			idx <- which(tolower(str_trim(result$municipality)) == tolower(str_trim(result$municipality.1)))
 			if (length(idx) == 1) {
-				if (debug) message(sprintf('disambiguated by municipality for %s!', x[ 'school_clean' ]))
+				# if (debug) message(sprintf('disambiguated by municipality for %s!', x[ 'school_clean' ]))
 				result <- result[ idx, ]
 			} else {
-				if (debug) message(sprintf('sloppy disambiguation for %s!', x[ 'school_clean' ]))
+				# if (debug) message(sprintf('sloppy disambiguation for %s!', x[ 'school_clean' ]))
 				result <- result[ 1, ]
 			}
 		}
 		return(result)
 	})
+	
+	# use this to update the clean_all_names function so that it can properly match
+	# entries in active cases dataset with corresponding entries in school demographics 
+	# dataset
+	if (debug) { 
+		message(sprintf('no corresponding school name found for: %s', paste0(ambiguous_school_names, collapse = ', ')))
+		df1 <- covid19_schools_active[ , c('school', 'municipality', 'school_board') ]
+		df1 <- unique(df1)
+		df1$clean_name <- clean_all_names(df1$school)
+		idx <- order(df1$school)
+		df1 <- df1[ idx, ]
+		View(df1)
+		df2 <- school_demographics[ , c('school name', 'municipality', 'board name') ]
+		df2 <- unique(df2)
+		df2$clean_name <- clean_all_names(df2$`school name`)
+		idx <- order(df2$school)
+		df2 <- df2[ idx, ]
+		View(df2)
+	}
+	
 	covid19_schools_active_with_demographics <- rbindlist(covid19_schools_active_with_demographics, use.names = TRUE, fill = TRUE)
 	covid19_schools_active_with_demographics <- data.frame(covid19_schools_active_with_demographics)
 	
@@ -696,6 +763,8 @@ if (needs_refresh | is.na(needs_refresh)) {
 	fn <- file.path(data_dir, 'risk_rank_elementary.rdata')
 	load(file = fn, envir = .GlobalEnv)
 	fn <- file.path(data_dir, 'risk_rank_secondary.rdata')
+	load(file = fn, envir = .GlobalEnv)
+	fn <- file.path(data_dir, 'risk_rank_neighborhood.rdata')
 	load(file = fn, envir = .GlobalEnv)
 }
 
