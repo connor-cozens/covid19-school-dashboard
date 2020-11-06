@@ -281,6 +281,7 @@ ui <- bootstrapPage(
                         
                         # risk_assessment_secondary_dt -------------------------
                         h3('Neighborhood Risk Assessment'),
+                        br(),
                         DTOutput('risk_assessment_neighborhood_dt')
                         
                ),
