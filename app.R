@@ -17,6 +17,44 @@ source('data_downloader.R')
 
 # FUNCTIONS --------------------------------------------------------------------
 
+#' get_summary_table
+#' 
+#' generate quick view summary table
+#' 
+get_summary_table <- function() {
+    df <- covid19_schools_summary
+    idx <- order(df$collected_date)
+    df <- df[ idx, ]
+    cn <- c(
+        'collected_date', 
+        'cumulative_school_related_cases', 
+        'new_total_school_related_cases', 
+        'current_schools_with_cases', 
+        'current_schools_closed'
+    )
+    df <- df[ , cn ]
+    idx <- which(df$collected_date <= as.Date(now())) # as.Date(input$plot_date))
+    idx <- max(idx)
+    df <- df[ (idx - 1):idx, ]
+    colnames(df) <- str_replace_all(colnames(df), '_', ' ')
+    df1 <- reshape2::melt(apply(df[ , -1 ], 2, diff))
+    df1$variable <- rownames(df1)
+    colnames(df1) <- c('change', 'variable')
+    df2 <- reshape2::melt(df[ 2, -1 ])
+    df <- merge(df2, df1, on = 'variable', all = TRUE)
+    colnames(df) <- c('Variable', 'Count', 'Change')
+    idx <- which(df$Change > 0)
+    df[ idx, 'Change' ] <- sprintf('+%s', df[ idx, 'Change' ])
+    df$Variable <- str_to_sentence(df$Variable)
+    df$Variable <- str_replace_all(df$Variable, ' w ', ' with ')
+    df$Variable <- str_replace_all(df$Variable, 'school related', 'school\\-related')
+    schools_count <- max(covid19_schools_summary$current_total_number_schools)
+    df$Percentage <- NA
+    df[ 2, 'Percentage' ] <- round(df[ 2, 'Count' ] / schools_count, 4) * 1e2
+    df[ 3, 'Percentage' ] <- round(df[ 3, 'Count' ] / schools_count, 4) * 1e2
+    df
+}
+
 # INITIALIZATION ---------------------------------------------------------------
 
 # SHINY UI ---------------------------------------------------------------------
@@ -42,10 +80,12 @@ ui <- bootstrapPage(
                                           class = 'panel panel-default',
                                           top = 80, 
                                           left = 55, 
-                                          width = 725, 
+                                          width = 500, 
                                           fixed = TRUE,
                                           draggable = TRUE, 
                                           height = 'auto',
+                                          
+                                          h2('Quick View Daily Summary', align = 'right'),
                                           
                                           # cumulative_case_count_text ---------
                                           h3(textOutput('cumulative_case_count_text'), align = 'right'),
@@ -53,21 +93,30 @@ ui <- bootstrapPage(
                                           # clean_date_reactive_text -----------
                                           h6(textOutput('clean_date_reactive_text'), align = 'right'),
                                           
+                                          # daily_summary_1_dt -----------------
+                                          div(tableOutput('daily_summary_1_dt'), style = 'font-size: small; width: 100%'),
+                                          
                                           # clean_date_reactive_text -----------
-                                          div(tableOutput('daily_summary'), style = 'font-size: small; width: 100%')
+                                          h6('Drag this box to move it', align = 'right')
                             )
                             
                         )
                         
                ),
                
-               # tab: Overview -------------------------------------------------
-               tabPanel('Overview',
-                        # cumulative_plot --------------------
+               # tab: Overview and Search --------------------------------------
+               tabPanel('Overview and Search',
+                        # cumulative_plot --------------------------------------
                         plotlyOutput('cumulative_plot', width = '100%'),
                         hr(),
-                        # school_details_dt ------------------
-                        h3('School Summary', align = 'right'),
+                        # daily_summary_2_dt -----------------------------------
+                        h3('Daily Summary', align = 'right'),
+                        div(tableOutput('daily_summary_2_dt'), style = 'font-size: small; width: 100%'),
+                        hr(),
+                        # school_details_dt ------------------------------------
+                        h3('Search Function and Table', align = 'right'),
+                        div('Search schools, boards, municipalities for confirmed cases of COVID-19.', width = '100%', align = 'right'),
+                        br(),
                         div(DTOutput('school_details_dt'), style = 'font-size: small; width: 100%')
                ),
                
@@ -127,7 +176,8 @@ ui <- bootstrapPage(
                tabPanel('Data Sources and Source Code',
                         h3('Data Sources'),
                         tags$ul(
-                            # tags$li(a(href = 'https://data.ontario.ca/dataset?keywords_en=COVID-19', 'All COVID-19 datasets', target = '_blank')),
+                            tags$li(a(href = 'https://www.ontario.ca/page/covid-19-cases-schools-and-child-care-centres', 'COVID-19 cases in schools and child care centres', target = '_blank')),
+                            tags$li(a(href = 'https://data.ontario.ca/dataset?keywords_en=COVID-19', 'All COVID-19 datasets', target = '_blank')),
                             tags$li(a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools', 'Schools COVID-19 data overview', target = '_blank')),
                             tags$li(a(href = 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/7fbdbb48-d074-45d9-93cb-f7de58950418/download/schoolcovidsummary.csv', 'Summary of cases in schools dataset (.csv)', target = '_blank')),
                             tags$li(a(href = 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/8b6d22e2-7065-4b0f-966f-02640be366f2/download/schoolsactivecovid.csv', 'Schools with active COVID-19 cases dataset (.csv)', target = '_blank')),
@@ -191,10 +241,10 @@ ui <- bootstrapPage(
                #              )
                #          )
                # ),
-
+               
                # tab: Risk assessment ------------------------------------------
                tabPanel('Risk assessment',
-
+                        
                         # h3('Reducing COVID-19 Transmission Upon School Reopening: Identifying High-Risk Neighbourhoods'),
                         # ('Prepared by: Toronto Public Health'),
                         # br(),
@@ -220,7 +270,7 @@ ui <- bootstrapPage(
                         # 
                         # h3('Results'),
                         # p('Note: An initial list for elementary schools was produced on August 17, 2020 that included all case dates and without the additional exclusions indicated in Step 1. Tab B shows the revised table. The "Comparison" tab illustrates the differences between the two.'),
-
+                        
                         # # risk_assessment_elementary_dt ------------------------
                         # h4('Elementary School Risk Assessment'),
                         # DTOutput('risk_assessment_elementary_dt'),
@@ -232,7 +282,7 @@ ui <- bootstrapPage(
                         # risk_assessment_secondary_dt -------------------------
                         h3('Neighborhood Risk Assessment'),
                         DTOutput('risk_assessment_neighborhood_dt')
-
+                        
                ),
                
                # tab: About this site ------------------------------------------
@@ -250,12 +300,12 @@ ui <- bootstrapPage(
                         h4('Update frequency'),
                         p('This site is automatically updated every weekday (excluding public holidays) following the release of school-related COVID-19 case data by the Ontario Ministry of Education. Cumulative totals represent all total cases reported to the Ministry of Education as of 5 September 2020, including resolved cases. The first school-related cases appeared in the dataset on 10 September 2020.'),
                         p('This site uses the latest publicly available data on school information and student demographics released by the Ontario Ministry of Education for school background characteristics. This dataset is updated by the Ministry monthly.'),
-                        p('Click ', a(href = '', 'here'), ' for more information on data sources.'),
+                        p('Click ', a(href = 'https://data.ontario.ca/dataset?keywords_en=COVID-19', 'here', target = '_blank'), ' for more information on data sources.'),
                         br(),
                         h4('Caveats'),
                         br(),
                         p('The main aim of the COVID-19 School Dashboard is to show which schools are affected by confirmed cases as reported in the official data, visually plot where the schools are, and to show relevant school background characteristics of affected schools. This site should not be used to draw inferences on the broader COVID-19 situation in Ontario, or on case numbers generally. A number of complementary metrics are useful in that regard.'),
-                        p('The numbers of cases are extracted from official data sources and are also related to the changing testing scenario in Ontario. This can mean that as the frequency of testing increases or decreases, threshold of symptoms is widened or restricted, and backlog of results clears or increases, amongst other factors, the number of new cases may show spikes or dips.'),
+                        p('The numbers of cases are extracted from official data sources and are also related to the changing testing scenario in Ontario. This can mean that as the frequency of testing increases or decreases, threshold of symptoms is widened or restricted, and backlog of results clears or increases, amongst other factors, the number of new cases may show spikes or dips. There are also known lags in data reported in the Ministry of Education dataset, which may result in real-time discrepancies.'),
                         p('Finally, Ontario instituted a phased re-opening of schools. Earlier school case data reflect a partial reopening of the system. Nearly all schools were meant to be re-opened by 21 September 2020.'),
                         br(),
                         h4('Coming soon'),
@@ -264,10 +314,9 @@ ui <- bootstrapPage(
                         p('Planned indicators and basic functions in the short-term include:'),
                         tags$ul(
                             tags$li('Recent cases (data available as of 1 October) '),
-                            tags$li('Cumulative: % of schools affected (total schools in ON)'),
                             tags$li('Cumulative: % of schools per board affected with at least one case'),
                             tags$li('Number and % of schools with multiple cases '),
-                            tags$li('Lists of schools with active cases + list of schools closed. Currently can be extracted from the Data table.')
+                            tags$li('Lists of schools with active cases. Currently can be extracted from the Data table.')
                         ),
                         p('We invite users to suggest further indicators for integration. Further web optimization and dynamic display features are also planned.'),
                         br(),
@@ -284,7 +333,7 @@ ui <- bootstrapPage(
                         br(),
                         tags$strong(('Bubbles')),
                         br(),
-                        p('The size of the bubbles indicates the magnitude of cumulative cases at specific schools relative to others. The bigger the bubble, the more cumulative cases at that school – that is, the more it has been affected relative to other schools.'),
+                        p('The size of the bubbles indicates the magnitude of cumulative cases (student, staff, unidentified) at specific schools relative to others. The bigger the bubble, the more cumulative cases at that school – that is, the more it has been affected relative to other schools.'),
                         p('Hovering on a bubble reveals school-specific COVID-19 case data and school social background information. Currently, the bubbles show: '),
                         tags$ul(
                             tags$li('cumulative cases;'), 
@@ -295,10 +344,10 @@ ui <- bootstrapPage(
                             tags$li('enrolment;'), 
                             tags$li('proportion of students from low-income households;'), 
                             tags$li('proportion of students receiving special education services;'),
-                            tags$li('proportion of students whose first language is not English (for English schools);'),
-                            tags$li('proportion of students whose first language is not French (for French schools);'), 
-                            tags$li('proportion of students who are immigrants from a non-English country (for English schools);'),
-                            tags$li('proportion of students who are immigrants from a non-French country (for French schools);'),
+                            tags$li('proportion of students whose first language is not English;'),
+                            tags$li('proportion of students whose first language is not French;'), 
+                            tags$li('proportion of students who are immigrants from a non-English country;'),
+                            tags$li('proportion of students who are immigrants from a non-French country;'),
                             tags$li('proportion of students whose parents have some university education')
                         ),
                         # p('View the Data Dictionary for definitions of these indicators.'),
@@ -306,7 +355,7 @@ ui <- bootstrapPage(
                         tags$strong(('Quick view summary pane')),
                         br(),
                         tags$ul(
-                            tags$li(tags$i('Cumulative Case Chart:'), ' Shows the number of cumulative school-related cases in Ontario. Use the slider to view the evolution since the first day of cases in the dataset. Selecting a specific date on the slider will adjust data in the Daily Summary accordingly.'),
+                            tags$li(tags$i('Cumulative Case Chart:'), ' Summarizes cumulative school-related cases, new total school-related cases, current schools with cases (and as % of schools in Ontario), and current’ schools closed (and as % of schools in Ontario).'),
                             tags$li(tags$i('Daily Summary:'), ' Summarizes cumulative school-related cases, new total school-related cases, current schools with cases, and current schools closed. It also shows the count and change (+/-) from the most current date with data to the date immediately preceding. No changes will be seen on or between weekend dates (i.e., on Saturday and Sunday and between Friday and Saturday; Saturday and Sunday) or public holidays since data are only released by the Ministry on weekdays.')
                         ),
                         br(),
@@ -314,10 +363,10 @@ ui <- bootstrapPage(
                         # p('These graphs provide an indication of the evolution of school-related cases over time. The first school-related cases appeared in the dataset on 10 September 2020. Currently, there are four graphs.'),
                         # br(),
                         # tags$strong(('Cumulative school-related cases')),
-                        # p('Shows all cumulative school-related cases, including resolved cases in Ontario and the breakdown of student cases, staff, and unspecified individual cases.'),
+                        # p('Shows all cumulative school-related cases, including resolved cases in Ontario and the breakdown of student cases, staff, and unidentified individual cases.'),
                         # br(),
                         # tags$strong(('New school-related cases')),
-                        # p('Shows all new school-related cases in Ontario, and the breakdown of student, staff, and unspecified cases.'),
+                        # p('Shows all new school-related cases in Ontario, and the breakdown of student, staff, and unidentified cases.'),
                         # br(),
                         # tags$strong(('Active school-related cases by municipality')),
                         # p('Shows the top 10 municipalities with active school-related cases.'),
@@ -328,17 +377,30 @@ ui <- bootstrapPage(
                         # tags$strong(('Slider')),
                         # p('Keep the slider to the minimum date (10 Sept) to see the full evolution of cases up to the most current date for every graph.'),
                         # br(),
+                        h4('Overview and Search Tab'),
+                        tags$strong(('Cumulative Case Chart')),
+                        br(),
+                        p('Shows the number of cumulative school-related cases in Ontario. '),
+                        br(),
                         tags$strong(('Tools for added functionality')),
                         br(),
                         p('Hover over the legend to access tools for added functionality: download graph as .PNG image file, zoom, pan, box select, lasso select, zoom in, zoom out, autoscale, reseat axes, toggle spike lines, show closest data on hover, compare data on hover.'),
                         p('"Compare data on hover" is especially useful to see and compare the number of cases on all lines in the graph on a specific date.'),
+                        br(),
+                        tags$strong(('Daily Summary')),
+                        br(),
+                        p('Summarizes cumulative school-related cases, new total school-related cases, current schools with cases (and as % of schools in Ontario), and current schools closed (and as % of schools in Ontario). It also shows the count and change (+/-) from the most current date with data to the date immediately preceding. No changes will be seen on or between weekend dates (i.e., on Saturday and Sunday and between Friday and Saturday; Saturday and Sunday) or public holidays since data are only released by the Ministry on weekdays.'),
+                        br(),
+                        tags$strong(('Search Function and Table')),
+                        br(),
+                        p('Use this to search schools, boards, municipalities for data on confirmed cases of COVID-19. '),
                         br(),
                         h4('Data Tables Tab'),
                         br(),
                         tags$strong(('Summary of cases in schools')),
                         br(),
                         p('Presents raw data of cases in schools. Data table can be manipulated in ascending or descending order by variable of interest. Table can be downloaded as a .CSV file for independent analysis.'),
-                        p('Variables included: collected date; reported date; current schools with cases; current schools closed; current total number of schools; new (total school-related cases; student; staff; unspecified); recent (total school-related cases; student; staff; unspecified); past (total school-related cases; student; staff; unspecified); cumulative (total school-related cases; student; staff; unspecified).'),
+                        p('Variables included: collected date; reported date; current schools with cases; current schools closed; current total number of schools; new (total school-related cases; student; staff; unidentified); recent (total school-related cases; student; staff; unidentified); past (total school-related cases; student; staff; unidentified); cumulative (total school-related cases; student; staff; unidentified).'),
                         p('Recent and past case data available as from 1 October 2020. See ', a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools/resource/7fbdbb48-d074-45d9-93cb-f7de58950418', 'Summary of cases in schools')),
                         p('Schools with active cases and school demographic data'),
                         p('Use the search function to see if a specific school, board, or municipality has been affected.'),
@@ -368,15 +430,12 @@ ui <- bootstrapPage(
                         br(),
                         h4('Preliminary site structure based on:'),
                         br(),
-                        tags$cite('Parker, E., & Leclerc, Q. (2020). COVID-19 tracker. [Web application]. ',  a(href = 'https://vac-lshtm.shinyapps.io/ncov_tracker/', 'https://vac-lshtm.shinyapps.io/ncov_tracker/')),
-                        br(),
+                        p('Parker, E., & Leclerc, Q. (2020). ', tags$em('COVID-19 tracker. '), '[Web application]. ',  a(href = 'https://vac-lshtm.shinyapps.io/ncov_tracker/', 'https://vac-lshtm.shinyapps.io/ncov_tracker/')),
                         br(),
                         h4('Cite the COVID-19 School Dashboard as:'),
                         br(),
-                        tags$cite('Srivastava, P. (2020). COVID-19 school dashboard (1.0 Oct 2020). [Web application]. ', a(href = 'http://covid19schooldashboard.com/', 'http://covid19schooldashboard.com/')),
+                        p('Srivastava, P. (2020). ', tags$em('COVID-19 school dashboard (1.0 Oct 2020). '), '[Web application]. ', a(href = 'http://covid19schooldashboard.com/', 'http://covid19schooldashboard.com/')),
                         br(), 
-                        br(),
-                        br(),
                         a(href = 'https://www.edu.uwo.ca', tags$img(src = 'uwo_logo.png', height = '58', width = '243')),
                         br(),
                         br()
@@ -418,7 +477,7 @@ server <- function(input, output) {
                                                      weight = 1, 
                                                      color = '#d62728',
                                                      fillOpacity = 0.1, 
-                                                     label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>Students receiving special education services: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Parents have some university education: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unspecified (cumulative): %s<br/></div>', 
+                                                     label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>Students receiving special education services: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Parents have some university education: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/></div>', 
                                                                      cases_per_school$school_name, 
                                                                      cases_per_school$city, 
                                                                      cases_per_school$school_level, 
@@ -435,7 +494,7 @@ server <- function(input, output) {
                                                                      cases_per_school$cases_per_school,
                                                                      cases_per_school$cases_per_school_staff,
                                                                      cases_per_school$cases_per_school_student,
-                                                                     cases_per_school$cases_per_school_unspecified) %>% lapply(htmltools::HTML), 
+                                                                     cases_per_school$cases_per_school_unidentified) %>% lapply(htmltools::HTML), 
                                                      labelOptions = labelOptions(
                                                          style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
                                                          textsize = '15px', direction = 'auto'))
@@ -451,7 +510,7 @@ server <- function(input, output) {
         fig <- plot_ly(df, x = ~collected_date, y = ~cumulative_school_related_cases, name = 'Cumulative school-related cases', type = 'scatter', mode = 'lines+markers')
         fig <- fig %>% add_trace(y = ~cumulative_school_related_student_cases, name = 'Cumulative school-related student cases', mode = 'lines+markers') 
         fig <- fig %>% add_trace(y = ~cumulative_school_related_staff_cases, name = 'Cumulative school-related staff cases', mode = 'lines+markers') 
-        fig <- fig %>% add_trace(y = ~cumulative_school_related_unspecified_cases, name = 'Cumulative school-related unspecified cases', mode = 'lines+markers')
+        fig <- fig %>% add_trace(y = ~cumulative_school_related_unidentified_cases, name = 'Cumulative school-related unidentified cases', mode = 'lines+markers')
         fig <- fig %>% layout(title = 'Cumulative school-related cases', 
                               legend = list(x = 0.1, y = 0.9),
                               xaxis = list(title = 'Collected date'),
@@ -460,44 +519,19 @@ server <- function(input, output) {
         fig
     })
     
-    # daily_summary ------------------------------------------------------------
-    output$daily_summary <- renderTable({
-        df <- covid19_schools_summary
-        idx <- order(df$collected_date)
-        df <- df[ idx, ]
-        cn <- c(
-            'collected_date', 
-            'cumulative_school_related_cases', 
-            'new_total_school_related_cases', 
-            'current_schools_w_cases', 
-            'current_schools_closed'
-        )
-        df <- df[ , cn ]
-        idx <- which(df$collected_date <= as.Date(now())) # as.Date(input$plot_date))
-        idx <- max(idx)
-        df <- df[ (idx - 1):idx, ]
-        colnames(df) <- str_replace_all(colnames(df), '_', ' ')
-        df1 <- reshape2::melt(apply(df[ , -1 ], 2, diff))
-        df1$variable <- rownames(df1)
-        colnames(df1) <- c('change', 'variable')
-        df2 <- reshape2::melt(df[ 2, -1 ])
-        df <- merge(df2, df1, on = 'variable', all = TRUE)
-        colnames(df) <- c('Variable', 'Count', 'Change')
-        idx <- which(df$Change > 0)
-        df[ idx, 'Change' ] <- sprintf('+%s', df[ idx, 'Change' ])
-        df$Variable <- str_to_sentence(df$Variable)
-        df$Variable <- str_replace_all(df$Variable, ' w ', ' with ')
-        df$Variable <- str_replace_all(df$Variable, 'school related', 'school\\-related')
-        schools_count <- max(covid19_schools_summary$current_total_number_schools)
-        df$Percentage <- NA
-        df[ 2, 'Percentage' ] <- round(df[ 2, 'Count' ] / schools_count, 4) * 1e2
-        df[ 3, 'Percentage' ] <- round(df[ 3, 'Count' ] / schools_count, 4) * 1e2
-        df
+    # daily_summary_1_dt -------------------------------------------------------
+    output$daily_summary_1_dt <- renderTable({
+        get_summary_table()
+    }, align = 'r', striped = TRUE, width = '100%')
+    
+    # daily_summary_2_dt -------------------------------------------------------
+    output$daily_summary_2_dt <- renderTable({
+        get_summary_table()
     }, align = 'r', striped = TRUE, width = '100%')
     
     # school_details_dt --------------------------------------------------------
     output$school_details_dt <- renderDT({
-        df <- covid19_schools_active_with_demographics_most_recent[ , 2:9 ]
+        df <- covid19_schools_active_with_demographics_most_recent[ , 2:8 ]
         colnames(df) <- str_replace_all(colnames(df), '_', ' ')
         colnames(df) <- str_to_title(colnames(df))
         datatable(
@@ -537,7 +571,7 @@ server <- function(input, output) {
         fig <- plot_ly(df, x = ~collected_date, y = ~cumulative_school_related_cases, name = 'Cumulative school-related cases', type = 'scatter', mode = 'lines+markers')
         fig <- fig %>% add_trace(y = ~cumulative_school_related_student_cases, name = 'Cumulative school-related student cases', mode = 'lines+markers') 
         fig <- fig %>% add_trace(y = ~cumulative_school_related_staff_cases, name = 'Cumulative school-related staff cases', mode = 'lines+markers') 
-        fig <- fig %>% add_trace(y = ~cumulative_school_related_unspecified_cases, name = 'Cumulative school-related unspecified cases', mode = 'lines+markers')
+        fig <- fig %>% add_trace(y = ~cumulative_school_related_unidentified_cases, name = 'Cumulative school-related unidentified cases', mode = 'lines+markers')
         fig <- fig %>% layout(title = 'Cumulative school-related cases',
                               xaxis = list(title = 'Collected date'),
                               yaxis = list (title = 'Cumulative cases'))
@@ -552,7 +586,7 @@ server <- function(input, output) {
         fig <- plot_ly(df, x = ~collected_date, y = ~new_total_school_related_cases, name = 'New total school-related cases', type = 'scatter', mode = 'lines+markers')
         fig <- fig %>% add_trace(y = ~new_school_related_student_cases, name = 'New school-related student cases', mode = 'lines+markers')
         fig <- fig %>% add_trace(y = ~new_school_related_staff_cases, name = 'New school-related staff cases', mode = 'lines+markers')
-        fig <- fig %>% add_trace(y = ~new_school_related_unspecified_cases, name = 'New school-related unspecified cases', mode = 'lines+markers')
+        fig <- fig %>% add_trace(y = ~new_school_related_unidentified_cases, name = 'New school-related unidentified cases', mode = 'lines+markers')
         fig <- fig %>% layout(title = 'New school-related cases',
                               xaxis = list(title = 'Collected date'),
                               yaxis = list (title = 'New cases'))
@@ -741,19 +775,19 @@ server <- function(input, output) {
                    'New Total School Related Cases',
                    'New School Related Student Cases',
                    'New School Related Staff Cases', 
-                   'New School Related Unspecified Cases', 
+                   'New School Related Unidentified Cases', 
                    'Recent Total School Related Cases', 
                    'Recent School Related Student Cases',
                    'Recent School Related Staff Cases',
-                   'Recent School Related Unspecified Cases', 
+                   'Recent School Related Unidentified Cases', 
                    'Past Total School Related Cases', 
                    'Past School Related Student Cases',
                    'Past School Related Staff Cases', 
-                   'Past School Related Unspecified Cases', 
+                   'Past School Related Unidentified Cases', 
                    'Cumulative School Related Cases',
                    'Cumulative School Related Student Cases',
                    'Cumulative School Related Staff Cases',
-                   'Cumulative School Related Unspecified Cases')
+                   'Cumulative School Related Unidentified Cases')
         description <- c('date results collected',
                          'date results reported',
                          'count of schools with active cases currently',
@@ -762,19 +796,19 @@ server <- function(input, output) {
                          'total new school-related cases of all types since last reporting date',
                          'new school-related student cases since last reporting date',
                          'new school-related staff cases since last reporting date',
-                         'new school-related unspecified cases since last reporting date',
+                         'new school-related unidentified cases since last reporting date',
                          'total recent school-related cases',
                          'recent school-related student cases',
                          'recent school-related staff cases',
-                         'recent school-related unspecified cases',
+                         'recent school-related unidentified cases',
                          'total past school-related cases',
                          'past school-related student cases',
                          'past school-related staff cases',
-                         'past school-related unspecified cases',
+                         'past school-related unidentified cases',
                          'cumulative total school-related cases',
                          'cumulative school-related student cases',
                          'cumulative school-related staff cases',
-                         'cumulative school-related unspecified cases')
+                         'cumulative school-related unidentified cases')
         df <- data.frame(field, description)
         datatable(
             df,
@@ -795,7 +829,7 @@ server <- function(input, output) {
     output$school_cases_demo_data_dictionary_dt <- renderDT({
         field <- c('Collected Date', 'Reported Date', 'School Board', 'School', 
                    'Municipality', 'Confirmed Student Cases', 'Confirmed Staff Cases',
-                   'Confirmed Unspecified Cases', 'Total Confirmed Cases',
+                   'Confirmed Unidentified Cases', 'Total Confirmed Cases',
                    'Board Number', 'Board Name', 'Board Type', 'School Number', 
                    'School Name', 'School Type', 'School Special Condition Code', 
                    'School Level', 'School Language', 'Grade Range', 'Street', 'City',

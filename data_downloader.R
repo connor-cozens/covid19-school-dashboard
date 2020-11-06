@@ -345,6 +345,11 @@ if (needs_refresh | is.na(needs_refresh)) {
 	colnames(covid19_schools_summary) <- tolower(colnames(covid19_schools_summary))
 	covid19_schools_summary$collected_date <- as.Date(covid19_schools_summary$collected_date)
 	covid19_schools_summary$reported_date <- as.Date(covid19_schools_summary$reported_date)
+	colnames(covid19_schools_summary) <- str_replace(colnames(covid19_schools_summary), 'current_schools_w_cases', 'current_schools_with_cases')
+	colnames(covid19_schools_summary) <- str_replace(colnames(covid19_schools_summary), 'new_school_related_unspecified_cases', 'new_school_related_unidentified_cases')
+	colnames(covid19_schools_summary) <- str_replace(colnames(covid19_schools_summary), 'recent_school_related_unspecified_cases', 'recent_school_related_unidentified_cases')
+	colnames(covid19_schools_summary) <- str_replace(colnames(covid19_schools_summary), 'past_school_related_unspecified_cases', 'past_school_related_unidentified_cases')
+	colnames(covid19_schools_summary) <- str_replace(colnames(covid19_schools_summary), 'cumulative_school_related_unspecified_cases', 'cumulative_school_related_unidentified_cases')
 	fn <- file.path(data_dir, 'covid19_schools_summary.rdata')
 	save('covid19_schools_summary', file = fn)
 	
@@ -580,7 +585,8 @@ if (needs_refresh | is.na(needs_refresh)) {
 	# $ confirmed_staff_cases                                                                   : chr  "1" "0" "0" "0" ...
 	covid19_schools_active_with_demographics$confirmed_staff_cases <- as.integer(covid19_schools_active_with_demographics$confirmed_staff_cases)
 	# $ confirmed_unspecified_cases                                                             : chr  NA NA NA NA ...
-	covid19_schools_active_with_demographics$confirmed_unspecified_cases <- as.integer(covid19_schools_active_with_demographics$confirmed_unspecified_cases)
+	covid19_schools_active_with_demographics$confirmed_unidentified_cases <- as.integer(covid19_schools_active_with_demographics$confirmed_unspecified_cases)
+	covid19_schools_active_with_demographics$confirmed_unspecified_cases <- NULL
 	# $ total_confirmed_cases                                                                   : chr  "1" "1" "1" "1" ...
 	covid19_schools_active_with_demographics$total_confirmed_cases <- as.integer(covid19_schools_active_with_demographics$total_confirmed_cases)
 	# $ school_clean                                                                            : chr  "catholique roger saint denis" "catholique saint fran<c3><a7>ois d assise" "catholique sainte anne" "catholique laurier carri<c3><a8>re" ...
@@ -719,12 +725,12 @@ if (needs_refresh | is.na(needs_refresh)) {
 	names(some_university) <- geo_query_str
 	cases_per_school_staff <- tapply(covid19_schools_active_with_demographics_most_recent$confirmed_staff_cases, geo_query_str, sum)
 	cases_per_school_student <- tapply(covid19_schools_active_with_demographics_most_recent$confirmed_student_cases, geo_query_str, sum)
-	cases_per_school_unspecified <- tapply(covid19_schools_active_with_demographics_most_recent$confirmed_unspecified_cases, geo_query_str, sum)
+	cases_per_school_unidentified <- tapply(covid19_schools_active_with_demographics_most_recent$confirmed_unidentified_cases, geo_query_str, sum)
 	cases_per_school <- tapply(covid19_schools_active_with_demographics_most_recent$total_confirmed_cases, geo_query_str, sum)
 	cases_per_school <- data.frame(cases_per_school, 
 								   cases_per_school_staff,
 								   cases_per_school_student,
-								   cases_per_school_unspecified,
+								   cases_per_school_unidentified,
 								   geo_query_str = names(cases_per_school))
 	rownames(cases_per_school) <- NULL
 	cases_per_school <- merge(cases_per_school, school_geocodes, by = 'geo_query_str')
