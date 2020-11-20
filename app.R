@@ -121,8 +121,8 @@ ui <- bootstrapPage(
                         div(DTOutput('school_details_dt'), style = 'font-size: small; width: 100%')
                ),
                
-               # TAB: Data Tables ----------------------------------------------
-               tabPanel('Data Tables',
+               # TAB: Data Tables & Data Dictionary ----------------------------
+               tabPanel('Data Tables & Data Dictionary',
                         tabsetPanel(
                             tabPanel('Summary of cases in schools', 
                                      h3('Summary of cases in schools'),
@@ -382,7 +382,7 @@ ui <- bootstrapPage(
                         h5(('Search Function and Table')),
                         p('Use this to search schools, boards, municipalities for data on confirmed cases of COVID-19. '),
                         br(),
-                        h4('Data Tables Tab'),
+                        h4('Data Tables & Data Dictionary Tab'),
                         h5(('Summary of cases in schools')),
                         p('Presents raw data of cases in schools. Data table can be manipulated in ascending or descending order by variable of interest. Table can be downloaded as a .CSV file for independent analysis.'),
                         p('Variables included: collected date; reported date; current schools with cases; current schools closed; current total number of schools; new (total school-related cases; student; staff; unidentified); recent (total school-related cases; student; staff; unidentified); past (total school-related cases; student; staff; unidentified); cumulative (total school-related cases; student; staff; unidentified).'),
