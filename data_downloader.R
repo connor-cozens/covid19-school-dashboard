@@ -85,8 +85,27 @@ clean_all_names <- function(dirty_names) {
 		str_replace_all(., '\\-', ' ') %>%
 		str_replace_all(., '&', ' ') %>%
 		str_replace_all(., '<e2><80><99>', '\'') %>%
-		str_replace_all(., '<c5><93>', 'oe') %>%
+		str_replace_all(., '<c3><83><c2><ae>', ' ') %>%
+		str_replace_all(., '<c3><ae>', ' ') %>%
+		str_replace_all(., '<c3><a2><e2><82><ac><e2><84><a2>', '\'') %>%
+		str_replace_all(., '<c3><82>', ' ') %>%
+		str_replace_all(., '<c3><83><c2><a1>', 'a') %>%
+		str_replace_all(., '<c3><83><c2><a2>', 'a') %>%
 		str_replace_all(., '<c3><a1>', 'a') %>%
+		str_replace_all(., '<c3><83><c2><a7>', 'c') %>%
+		str_replace_all(., '<c3><a7>', 'c') %>%
+		str_replace_all(., '<c3><83><c2><a9>l<c3><83><c2><a9>', 'el') %>%
+		str_replace_all(., '<c3><83><e2><80><b0>', 'e') %>%
+		str_replace_all(., '<c3><83><e2><80><9c>', 'e') %>%	
+		str_replace_all(., '<c3><83><c2><ab>', 'e') %>%	
+		str_replace_all(., '<c3><83><c2><a9>', 'e') %>%
+		str_replace_all(., '<c3><83><c2><a8>', 'e') %>%
+		str_replace_all(., '<c3><89>', 'e') %>%
+		str_replace_all(., '<c3><a8>', 'e') %>%
+		str_replace_all(., '<c3><a9>', 'e') %>%
+		str_replace_all(., '<c3><83><c2><af>', 'i') %>%
+		str_replace_all(., '<c5><93>', 'oe') %>%
+		str_replace_all(., '<c3><85><e2><80><9c>', 'oe') %>%
 		str_squish
 	
 	stopwords <- c('<c3><89><c3><89>c', 
@@ -132,12 +151,16 @@ clean_all_names <- function(dirty_names) {
 				   'continuing',
 				   ' cvi\\s?',
 				   'c vi\\s?',
-				   'ecole', 
+				   'ecole',
+				   '^eec ',
+				   '^eic ',
+				   '^e elem c ',
 				   'education', 
 				   'elementaire', 
 				   'elemenary', 
 				   'elementary',
 				   'elementry',
+				   'elmentaire',
 				   ' e s$',
 				   ' es$',
 				   '^esp ',
@@ -150,6 +173,7 @@ clean_all_names <- function(dirty_names) {
 				   'institute-secondary',
 				   'interm<c3><a9>diaire', 
 				   'intermediate', 
+				   'intermediaire',
 				   'intstitute',
 				   'junior',
 				   'jr',
@@ -270,7 +294,9 @@ if (needs_refresh | is.na(needs_refresh)) {
 
 
 if (needs_refresh | is.na(needs_refresh)) {
+	
 	# REFRESH ALL DATA ---------------------------------------------------------
+	
 	# 1. load school summary data into memory ----------------------------------
 	
 	covid19_schools_summary <- read.csv(fname_summary, fileEncoding = 'Windows-1252', stringsAsFactors = FALSE)
@@ -444,6 +470,7 @@ if (needs_refresh | is.na(needs_refresh)) {
 	sdm <- stringdistmatrix(mismatched_school_names, sn1)
 	
 	# visually inspect the quality of our fuzzy matches
+	message(sprintf('fuzzy matching based on minimum string distance yields the following matches between names in cases and demographics datasets:'))
 	sprintf('%s --> %s', mismatched_school_names, sn1[ apply(sdm, 1, which.min) ]) %>% cat(., sep = '\n')
 	
 	# use this code for string matching diagnostics
@@ -633,7 +660,7 @@ if (needs_refresh | is.na(needs_refresh)) {
 	# $ percentage.of.students.identified.as.gifted                                             : chr  "25" "10" "20" "15" ...
 	covid19_schools_active_with_demographics$percentage.of.students.identified.as.gifted <- as.integer(covid19_schools_active_with_demographics$percentage.of.students.identified.as.gifted)
 	# $ percentage.of.students.receiving.special.education.services                             : chr  "0" "0" "0" "0" ...
-	covid19_schools_active_with_demographics$percentage.of.students.receiving.special.education.services <- as.integer(covid19_schools_active_with_demographics$percentage.of.students.receiving.special.education.services)
+	covid19_schools_active_with_demographics$percentage.of.students.receiving.special.education.services <- NULL # as.integer(covid19_schools_active_with_demographics$percentage.of.students.receiving.special.education.services)
 	# $ percentage.of.grade.3.students.achieving.the.provincial.standard.in.reading             : chr  "67%" "83%" "65%" "92%" ...
 	covid19_schools_active_with_demographics$percentage.of.grade.3.students.achieving.the.provincial.standard.in.reading <- NULL
 	# $ change.in.grade.3.reading.achievement.over.three.years                                  : chr  "0" "-12" "-23" "5" ...
@@ -711,8 +738,8 @@ if (needs_refresh | is.na(needs_refresh)) {
 	names(school_enrolment) <- geo_query_str
 	low_income <- covid19_schools_active_with_demographics_most_recent$percentage.of.school.aged.children.who.live.in.low.income.households
 	names(low_income) <- geo_query_str
-	special_education <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.receiving.special.education.services
-	names(special_education) <- geo_query_str
+	# special_education <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.receiving.special.education.services
+	# names(special_education) <- geo_query_str
 	non_english <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.whose.first.language.is.not.english
 	names(non_english) <- geo_query_str
 	non_french <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.whose.first.language.is.not.french
@@ -741,7 +768,7 @@ if (needs_refresh | is.na(needs_refresh)) {
 	cases_per_school$school_language <- sapply(cases_per_school$geo_query_str, function(x) school_language[[ x ]][ 1 ]) %>% as.character
 	cases_per_school$school_enrolment <- sapply(cases_per_school$geo_query_str, function(x) school_enrolment[[ x ]][ 1 ]) %>% as.integer
 	cases_per_school$low_income <- sapply(cases_per_school$geo_query_str, function(x) low_income[[ x ]][ 1 ]) %>% as.integer
-	cases_per_school$special_education <- sapply(cases_per_school$geo_query_str, function(x) special_education[[ x ]][ 1 ]) %>% as.integer
+	# cases_per_school$special_education <- sapply(cases_per_school$geo_query_str, function(x) special_education[[ x ]][ 1 ]) %>% as.integer
 	cases_per_school$non_english <- sapply(cases_per_school$geo_query_str, function(x) non_english[[ x ]][ 1 ]) %>% as.integer
 	cases_per_school$non_french <- sapply(cases_per_school$geo_query_str, function(x) non_french[[ x ]][ 1 ]) %>% as.integer
 	cases_per_school$from_non_english <- sapply(cases_per_school$geo_query_str, function(x) from_non_english[[ x ]][ 1 ]) %>% as.integer

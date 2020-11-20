@@ -131,7 +131,10 @@ ui <- bootstrapPage(
                                      DTOutput('school_summary_data_dt'),
                                      br(),
                                      'Adapted from data published by Government of Ontario: ', 
-                                     a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools', 'Summary of cases in schools')
+                                     a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools', 'Summary of cases in schools'),
+                                     br(), 
+                                     h3('Data dictionary'),
+                                     DTOutput('school_summary_data_dictionary_dt')
                             ),
                             tabPanel('Schools with active cases and school demographic data', 
                                      h3('Schools with active cases and school demographic data'),
@@ -143,7 +146,11 @@ ui <- bootstrapPage(
                                      'Adapted from data published by Government of Ontario: ', 
                                      a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools', 'Schools with active COVID-19 cases'),
                                      ', ',
-                                     a(href = 'https://data.ontario.ca/dataset/school-information-and-student-demographics', 'School information and student demographics')
+                                     a(href = 'https://data.ontario.ca/dataset/school-information-and-student-demographics', 'School information and student demographics'),
+                                     br(), 
+                                     h3('Data dictionary'),
+                                     DTOutput('school_cases_demo_data_dictionary_dt')
+                                     
                             )
                         )
                ),
@@ -243,48 +250,48 @@ ui <- bootstrapPage(
                # ),
                
                # tab: Risk assessment ------------------------------------------
-               tabPanel('Risk assessment',
-                        
-                        # h3('Reducing COVID-19 Transmission Upon School Reopening: Identifying High-Risk Neighbourhoods'),
-                        # ('Prepared by: Toronto Public Health'),
-                        # br(),
-                        # ('Prepared date: August 20, 2020'),
-                        # br(),
-                        # ('Prepared for the Toronto Catholic District School Board (TCDSB)'),
-                        # br(),
-                        # h3('Background'),
-                        # p('Toronto elementary schools are set to re-open for in-person learning in September. This document outlines a method that can be used to inform decisions about areas of the city to prioritize for mitigation strategies in order to reduce the spread of COVID-19. Neighbourhood-level data is used to produce a risk score based on case information in combination with select socioeconomic indicators. This analysis can be used in conjunction with other considerations when deciding about COVID-19 risk mitigation strategies in schools. Since the evidence around COVID-19 is ever-changing, our method allows for flexibility and continuous updates based on available data.'),
-                        # h3('Methods'),
-                        # p('A composite index score was generated in order to rank neighbourhoods in terms of their risk for increased COVID-19 transmission when schools reopen.'),
-                        # h4('Rankings were generated using the following steps:'),
-                        # tags$ol(
-                        #     tags$li('For each neighbourhood with TCDSB schools, confirmed/probable COVID-19 case counts were obtained from May 29 (the date where widespread testing was announced in the province) to Aug 16, 2020 (most recent available data). Cases associated with outbreaks in long-term care or retirement homes among individuals aged 65+ were excluded from case rates, as they represent institutionalized individuals. Rates proportionate to neighbourhood population size were used. Select sociodemographic indicators were obtained using Census 2016 data (Table 1).'),
-                        #     tags$li('To generate the risk score, each variable was assigned a weight. Case rates were assigned a higher weight than other variables. Effects of each socioeconomic indicator on COVID-19 transmission are difficult to tease out and therefore they have been assigned the same weight.'),
-                        #     tags$li('Indicators within each neighbourhood were then multiplied by the assigned weight to generate a composite score. All neighbourhood scores (unique on neighbourhood level) were then subdivided into quintiles based on percentile score; higher quintiles indicate higher-risk.'),
-                        #     tags$li('sociodemographic indicators were available at the neighbourhood level only, all schools within the neighbourhood are considered of similar risk.')
-                        # ),
-                        # h4('Table 1: Variables used to generate neighbourhood risk scores'),
-                        # 
-                        # # variables_details_dt ---------------------------------
-                        # div(DTOutput('variables_details_dt'), style = 'font-size: small; width: 100%'),
-                        # 
-                        # h3('Results'),
-                        # p('Note: An initial list for elementary schools was produced on August 17, 2020 that included all case dates and without the additional exclusions indicated in Step 1. Tab B shows the revised table. The "Comparison" tab illustrates the differences between the two.'),
-                        
-                        # # risk_assessment_elementary_dt ------------------------
-                        # h4('Elementary School Risk Assessment'),
-                        # DTOutput('risk_assessment_elementary_dt'),
-                        # 
-                        # # risk_assessment_secondary_dt -------------------------
-                        # h4('Secondary School Risk Assessment'),
-                        # DTOutput('risk_assessment_secondary_dt')
-                        
-                        # risk_assessment_secondary_dt -------------------------
-                        h3('Neighborhood Risk Assessment'),
-                        br(),
-                        DTOutput('risk_assessment_neighborhood_dt')
-                        
-               ),
+               # tabPanel('Risk assessment',
+               # 
+               #          # h3('Reducing COVID-19 Transmission Upon School Reopening: Identifying High-Risk Neighbourhoods'),
+               #          # ('Prepared by: Toronto Public Health'),
+               #          # br(),
+               #          # ('Prepared date: August 20, 2020'),
+               #          # br(),
+               #          # ('Prepared for the Toronto Catholic District School Board (TCDSB)'),
+               #          # br(),
+               #          # h3('Background'),
+               #          # p('Toronto elementary schools are set to re-open for in-person learning in September. This document outlines a method that can be used to inform decisions about areas of the city to prioritize for mitigation strategies in order to reduce the spread of COVID-19. Neighbourhood-level data is used to produce a risk score based on case information in combination with select socioeconomic indicators. This analysis can be used in conjunction with other considerations when deciding about COVID-19 risk mitigation strategies in schools. Since the evidence around COVID-19 is ever-changing, our method allows for flexibility and continuous updates based on available data.'),
+               #          # h3('Methods'),
+               #          # p('A composite index score was generated in order to rank neighbourhoods in terms of their risk for increased COVID-19 transmission when schools reopen.'),
+               #          # h4('Rankings were generated using the following steps:'),
+               #          # tags$ol(
+               #          #     tags$li('For each neighbourhood with TCDSB schools, confirmed/probable COVID-19 case counts were obtained from May 29 (the date where widespread testing was announced in the province) to Aug 16, 2020 (most recent available data). Cases associated with outbreaks in long-term care or retirement homes among individuals aged 65+ were excluded from case rates, as they represent institutionalized individuals. Rates proportionate to neighbourhood population size were used. Select sociodemographic indicators were obtained using Census 2016 data (Table 1).'),
+               #          #     tags$li('To generate the risk score, each variable was assigned a weight. Case rates were assigned a higher weight than other variables. Effects of each socioeconomic indicator on COVID-19 transmission are difficult to tease out and therefore they have been assigned the same weight.'),
+               #          #     tags$li('Indicators within each neighbourhood were then multiplied by the assigned weight to generate a composite score. All neighbourhood scores (unique on neighbourhood level) were then subdivided into quintiles based on percentile score; higher quintiles indicate higher-risk.'),
+               #          #     tags$li('sociodemographic indicators were available at the neighbourhood level only, all schools within the neighbourhood are considered of similar risk.')
+               #          # ),
+               #          # h4('Table 1: Variables used to generate neighbourhood risk scores'),
+               #          #
+               #          # # variables_details_dt ---------------------------------
+               #          # div(DTOutput('variables_details_dt'), style = 'font-size: small; width: 100%'),
+               #          #
+               #          # h3('Results'),
+               #          # p('Note: An initial list for elementary schools was produced on August 17, 2020 that included all case dates and without the additional exclusions indicated in Step 1. Tab B shows the revised table. The "Comparison" tab illustrates the differences between the two.'),
+               # 
+               #          # # risk_assessment_elementary_dt ------------------------
+               #          # h4('Elementary School Risk Assessment'),
+               #          # DTOutput('risk_assessment_elementary_dt'),
+               #          #
+               #          # # risk_assessment_secondary_dt -------------------------
+               #          # h4('Secondary School Risk Assessment'),
+               #          # DTOutput('risk_assessment_secondary_dt')
+               # 
+               #          # risk_assessment_secondary_dt -------------------------
+               #          h3('Neighborhood Risk Assessment'),
+               #          br(),
+               #          DTOutput('risk_assessment_neighborhood_dt')
+               # 
+               # ),
                
                # tab: About this site ------------------------------------------
                tabPanel('About This Site',
@@ -459,7 +466,7 @@ server <- function(input, output) {
                                                      weight = 1, 
                                                      color = '#d62728',
                                                      fillOpacity = 0.1, 
-                                                     label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>Students receiving special education services: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Parents have some university education: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/></div>', 
+                                                     label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Parents have some university education: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/></div>', 
                                                                      cases_per_school$school_name, 
                                                                      cases_per_school$city, 
                                                                      cases_per_school$school_level, 
@@ -467,7 +474,7 @@ server <- function(input, output) {
                                                                      cases_per_school$school_language, 
                                                                      cases_per_school$school_enrolment, 
                                                                      cases_per_school$low_income, 
-                                                                     cases_per_school$special_education, 
+                                                                     # cases_per_school$special_education, 
                                                                      cases_per_school$non_english, 
                                                                      cases_per_school$from_non_english, 
                                                                      cases_per_school$non_french, 
@@ -681,56 +688,12 @@ server <- function(input, output) {
         fig
     })
     
-    # download_csv_button_1 ----------------------------------------------------
-    output$download_csv_button_1 <- downloadHandler(
-        filename = function() {
-            paste('schoolcovidsummary_', format(now(), '%Y%m%d'), '.csv', sep='')
-        },
-        content = function(file) {
-            write.csv(covid19_schools_summary, file)
-        }
-    )
-    
     # school_summary_data_dt ---------------------------------------------------
     output$school_summary_data_dt <- renderDT({
         df <- covid19_schools_summary
         idx <- order(df$reported_date, decreasing = TRUE)
         df <- df[ idx, ]
         colnames(df) <- str_replace_all(colnames(df), '_', ' ')
-        colnames(df) <- str_to_title(colnames(df))
-        datatable(
-            df,
-            options = list(
-                paging = TRUE,
-                searching = TRUE,
-                fixedColumns = TRUE,
-                autoWidth = TRUE,
-                ordering = TRUE,
-                dom = 'Bfrtip'
-            ),
-            rownames = FALSE,
-            class = 'display'
-        )
-    })
-    
-    # download_csv_button_2 ----------------------------------------------------
-    output$download_csv_button_2 <- downloadHandler(
-        filename = function() {
-            paste('schoolsactivecovidwithdemographics_', format(now(), '%Y%m%d'), '.csv', sep='')
-        },
-        content = function(file) {
-            write.csv(covid19_schools_active_with_demographics, file)
-        }
-    )
-    
-    # school_cases_demo_data_dt ------------------------------------------------
-    output$school_cases_demo_data_dt <- renderDT({
-        df <- covid19_schools_active_with_demographics
-        idx <- order(df$reported_date, decreasing = TRUE)
-        df <- df[ idx, ]
-        df$board.name <- NULL
-        df$school.name <- NULL
-        colnames(df) <- str_replace_all(colnames(df), '_|\\.', ' ')
         colnames(df) <- str_to_title(colnames(df))
         datatable(
             df,
@@ -807,6 +770,39 @@ server <- function(input, output) {
         )
     })
     
+    # download_csv_button_1 ----------------------------------------------------
+    output$download_csv_button_1 <- downloadHandler(
+        filename = function() {
+            paste('schoolcovidsummary_', format(now(), '%Y%m%d'), '.csv', sep='')
+        },
+        content = function(file) {
+            write.csv(covid19_schools_summary, file)
+        }
+    )
+    # school_cases_demo_data_dt ------------------------------------------------
+    output$school_cases_demo_data_dt <- renderDT({
+        df <- covid19_schools_active_with_demographics
+        idx <- order(df$reported_date, decreasing = TRUE)
+        df <- df[ idx, ]
+        df$board.name <- NULL
+        df$school.name <- NULL
+        colnames(df) <- str_replace_all(colnames(df), '_|\\.', ' ')
+        colnames(df) <- str_to_title(colnames(df))
+        datatable(
+            df,
+            options = list(
+                paging = TRUE,
+                searching = TRUE,
+                fixedColumns = TRUE,
+                autoWidth = TRUE,
+                ordering = TRUE,
+                dom = 'Bfrtip'
+            ),
+            rownames = FALSE,
+            class = 'display'
+        )
+    })
+    
     # school_cases_demo_data_dictionary_dt -------------------------------------
     output$school_cases_demo_data_dictionary_dt <- renderDT({
         field <- c('Collected Date', 'Reported Date', 'School Board', 'School', 
@@ -821,10 +817,10 @@ server <- function(input, output) {
                    'Percentage Of Students Who Are New To Canada From A Non English Speaking Country',
                    'Percentage Of Students Who Are New To Canada From A Non French Speaking Country', 
                    'Percentage Of Students Identified As Gifted', 
-                   'Percentage Of Students Receiving Special Education Services', 
+                   # 'Percentage Of Students Receiving Special Education Services', 
                    'Percentage Of School Aged Children Who Live In Low Income Households', 
                    'Percentage Of Students Whose Parents Have Some University Education')
-        description <- character(34)
+        description <- character(33)
         df <- data.frame(field, description)
         datatable(
             df,
@@ -840,6 +836,16 @@ server <- function(input, output) {
             class = 'display'
         )
     })
+    
+    # download_csv_button_2 ----------------------------------------------------
+    output$download_csv_button_2 <- downloadHandler(
+        filename = function() {
+            paste('schoolsactivecovidwithdemographics_', format(now(), '%Y%m%d'), '.csv', sep='')
+        },
+        content = function(file) {
+            write.csv(covid19_schools_active_with_demographics, file)
+        }
+    )
     
     # risk_assessment_elementary_dt --------------------------------------------
     output$risk_assessment_elementary_dt <- renderDT({
