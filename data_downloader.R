@@ -69,7 +69,7 @@ debug <- FALSE
 #' 
 clean_all_names <- function(dirty_names) {
 	
-	# clean up 1
+	# clean up 1: fix iconv transliterated characters and remove extraneous characters
 	clean_names <- str_replace_all(dirty_names, '[0-9]+', ' ') %>%
 		iconv(., 'ASCII//TRANSLIT', sub = 'byte') %>%
 		tolower %>% 
@@ -89,6 +89,7 @@ clean_all_names <- function(dirty_names) {
 		str_replace_all(., '<c3><ae>', ' ') %>%
 		str_replace_all(., '<c3><a2><e2><82><ac><e2><84><a2>', '\'') %>%
 		str_replace_all(., '<c3><82>', ' ') %>%
+		str_replace_all(., '<c3><a2>', 'a') %>%
 		str_replace_all(., '<c3><83><c2><a1>', 'a') %>%
 		str_replace_all(., '<c3><83><c2><a2>', 'a') %>%
 		str_replace_all(., '<c3><a1>', 'a') %>%
@@ -124,6 +125,7 @@ clean_all_names <- function(dirty_names) {
 				   '<c3><a9>l<c3><a9>mentaire', 
 				   'aaec\'s',
 				   'acad<c3><a9>mie',
+				   'academie',
 				   'academy', 
 				   'academy-', 
 				   'adolescent', 
@@ -132,7 +134,7 @@ clean_all_names <- function(dirty_names) {
 				   # 'alternate',
 				   # 'alternative',
 				   # 'alternatives', 
-				   ' and\\s?',
+				   ' and ',
 				   ' at ',
 				   'authority',
 				   'c<c3><89>p',
@@ -153,6 +155,7 @@ clean_all_names <- function(dirty_names) {
 				   'c vi\\s?',
 				   'ecole',
 				   '^eec ',
+				   '^eep ',
 				   '^eic ',
 				   '^e elem c ',
 				   'education', 
@@ -186,6 +189,7 @@ clean_all_names <- function(dirty_names) {
 				   ' ps\\s?', 
 				   'pssb', 
 				   'pte',
+				   'pubic', 
 				   'public', 
 				   'publique',
 				   'publiques', 
@@ -221,14 +225,19 @@ clean_all_names <- function(dirty_names) {
 	clean_names <- str_replace_all(clean_names, 'banting memorial district', 'banting memorial')
 	clean_names <- str_replace_all(clean_names, 'blessed margherita of citta castello', 'blessed margherita of citta di castello')
 	clean_names <- str_replace_all(clean_names, '^city calc$', 'calc')
+	clean_names <- str_replace_all(clean_names, '^clifton drive$', 'clifton')
 	clean_names <- str_replace_all(clean_names, '^de hearst$', 'hearst')
+	clean_names <- str_replace_all(clean_names, 'provincial demonstration s', 'e c drury trillium demonstration')
 	clean_names <- str_replace_all(clean_names, 'dunrankin drive', 'dunrankin')
+	clean_names <- str_replace_all(clean_names, 'father henri nouwen', 'father henri j m nouwen')
 	clean_names <- str_replace_all(clean_names, 'fisher park summit as', 'fisher park summit alternative')
 	clean_names <- str_replace_all(clean_names, 'frank panabaker north ancaster', 'frank panabaker north')
 	clean_names <- str_replace_all(clean_names, 'jean vanier formerly known as our lady queen of world', 'our lady queen of world ca')
 	clean_names <- str_replace_all(clean_names, 'jean vanier renamed st joan of arc', 'our lady queen of world ca')
 	clean_names <- str_replace_all(clean_names, 'john clarke richardson', 'j clarke richardson')
 	clean_names <- str_replace_all(clean_names, 'mcnaughton avenue', 'mcnaughton ave')
+	clean_names <- str_replace_all(clean_names, 'r h lagerquiste', 'robert h lagerquist')
+	clean_names <- str_replace_all(clean_names, 'l\' st charles garnier', 'esc st charles garnier')
 	clean_names <- str_replace_all(clean_names, '^msgr fraser$', 'msgr fraser midland')
 	clean_names <- str_replace_all(clean_names, '^msgr fraser isabella$', 'msgr fraser isabella campus')
 	clean_names <- str_replace_all(clean_names, '^msgr fraser norfinch$', 'msgr fraser norfinch campus')
