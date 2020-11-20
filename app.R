@@ -108,6 +108,8 @@ ui <- bootstrapPage(
                # TAB: Overview and Search --------------------------------------
                tabPanel('Overview and Search',
                         # cumulative_plot --------------------------------------
+                        h3('Cumulative Case Chart'),
+                        p('Shows the total number of cumulative school-related cases in Ontario and disaggregated to show cumulative school-related student cases, cumulative school-related staff cases, and unidentified cases. "Unidentified cases" is used by the Ministry of Education to refer to the following: "In some instances, the type of case has not been identified as either student/child or staff/provider/partner due to privacy considerations. These "individuals" only include unidentified students/children or staff/providers/partners and not visitors or parents. These cases will be tracked as "individuals" but not included in the "student/child" or "staff/provider" columns.'),
                         plotlyOutput('cumulative_plot', width = '100%'),
                         hr(),
                         # daily_summary_2_dt -----------------------------------
