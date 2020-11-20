@@ -137,6 +137,7 @@ ui <- bootstrapPage(
                                      'Adapted from data published by Government of Ontario: ', 
                                      a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools', 'Summary of cases in schools'),
                                      br(), 
+                                     hr(),
                                      h3('Data dictionary'),
                                      DTOutput('school_summary_data_dictionary_dt')
                             ),
@@ -154,36 +155,13 @@ ui <- bootstrapPage(
                                      ', ',
                                      a(href = 'https://data.ontario.ca/dataset/school-information-and-student-demographics', 'School information and student demographics'),
                                      br(), 
+                                     hr(),
                                      h3('Data dictionary'),
                                      DTOutput('school_cases_demo_data_dictionary_dt')
                                      
                             )
                         )
                ),
-               
-               # # TAB: Data Dictionary and Data Sources -----------------------
-               # tabPanel('Data Dictionary and Data Sources',
-               #          tabsetPanel(
-               #              tabPanel('Summary of cases in schools', 
-               #                       h3('Summary of cases in schools'),
-               #                       br(), 
-               #                       DTOutput('school_summary_data_dictionary_dt'),
-               #                       br(),
-               #                       'Adapted from data published by Government of Ontario: ', 
-               #                       a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools/resource/7fbdbb48-d074-45d9-93cb-f7de58950418', 'Summary of cases in schools')
-               #              ),
-               #              tabPanel('Schools with active cases and school demographic data', 
-               #                       h3('Schools with active cases and school demographic data'),
-               #                       br(), 
-               #                       DTOutput('school_cases_demo_data_dictionary_dt'),
-               #                       br(),
-               #                       'Adapted from data published by Government of Ontario: ', 
-               #                       a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools/resource/8b6d22e2-7065-4b0f-966f-02640be366f2', 'Schools with active COVID-19 cases'),
-               #                       ', ',
-               #                       a(href = 'https://data.ontario.ca/dataset/school-information-and-student-demographics/resource/602a5186-67f5-4faf-94f3-7c61ffc4719a', 'School information and student demographics')
-               #              )
-               #          )
-               # ),
                
                # TAB: Data Sources and Source Code -----------------------------
                tabPanel('Data Sources and Source Code',
@@ -422,6 +400,7 @@ ui <- bootstrapPage(
                         br(),
                         h4('Cite the COVID-19 School Dashboard as:'),
                         p('Srivastava, P. (2020). ', tags$em('COVID-19 school dashboard (1.0 Nov 2020). '), '[Web application]. ', a(href = 'http://covid19schooldashboard.com/', 'http://covid19schooldashboard.com/')),
+                        br(),
                         br(),
                         a(href = 'https://www.edu.uwo.ca', tags$img(src = 'uwo_logo.png', height = '58', width = '243')),
                         br(),
