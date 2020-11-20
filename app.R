@@ -310,17 +310,6 @@ ui <- bootstrapPage(
                         p('The numbers of cases are extracted from official data sources and are also related to the changing testing scenario in Ontario. This can mean that as the frequency of testing increases or decreases, threshold of symptoms is widened or restricted, and backlog of results clears or increases, amongst other factors, the number of new cases may show spikes or dips. There are also known lags in data reported in the Ministry of Education dataset, which may result in real-time discrepancies.'),
                         p('Finally, Ontario instituted a phased re-opening of schools. Earlier school case data reflect a partial reopening of the system. Nearly all schools were meant to be re-opened by 21 September 2020.'),
                         br(),
-                        h4('Coming soon'),
-                        p('The COVID-19 School Dashboard will soon add more indicators. Version 1.0 of the site has been published to balance the need for expedience in view of the need for timely public information given the effects of COVID-19 on education.'),
-                        p('Planned indicators and basic functions in the short-term include:'),
-                        tags$ul(
-                            tags$li('Recent cases (data available as of 1 October) '),
-                            tags$li('Cumulative: % of schools per board affected with at least one case'),
-                            tags$li('Number and % of schools with multiple cases '),
-                            tags$li('Lists of schools with active cases. Currently can be extracted from the Data table.')
-                        ),
-                        p('We invite users to suggest further indicators for integration. Further web optimization and dynamic display features are also planned.'),
-                        br(),
                         h3('CONTEXT'),
                         p('Pandemic-related school closures in Ontario affected over 2 million elementary and secondary school students. The province’s first school closure announcement was issued on 12 March 2020 for an initial period from 14 March to 4 April 2020. This compelled all publicly funded elementary and secondary schools to close. Public school closures were extended another three times – first until 4 May, then 31 May, and finally until the end of June 2020.'),
                         p('Phased reopening of publicly funded schools in the province began on 8 September 2020 and continued until 21 September 2020, by which time all schools should have opened.'),
@@ -393,7 +382,8 @@ ui <- bootstrapPage(
                         p('Presents raw data of cases in schools. Data table can be manipulated in ascending or descending order by variable of interest. Table can be downloaded as a .CSV file for independent analysis.'),
                         p('Variables included: collected date; reported date; current schools with cases; current schools closed; current total number of schools; new (total school-related cases; student; staff; unidentified); recent (total school-related cases; student; staff; unidentified); past (total school-related cases; student; staff; unidentified); cumulative (total school-related cases; student; staff; unidentified).'),
                         p('Recent and past case data available as from 1 October 2020. See ', a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools/resource/7fbdbb48-d074-45d9-93cb-f7de58950418', 'Summary of cases in schools')),
-                        p('Schools with active cases and school demographic data'),
+                        br(),
+                        h5('Schools with active cases and school demographic data'),
                         p('Use the search function to see if a specific school, board, or municipality has been affected.'),
                         br(),
                         h5('Data Dictionary'),
@@ -422,7 +412,18 @@ ui <- bootstrapPage(
                         br(),
                         h4('Cite the COVID-19 School Dashboard as:'),
                         p('Srivastava, P. (2020). ', tags$em('COVID-19 school dashboard (1.0 Nov 2020). '), '[Web application]. ', a(href = 'http://covid19schooldashboard.com/', 'http://covid19schooldashboard.com/')),
-                        br(), 
+                        br(),
+                        h3('COMING SOON'),
+                        p('The COVID-19 School Dashboard will soon add more indicators. Version 1.0 of the site has been published to balance the need for expedience in view of the need for timely public information given the effects of COVID-19 on education.'),
+                        p('Planned indicators and basic functions in the short-term include:'),
+                        tags$ul(
+                            tags$li('Recent cases (data available as of 1 October) '),
+                            tags$li('Cumulative: % of schools per board affected with at least one case'),
+                            tags$li('Number and % of schools with multiple cases '),
+                            tags$li('Lists of schools with active cases. Currently can be extracted from the Data table.')
+                        ),
+                        p('We invite users to suggest further indicators for integration. Further web optimization and dynamic display features are also planned.'),
+                        br(),
                         a(href = 'https://www.edu.uwo.ca', tags$img(src = 'uwo_logo.png', height = '58', width = '243')),
                         br(),
                         br()
@@ -818,7 +819,20 @@ server <- function(input, output) {
                    # 'Percentage Of Students Receiving Special Education Services', 
                    'Percentage Of School Aged Children Who Live In Low Income Households', 
                    'Percentage Of Students Whose Parents Have Some University Education')
-        description <- character(33)
+        description <- c('Collected Date', 'Reported Date', 'School Board', 'School', 
+                         'Municipality', NA, NA, NA, NA,
+                         'Board Number', 'Board Name', 'Board Type', 'School Number', 
+                         'School Name', 'School Type', 'School Special Condition Code', 
+                         'School Level', 'School Language', 'Grade Range', 'Street', 'City',
+                         'Province', 'Postal Code', 'Enrolment', 'Latitude', 'Longitude', 
+                         'Percentage Of Students Whose First Language Is Not English', 
+                         'Percentage Of Students Whose First Language Is Not French', 
+                         'Percentage Of Students Who Are New To Canada From A Non English Speaking Country',
+                         'Percentage Of Students Who Are New To Canada From A Non French Speaking Country', 
+                         'Percentage Of Students Identified As Gifted', 
+                         # 'Percentage Of Students Receiving Special Education Services', 
+                         'Percentage Of School Aged Children Who Live In Low Income Households', 
+                         'Percentage Of Students Whose Parents Have Some University Education')
         df <- data.frame(field, description)
         datatable(
             df,
