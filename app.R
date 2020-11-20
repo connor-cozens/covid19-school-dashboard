@@ -109,7 +109,6 @@ ui <- bootstrapPage(
                tabPanel('Overview and Search',
                         # cumulative_plot --------------------------------------
                         h3('Cumulative Case Chart'),
-                        p('Shows the total number of cumulative school-related cases in Ontario and disaggregated to show cumulative school-related student cases, cumulative school-related staff cases, and unidentified cases. "Unidentified cases" is used by the Ministry of Education to refer to the following: "In some instances, the type of case has not been identified as either student/child or staff/provider/partner due to privacy considerations. These "individuals" only include unidentified students/children or staff/providers/partners and not visitors or parents. These cases will be tracked as "individuals" but not included in the "student/child" or "staff/provider" columns.'),
                         plotlyOutput('cumulative_plot', width = '100%'),
                         hr(),
                         # daily_summary_2_dt -----------------------------------
@@ -365,7 +364,7 @@ ui <- bootstrapPage(
                         # br(),
                         h4('Overview and Search Tab'),
                         h5(('Cumulative Case Chart')),
-                        p('Shows the number of cumulative school-related cases in Ontario. '),
+                        p('Shows the total number of cumulative school-related cases in Ontario and disaggregated to show cumulative school-related student cases, cumulative school-related staff cases, and unidentified cases. "Unidentified cases" is used by the Ministry of Education to refer to the following: "In some instances, the type of case has not been identified as either student/child or staff/provider/partner due to privacy considerations. These "individuals" only include unidentified students/children or staff/providers/partners and not visitors or parents. These cases will be tracked as "individuals" but not included in the "student/child" or "staff/provider" columns.'),
                         br(),
                         h5(('Tools for added functionality')),
                         p('Hover over the legend to access tools for added functionality: download graph as .PNG image file, zoom, pan, box select, lasso select, zoom in, zoom out, autoscale, reseat axes, toggle spike lines, show closest data on hover, compare data on hover.'),
@@ -399,6 +398,17 @@ ui <- bootstrapPage(
                         h5(('Source code')),
                         p('Source code for this site can be found ', a(href = 'https://gitlab.com/br00t/ontario-covid19-dashboard', 'here', target = "_blank")),
                         br(),
+                        h3('COMING SOON'),
+                        p('The COVID-19 School Dashboard will soon add more indicators. Version 1.0 of the site has been published to balance the need for expedience in view of the need for timely public information given the effects of COVID-19 on education.'),
+                        p('Planned indicators and basic functions in the short-term include:'),
+                        tags$ul(
+                            tags$li('Recent cases (data available as of 1 October) '),
+                            tags$li('Cumulative: % of schools per board affected with at least one case'),
+                            tags$li('Number and % of schools with multiple cases '),
+                            tags$li('Lists of schools with active cases. Currently can be extracted from the Data table.')
+                        ),
+                        p('We invite users to suggest further indicators for integration. Further web optimization and dynamic display features are also planned.'),
+                        br(),
                         h3('AUTHORSHIP, ATTRIBUTIONS, CITATION'),
                         p(a(href = 'https://www.edu.uwo.ca/faculty-profiles/prachi-srivastava.html', 'Dr. Prachi Srivastava'), ', Associate Professor, Faculty of Education, University of Western Ontario, Canada.'),
                         p(a(href = 'mailto:prachi.srivastava@uwo.ca', 'Prachi.srivastava@uwo.ca')),
@@ -412,17 +422,6 @@ ui <- bootstrapPage(
                         br(),
                         h4('Cite the COVID-19 School Dashboard as:'),
                         p('Srivastava, P. (2020). ', tags$em('COVID-19 school dashboard (1.0 Nov 2020). '), '[Web application]. ', a(href = 'http://covid19schooldashboard.com/', 'http://covid19schooldashboard.com/')),
-                        br(),
-                        h3('COMING SOON'),
-                        p('The COVID-19 School Dashboard will soon add more indicators. Version 1.0 of the site has been published to balance the need for expedience in view of the need for timely public information given the effects of COVID-19 on education.'),
-                        p('Planned indicators and basic functions in the short-term include:'),
-                        tags$ul(
-                            tags$li('Recent cases (data available as of 1 October) '),
-                            tags$li('Cumulative: % of schools per board affected with at least one case'),
-                            tags$li('Number and % of schools with multiple cases '),
-                            tags$li('Lists of schools with active cases. Currently can be extracted from the Data table.')
-                        ),
-                        p('We invite users to suggest further indicators for integration. Further web optimization and dynamic display features are also planned.'),
                         br(),
                         a(href = 'https://www.edu.uwo.ca', tags$img(src = 'uwo_logo.png', height = '58', width = '243')),
                         br(),
