@@ -52,6 +52,7 @@ get_summary_table <- function() {
     df$Percentage <- NA
     df[ 2, 'Percentage' ] <- round(df[ 2, 'Count' ] / schools_count, 4) * 1e2
     df[ 3, 'Percentage' ] <- round(df[ 3, 'Count' ] / schools_count, 4) * 1e2
+    df <- df[ c(1, 4, 3, 2), ]
     df
 }
 
@@ -65,7 +66,7 @@ ui <- bootstrapPage(
                'COVID-19 School Dashboard', 
                id = 'nav',
                
-               # tab: COVID-19 Mapper ------------------------------------------
+               # TAB: COVID-19 Mapper ------------------------------------------
                tabPanel('Mapper - Affected Ontario Schools',
                         div(class='outer',
                             
@@ -104,23 +105,23 @@ ui <- bootstrapPage(
                         
                ),
                
-               # tab: Overview and Search --------------------------------------
+               # TAB: Overview and Search --------------------------------------
                tabPanel('Overview and Search',
                         # cumulative_plot --------------------------------------
                         plotlyOutput('cumulative_plot', width = '100%'),
                         hr(),
                         # daily_summary_2_dt -----------------------------------
-                        h3('Daily Summary', align = 'right'),
+                        h3('Daily Summary', align = 'left'),
                         div(tableOutput('daily_summary_2_dt'), style = 'font-size: small; width: 100%'),
                         hr(),
                         # school_details_dt ------------------------------------
-                        h3('Search Function and Table', align = 'right'),
-                        div('Search schools, boards, municipalities for confirmed cases of COVID-19.', width = '100%', align = 'right'),
+                        h3('Search Function and Table', align = 'left'),
+                        div('Search schools, boards, municipalities for confirmed cases of COVID-19.', width = '100%', align = 'left'),
                         br(),
                         div(DTOutput('school_details_dt'), style = 'font-size: small; width: 100%')
                ),
                
-               # tab: Data Tables ----------------------------------------------
+               # TAB: Data Tables ----------------------------------------------
                tabPanel('Data Tables',
                         tabsetPanel(
                             tabPanel('Summary of cases in schools', 
@@ -155,7 +156,7 @@ ui <- bootstrapPage(
                         )
                ),
                
-               # # tab: Data Dictionary and Data Sources -----------------------
+               # # TAB: Data Dictionary and Data Sources -----------------------
                # tabPanel('Data Dictionary and Data Sources',
                #          tabsetPanel(
                #              tabPanel('Summary of cases in schools', 
@@ -179,35 +180,23 @@ ui <- bootstrapPage(
                #          )
                # ),
                
-               # tab: Data Sources and Source Code -----------------------------
+               # TAB: Data Sources and Source Code -----------------------------
                tabPanel('Data Sources and Source Code',
                         h3('Data Sources'),
                         tags$ul(
-                            tags$li(a(href = 'https://www.ontario.ca/page/covid-19-cases-schools-and-child-care-centres', 'COVID-19 cases in schools and child care centres', target = '_blank')),
                             tags$li(a(href = 'https://data.ontario.ca/dataset?keywords_en=COVID-19', 'All COVID-19 datasets', target = '_blank')),
+                            tags$li(a(href = 'https://www.ontario.ca/page/covid-19-cases-schools-and-child-care-centres', 'COVID-19 cases in schools and child care centres', target = '_blank')),
                             tags$li(a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools', 'Schools COVID-19 data overview', target = '_blank')),
-                            tags$li(a(href = 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/7fbdbb48-d074-45d9-93cb-f7de58950418/download/schoolcovidsummary.csv', 'Summary of cases in schools dataset (.csv)', target = '_blank')),
-                            tags$li(a(href = 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/8b6d22e2-7065-4b0f-966f-02640be366f2/download/schoolsactivecovid.csv', 'Schools with active COVID-19 cases dataset (.csv)', target = '_blank')),
-                            # tags$li(a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-licensed-child-care-settings', 'Licensed child care settings COVID-19 data ')),
-                            # tags$li(a(href = 'https://data.ontario.ca/dataset/5bf54477-6147-413f-bab0-312f06fcb388/resource/eee282d3-01e6-43ac-9159-4ba694757aea/download/lccactivecovid.csv', 'Licensed child care centres and agencies with active COVID-19 cases')),
-                            # tags$li(a(href = 'https://data.ontario.ca/dataset/confirmed-positive-cases-of-covid-19-in-ontario', 'Confirmed positive cases of COVID-19 in Ontario ')),
-                            # tags$li(a(href = 'https://data.ontario.ca/dataset/5bf54477-6147-413f-bab0-312f06fcb388/resource/eee282d3-01e6-43ac-9159-4ba694757aea/download/lccactivecovid.csv', 'Confirmed positive cases of COVID19 in Ontario')),
-                            # tags$li(a(href = 'https://data.ontario.ca/dataset/confirmed-positive-cases-of-covid-19-in-ontario', '...')),
-                            # tags$li(a(href = 'https://data.ontario.ca/dataset/f4112442-bdc8-45d2-be3c-12efae72fb27/resource/455fd63b-603d-4608-8216-7d8647f43350/download/conposcovidloc.csv', '...')),
-                            # tags$li(a(href = 'https://data.ontario.ca/dataset/status-of-covid-19-cases-in-ontario', '...')),
-                            # tags$li(a(href = 'https://data.ontario.ca/dataset/f4f86e54-872d-43f8-8a86-3892fd3cb5e6/resource/ed270bb8-340b-41f9-a7c6-e8ef587e6d11/download/covidtesting.csv', '...')),
-                            # tags$li(a(href = 'https://data.ontario.ca/dataset/confirmed-positive-cases-of-covid-19-in-ontario', '...')),
-                            # tags$li(a(href = 'https://data.ontario.ca/dataset/f4112442-bdc8-45d2-be3c-12efae72fb27/resource/4f39b02b-47fe-4e66-95b6-e6da879c6910/download/conposcovidloc.geojson', '...')),
-                            # tags$li(a(href = 'https://data.ontario.ca/dataset/f4112442-bdc8-45d2-be3c-12efae72fb27/resource/455fd63b-603d-4608-8216-7d8647f43350/download/conposcovidloc.csv', '...'))
+                            tags$li(a(href = 'https://data.ontario.ca/dataset/d85f68c5-fcb0-4b4d-aec5-3047db47dcd5/resource/602a5186-67f5-4faf-94f3-7c61ffc4719a/download/new_sif_data_table_2018_2019prelim_en_august.xlsx', ' School information and student demographics dataset (.xlsx)', target = '_blank')),
                             tags$li(a(href = 'https://data.ontario.ca/dataset/school-information-and-student-demographics', ' School information and student demographics overview', target = '_blank')),
-                            tags$li(a(href = 'https://data.ontario.ca/dataset/d85f68c5-fcb0-4b4d-aec5-3047db47dcd5/resource/602a5186-67f5-4faf-94f3-7c61ffc4719a/download/new_sif_data_table_2018_2019prelim_en_august.xlsx', ' School information and student demographics dataset (.xlsx)', target = '_blank'))
-                            # tags$li(a(href = '...', '...'))
+                            tags$li(a(href = 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/8b6d22e2-7065-4b0f-966f-02640be366f2/download/schoolsactivecovid.csv', 'Schools with active COVID-19 cases dataset (.csv)', target = '_blank')),
+                            tags$li(a(href = 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/7fbdbb48-d074-45d9-93cb-f7de58950418/download/schoolcovidsummary.csv', 'Summary of cases in schools dataset (.csv)', target = '_blank'))
                         ),
                         h3('Source Code'),
                         p('Source code for this site can be found ', a(href = 'https://gitlab.com/br00t/ontario-covid19-dashboard', 'here', target = '_blank'))
                ),
                
-               # tab: Plots ----------------------------------------------------
+               # TAB: Plots ----------------------------------------------------
                # tabPanel('Plots',
                #          
                #          sidebarLayout(
@@ -249,7 +238,7 @@ ui <- bootstrapPage(
                #          )
                # ),
                
-               # tab: Risk assessment ------------------------------------------
+               # TAB: Risk assessment ------------------------------------------
                # tabPanel('Risk assessment',
                # 
                #          # h3('Reducing COVID-19 Transmission Upon School Reopening: Identifying High-Risk Neighbourhoods'),
@@ -293,13 +282,14 @@ ui <- bootstrapPage(
                # 
                # ),
                
-               # tab: About this site ------------------------------------------
+               # TAB: About this site ------------------------------------------
                tabPanel('About This Site',
                         tags$div(),
                         h3('COVID-19 SCHOOL DASHBOARD KEY AIMS & INFORMATION'),
-                        a(href = 'COVID19SchoolDashboard.com', 'covid19schooldashboard.com'), ' reports and maps confirmed school-related cases of COVID-19 in publicly funded elementary and secondary schools in Ontario, Canada, and connects this to data on school social background characteristics (school-level demographic data).',
+                        a(href = 'http://covid19schooldashboard.com', 'covid19schooldashboard.com'), ' reports and maps confirmed school-related cases of COVID-19 in publicly funded elementary and secondary schools in Ontario, Canada, and connects this to data on school social background characteristics (school-level demographic data).',
                         br(),
-                        p('The main aim of this site is to provide real-time data visualization of affected schools for broad dissemination. This will help to increase transparency and understanding of the education scenario as it evolves. It will help school communities (parents, students, teachers and staff, leaders and administrators), community members and neighbours, education and health professionals, officials, researchers, media, and the general public.'),
+                        p('The main aim of this site is to provide real-time data visualization of affected schools for broad dissemination.'),
+                        p('This will help to increase transparency and understanding of the education scenario as it evolves. It will help school communities (parents, students, teachers and staff, leaders and administrators), community members and neighbours, education and health professionals, officials, researchers, media, and the general public.'),
                         br(),
                         h4('Why is this important?'),
                         p('The effects of COVID-19 are more severe on high-risk communities, populations, and schools. There are strong equity concerns. Visualizing COVID-19 case data with data on school social background characteristics will give us a better understanding of the composition of affected schools. In short, we will get closer to understanding the human dimension of COVID-19 on school populations.'),
@@ -307,7 +297,7 @@ ui <- bootstrapPage(
                         h4('Update frequency'),
                         p('This site is automatically updated every weekday (excluding public holidays) following the release of school-related COVID-19 case data by the Ontario Ministry of Education. Cumulative totals represent all total cases reported to the Ministry of Education as of 5 September 2020, including resolved cases. The first school-related cases appeared in the dataset on 10 September 2020.'),
                         p('This site uses the latest publicly available data on school information and student demographics released by the Ontario Ministry of Education for school background characteristics. This dataset is updated by the Ministry monthly.'),
-                        p('Click ', a(href = 'https://data.ontario.ca/dataset?keywords_en=COVID-19', 'here', target = '_blank'), ' for more information on data sources.'),
+                        p('See "Data Sources and Source Code" tab for more information on data sources used.'),
                         br(),
                         h4('Caveats'),
                         p('The main aim of the COVID-19 School Dashboard is to show which schools are affected by confirmed cases as reported in the official data, visually plot where the schools are, and to show relevant school background characteristics of affected schools. This site should not be used to draw inferences on the broader COVID-19 situation in Ontario, or on case numbers generally. A number of complementary metrics are useful in that regard.'),
@@ -345,7 +335,7 @@ ui <- bootstrapPage(
                             tags$li('main language of instruction;'), 
                             tags$li('enrolment;'), 
                             tags$li('proportion of students from low-income households;'), 
-                            tags$li('proportion of students receiving special education services;'),
+                            # tags$li('proportion of students receiving special education services;'),
                             tags$li('proportion of students whose first language is not English;'),
                             tags$li('proportion of students whose first language is not French;'), 
                             tags$li('proportion of students who are immigrants from a non-English country;'),
@@ -356,8 +346,8 @@ ui <- bootstrapPage(
                         br(),
                         h5(('Quick view summary pane')),
                         tags$ul(
-                            tags$li(tags$i('Cumulative Case Chart:'), ' Summarizes cumulative school-related cases, new total school-related cases, current schools with cases (and as % of schools in Ontario), and current’ schools closed (and as % of schools in Ontario).'),
-                            tags$li(tags$i('Daily Summary:'), ' Summarizes cumulative school-related cases, new total school-related cases, current schools with cases, and current schools closed. It also shows the count and change (+/-) from the most current date with data to the date immediately preceding. No changes will be seen on or between weekend dates (i.e., on Saturday and Sunday and between Friday and Saturday; Saturday and Sunday) or public holidays since data are only released by the Ministry on weekdays.')
+                            tags$li(tags$i('Cumulative Case Chart:'), ' Shows the total number of cumulative school-related cases in Ontario and disaggregated to show cumulative school-related student cases, cumulative school-related staff cases, and unidentified cases. "Unidentified cases" is used by the Ministry of Education to refer to the following: "In some instances, the type of case has not been identified as either student/child or staff/provider/partner due to privacy considerations. These "individuals" only include unidentified students/children or staff/providers/partners and not visitors or parents. These cases will be tracked as "individuals" but not included in the "student/child" or "staff/provider" columns.'),
+                            tags$li(tags$i('Daily Summary:'), ' Summarizes cumulative school-related cases, new total school-related cases, current schools with cases (and as % of schools in Ontario), and current schools closed (and as % of schools in Ontario). It also shows the count and change (+/-) from the most current date with data to the date immediately preceding. No changes will be seen on or between weekend dates (i.e., on Saturday and Sunday and between Friday and Saturday; Saturday and Sunday) or public holidays since data are only released by the Ministry on weekdays.')
                         ),
                         br(),
                         # h4('Plots Tab'),
@@ -408,22 +398,21 @@ ui <- bootstrapPage(
                         p('Lists all publicly available data sources used to generate the COVID-19 School Dashboard.'),
                         br(),
                         h5(('Source code')),
-                        p('Source code for this site can be found ', a(href = 'https://gitlab.com/br00t/ontario-covid19-dashboard', 'here')),
+                        p('Source code for this site can be found ', a(href = 'https://gitlab.com/br00t/ontario-covid19-dashboard', 'here', target = "_blank")),
                         br(),
                         h3('AUTHORSHIP, ATTRIBUTIONS, CITATION'),
-                        tags$ul(
-                            tags$li(a(href = 'https://www.edu.uwo.ca/faculty-profiles/prachi-srivastava.html', 'Dr. Prachi Srivastava'), ', Associate Professor, Faculty of Education, University of Western Ontario, Canada.'),
-                            tags$li(a(href = 'mailto:prachi.srivastava@uwo.ca', 'Prachi.srivastava@uwo.ca')),
-                            tags$li(a(href = 'https://twitter.com/PrachiSrivas', '@PrachiSrivas')),
-                            tags$li(a(href = 'https://orcid.org/0000-0003-4865-8963', 'ORCID iD: 0000-0003-4865-8963'))
-                        ),
-                        p('The technical development and design of the COVID-19 School Dashboard was done by an independent developer.'),
+                        p(a(href = 'https://www.edu.uwo.ca/faculty-profiles/prachi-srivastava.html', 'Dr. Prachi Srivastava'), ', Associate Professor, Faculty of Education, University of Western Ontario, Canada.'),
+                        p(a(href = 'mailto:prachi.srivastava@uwo.ca', 'Prachi.srivastava@uwo.ca')),
+                        p(a(href = 'https://twitter.com/PrachiSrivas', '@PrachiSrivas')),
+                        p(a(href = 'https://orcid.org/0000-0003-4865-8963', 'ORCID iD: 0000-0003-4865-8963')),
+                        br(),
+                        p('COVID-19 School Dashboard technical development and design: Peter Taylor.'),
                         br(),
                         h4('Preliminary site structure based on:'),
                         p('Parker, E., & Leclerc, Q. (2020). ', tags$em('COVID-19 tracker. '), '[Web application]. ',  a(href = 'https://vac-lshtm.shinyapps.io/ncov_tracker/', 'https://vac-lshtm.shinyapps.io/ncov_tracker/')),
                         br(),
                         h4('Cite the COVID-19 School Dashboard as:'),
-                        p('Srivastava, P. (2020). ', tags$em('COVID-19 school dashboard (1.0 Oct 2020). '), '[Web application]. ', a(href = 'http://covid19schooldashboard.com/', 'http://covid19schooldashboard.com/')),
+                        p('Srivastava, P. (2020). ', tags$em('COVID-19 school dashboard (1.0 Nov 2020). '), '[Web application]. ', a(href = 'http://covid19schooldashboard.com/', 'http://covid19schooldashboard.com/')),
                         br(), 
                         a(href = 'https://www.edu.uwo.ca', tags$img(src = 'uwo_logo.png', height = '58', width = '243')),
                         br(),
@@ -733,27 +722,27 @@ server <- function(input, output) {
                    'Cumulative School Related Student Cases',
                    'Cumulative School Related Staff Cases',
                    'Cumulative School Related Unidentified Cases')
-        description <- c('date results collected',
-                         'date results reported',
-                         'count of schools with active cases currently',
-                         'count of schools closed',
-                         'total number of schools in province',
-                         'total new school-related cases of all types since last reporting date',
-                         'new school-related student cases since last reporting date',
-                         'new school-related staff cases since last reporting date',
-                         'new school-related unidentified cases since last reporting date',
-                         'total recent school-related cases',
-                         'recent school-related student cases',
-                         'recent school-related staff cases',
-                         'recent school-related unidentified cases',
-                         'total past school-related cases',
-                         'past school-related student cases',
-                         'past school-related staff cases',
-                         'past school-related unidentified cases',
-                         'cumulative total school-related cases',
-                         'cumulative school-related student cases',
-                         'cumulative school-related staff cases',
-                         'cumulative school-related unidentified cases')
+        description <- c('Date results collected',
+                         'Date results reported',
+                         'Count of schools with active cases currently',
+                         'Count of schools closed',
+                         'Total number of schools in province',
+                         'Total new school-related cases of all types since last reporting date',
+                         'New school-related student cases since last reporting date',
+                         'New school-related staff cases since last reporting date',
+                         'New school-related unidentified cases since last reporting date. Unidentified cases: Where the type of case was not identified in the dataset as either student/child or staff/provider/partner due to privacy considerations. These only include unidentified students/children or staff/providers/partners and not visitors or parents. These cases are tracked in the dataset as "individuals" but not included in the "student/child" or "staff/provider" columns.',
+                         'Total recent school-related cases reported in the past 14 days',
+                         'Recent school-related student cases reported in the past 14 days',
+                         'Recent school-related staff cases reported in the past 14 days',
+                         'Recent school-related unidentified cases reported in the past 14 days. Unidentified cases: Where the type of case was not identified in the dataset as either student/child or staff/provider/partner due to privacy considerations. These only include unidentified students/children or staff/providers/partners and not visitors or parents. These cases are tracked in the dataset as "individuals" but not included in the "student/child" or "staff/provider" columns.',
+                         'Total past school-related cases',
+                         'Past school-related student cases',
+                         'Past school-related staff cases',
+                         'Past school-related unidentified cases. Unidentified cases: Where the type of case was not identified in the dataset as either student/child or staff/provider/partner due to privacy considerations. These only include unidentified students/children or staff/providers/partners and not visitors or parents. These cases are tracked in the dataset as "individuals" but not included in the "student/child" or "staff/provider" columns.',
+                         'Cumulative total school-related cases',
+                         'Cumulative school-related student cases',
+                         'Cumulative school-related staff cases',
+                         'Cumulative school-related unidentified cases. Unidentified cases: Where the type of case was not identified in the dataset as either student/child or staff/provider/partner due to privacy considerations. These only include unidentified students/children or staff/providers/partners and not visitors or parents. These cases are tracked in the dataset as "individuals" but not included in the "student/child" or "staff/provider" columns.')
         df <- data.frame(field, description)
         datatable(
             df,
