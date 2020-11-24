@@ -31,6 +31,7 @@ library(leaflet)
 library(lubridate)
 library(readxl)
 library(RColorBrewer)
+library(rgeos)
 library(rvest)
 library(stringr)
 library(xts)
@@ -393,6 +394,9 @@ if (needs_refresh | is.na(needs_refresh)) {
 										  'Population Density Per Square Kilometre',
 										  'Average Household Size',
 										  'Prevalence of low income based on the Low-income cut-offs, after tax (LICO-AT) (%)')
+	risk_rank_neighborhood$neighborhood_name <- str_replace_all(risk_rank_neighborhood$neighborhood_name, 'St\\.', 'St\\. ') %>% str_squish
+	risk_rank_neighborhood$neighborhood_name <- str_replace(risk_rank_neighborhood$neighborhood_name, 'Mimico \\(includes Humber Bay Shores\\)', 'Mimico')
+	risk_rank_neighborhood$neighborhood_name <- str_replace(risk_rank_neighborhood$neighborhood_name, 'Weston-Pelham Park', 'Weston-Pellam Park')
 	fn <- file.path(data_dir, 'risk_rank_neighborhood.rdata')
 	save('risk_rank_neighborhood', file = fn)
 	
