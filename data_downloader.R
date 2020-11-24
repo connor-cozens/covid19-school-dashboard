@@ -119,6 +119,7 @@ clean_all_names <- function(dirty_names) {
 		str_replace_all(., '<c3><a8>', 'e') %>%
 		str_replace_all(., '<c3><a9>', 'e') %>%
 		str_replace_all(., '<c3><83><c2><af>', 'i') %>%
+		str_replace_all(., '<c3><ae>', 'i') %>%
 		str_replace_all(., '<c5><93>', 'oe') %>%
 		str_replace_all(., '<c3><85><e2><80><9c>', 'oe') %>%
 		str_squish
