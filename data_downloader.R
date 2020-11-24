@@ -55,13 +55,14 @@ get_utf_table <- function() {
 	url <- 'https://www.utf8-chartable.de/'
 	pg_html <- read_html(url)
 	utf8_tbl <- html_table(pg_html)[[ 3 ]]
-	utf8_tbl$my_transliteration <- str_extract_all(utf8_tbl$name, '(CAPITAL|SMALL) LETTER [a-zA-Z]{1}') %>% 
+	utf8_tbl$my_transliteration <- str_extract_all(utf8_tbl$name, '(CAPITAL|SMALL) LETTER [a-zA-Z]{1}\\s?') %>% 
 		str_squish %>% 
 		str_replace_all(., 'character\\(0\\)', '') %>%
 		str_replace_all(., 'CAPITAL LETTER ', '') %>%
 		str_squish
 	idx <- which(str_detect(utf8_tbl$my_transliteration, 'SMALL LETTER '))
-	utf8_tbl[ idx, 'my_transliteration' ] <- str_replace_all(utf8_tbl[ idx, 'my_transliteration' ], 'SMALL LETTER ', '') %>% tolower
+	utf8_tbl[ idx, 'my_transliteration' ] <- str_replace_all(utf8_tbl[ idx, 'my_transliteration' ], 'SMALL LETTER ', '') %>% 
+		tolower
 	utf8_tbl
 }
 
@@ -100,7 +101,6 @@ clean_all_names <- function(dirty_names) {
 		str_replace_all(., '&', ' ') %>%
 		str_replace_all(., '<e2><80><99>', '\'') %>%
 		str_replace_all(., '<c3><83><c2><ae>', ' ') %>%
-		str_replace_all(., '<c3><ae>', ' ') %>%
 		str_replace_all(., '<c3><a2><e2><82><ac><e2><84><a2>', '\'') %>%
 		str_replace_all(., '<c3><82>', ' ') %>%
 		str_replace_all(., '<c3><a2>', 'a') %>%
