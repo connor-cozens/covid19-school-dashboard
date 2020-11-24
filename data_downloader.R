@@ -60,9 +60,26 @@ get_utf_table <- function() {
 		str_replace_all(., 'character\\(0\\)', '') %>%
 		str_replace_all(., 'CAPITAL LETTER ', '') %>%
 		str_squish
+	idx <- which(utf8_tbl$name == 'LATIN CAPITAL LETTER AE')
+	utf8_tbl[ idx, 'my_transliteration' ] <- 'AE'
+	idx <- which(utf8_tbl$name == 'LATIN SMALL LETTER AE')
+	utf8_tbl[ idx, 'my_transliteration' ] <- 'ae'
 	idx <- which(str_detect(utf8_tbl$my_transliteration, 'SMALL LETTER '))
 	utf8_tbl[ idx, 'my_transliteration' ] <- str_replace_all(utf8_tbl[ idx, 'my_transliteration' ], 'SMALL LETTER ', '') %>% 
 		tolower
+	idx <- which(utf8_tbl$name == 'LATIN CAPITAL LETTER AE')
+	utf8_tbl[ idx, 'my_transliteration' ] <- 'AE'
+	idx <- which(utf8_tbl$my_transliteration != '')
+	utf8_tbl <- utf8_tbl[ idx, ]
+	idx <- which(nchar(utf8_tbl[ , 3 ]) > 2)
+	utf8_tbl <- utf8_tbl[ idx, ]
+	byte_1 <- str_split(utf8_tbl[ , 3 ], ' ') %>% sapply(., '[', 1)
+	byte_2 <- str_split(utf8_tbl[ , 3 ], ' ') %>% sapply(., '[', 2)
+	tl <- utf8_tbl[ , 5 ]
+	utf8_tbl$regex <- sprintf('str_replace_all(., "<%s><%s>", "%s") %%>%%',
+							  byte_1,
+							  byte_2,
+							  tl)
 	utf8_tbl
 }
 
@@ -327,7 +344,7 @@ if (needs_refresh | is.na(needs_refresh)) {
 	
 	# 2. load school active cases data into memory -----------------------------
 	
-	covid19_schools_active <- read.csv(fname_active, fileEncoding = 'Windows-1252', stringsAsFactors = FALSE)
+	covid19_schools_active <- read.csv(fname_active, stringsAsFactors = FALSE)
 	
 	# 3. load all cases data into memory ---------------------------------------
 	

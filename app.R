@@ -97,7 +97,6 @@ ui <- bootstrapPage(
                                           # daily_summary_1_dt -----------------
                                           div(tableOutput('daily_summary_1_dt'), style = 'font-size: small; width: 100%'),
                                           
-                                          # clean_date_reactive_text -----------
                                           h6('Drag this box to move it', align = 'right')
                             )
                             
@@ -520,7 +519,7 @@ server <- function(input, output) {
     # clean_date_reactive_text -------------------------------------------------
     output$clean_date_reactive_text <- renderText({
         # format(as.POSIXct(input$plot_date), '%d %B %Y')
-        format(as.POSIXct(now()), '%d %B %Y')
+        format(max(covid19_schools_active$reported_date), '%d %B %Y')
     })
     
     # cumulative_case_count_text -----------------------------------------------
