@@ -344,7 +344,7 @@ if (needs_refresh | is.na(needs_refresh)) {
 	
 	# 2. load school active cases data into memory -----------------------------
 	
-	covid19_schools_active <- read.csv(fname_active, stringsAsFactors = FALSE)
+	covid19_schools_active <- read.csv(fname_active, fileEncoding = 'Windows-1252', stringsAsFactors = FALSE)
 	
 	# 3. load all cases data into memory ---------------------------------------
 	
