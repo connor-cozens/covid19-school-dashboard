@@ -16,7 +16,6 @@
 # https://data.ontario.ca/dataset/f4f86e54-872d-43f8-8a86-3892fd3cb5e6/resource/ed270bb8-340b-41f9-a7c6-e8ef587e6d11/download/covidtesting.csv
 
 # https://data.ontario.ca/dataset/confirmed-positive-cases-of-covid-19-in-ontario
-# https://data.ontario.ca/dataset/confirmed-positive-cases-of-covid-19-in-ontario
 # https://data.ontario.ca/dataset/f4112442-bdc8-45d2-be3c-12efae72fb27/resource/4f39b02b-47fe-4e66-95b6-e6da879c6910/download/conposcovidloc.geojson
 # https://data.ontario.ca/dataset/f4112442-bdc8-45d2-be3c-12efae72fb27/resource/455fd63b-603d-4608-8216-7d8647f43350/download/conposcovidloc.csv
 
@@ -32,6 +31,7 @@ library(leaflet)
 library(lubridate)
 library(readxl)
 library(RColorBrewer)
+library(rvest)
 library(stringr)
 library(xts)
 # library(utils)
@@ -45,11 +45,25 @@ data_dir <- 'data'
 
 geocodes_cache_file <- file.path(data_dir, 'geocode_cache.rdata')
 
-max_file_age_hrs <- 12L
+max_file_age_hrs <- 24L
 
 debug <- FALSE
 
 # UTILITY FUNCTIONS ------------------------------------------------------------
+
+get_utf_table <- function() {
+	url <- 'https://www.utf8-chartable.de/'
+	pg_html <- read_html(url)
+	utf8_tbl <- html_table(pg_html)[[ 3 ]]
+	utf8_tbl$my_transliteration <- str_extract_all(utf8_tbl$name, '(CAPITAL|SMALL) LETTER [a-zA-Z]{1}') %>% 
+		str_squish %>% 
+		str_replace_all(., 'character\\(0\\)', '') %>%
+		str_replace_all(., 'CAPITAL LETTER ', '') %>%
+		str_squish
+	idx <- which(str_detect(utf8_tbl$my_transliteration, 'SMALL LETTER '))
+	utf8_tbl[ idx, 'my_transliteration' ] <- str_replace_all(utf8_tbl[ idx, 'my_transliteration' ], 'SMALL LETTER ', '') %>% tolower
+	utf8_tbl
+}
 
 #' clean_all_names
 #' 
