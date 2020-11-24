@@ -33,7 +33,7 @@ get_summary_table <- function() {
         'current_schools_closed'
     )
     df <- df[ , cn ]
-    idx <- which(df$collected_date <= as.Date(now())) # as.Date(input$plot_date))
+    idx <- which(df$collected_date <= as.Date(now()))
     idx <- max(idx)
     df <- df[ (idx - 1):idx, ]
     colnames(df) <- str_replace_all(colnames(df), '_', ' ')
@@ -451,7 +451,6 @@ server <- function(input, output) {
                                                                      cases_per_school$school_language, 
                                                                      cases_per_school$school_enrolment, 
                                                                      cases_per_school$low_income, 
-                                                                     # cases_per_school$special_education, 
                                                                      cases_per_school$non_english, 
                                                                      cases_per_school$from_non_english, 
                                                                      cases_per_school$non_french, 
@@ -518,13 +517,12 @@ server <- function(input, output) {
     
     # clean_date_reactive_text -------------------------------------------------
     output$clean_date_reactive_text <- renderText({
-        # format(as.POSIXct(input$plot_date), '%d %B %Y')
         format(max(covid19_schools_active$reported_date), '%d %B %Y')
     })
     
     # cumulative_case_count_text -----------------------------------------------
     output$cumulative_case_count_text <- renderText({
-        idx <- max(which(covid19_schools_summary$collected_date <= as.Date(now()))) # as.Date(input$plot_date)))
+        idx <- max(which(covid19_schools_summary$collected_date <= as.Date(now())))
         count <- last(covid19_schools_summary[ idx, 'cumulative_school_related_cases' ])
         paste0(prettyNum(count, big.mark = ','), ' cumulative cases')
     })
@@ -794,7 +792,6 @@ server <- function(input, output) {
                    'Percentage Of Students Who Are New To Canada From A Non English Speaking Country',
                    'Percentage Of Students Who Are New To Canada From A Non French Speaking Country', 
                    'Percentage Of Students Identified As Gifted', 
-                   # 'Percentage Of Students Receiving Special Education Services', 
                    'Percentage Of School Aged Children Who Live In Low Income Households', 
                    'Percentage Of Students Whose Parents Have Some University Education')
         description <- c('Collected Date', 'Reported Date', 'School Board', 'School', 
@@ -808,7 +805,6 @@ server <- function(input, output) {
                          'Percentage Of Students Who Are New To Canada From A Non English Speaking Country',
                          'Percentage Of Students Who Are New To Canada From A Non French Speaking Country', 
                          'Percentage Of Students Identified As Gifted', 
-                         # 'Percentage Of Students Receiving Special Education Services', 
                          'Percentage Of School Aged Children Who Live In Low Income Households', 
                          'Percentage Of Students Whose Parents Have Some University Education')
         df <- data.frame(field, description)
@@ -896,7 +892,6 @@ server <- function(input, output) {
                 fixedColumns = TRUE,
                 autoWidth = TRUE,
                 ordering = TRUE
-                # dom = 'Bfrtip'
             ),
             rownames = FALSE,
             class = 'display'
