@@ -355,7 +355,7 @@ if (needs_refresh | is.na(needs_refresh)) {
 	
 	school_demographics <- read_xlsx(fname_demographics)
 	school_demographics <- as.data.frame(school_demographics, stringsAsFactors = FALSE)
-	school_demographics$`school name` <- str_replace_all(school_demographics$`school name`, '’', '\'')
+	school_demographics$`School Name` <- str_replace_all(school_demographics$`School Name`, '’', '\'')
 	
 	# 5. load school risk rank data --------------------------------------------
 	
