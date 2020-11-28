@@ -1,0 +1,10 @@
+{
+    "codeRepository": "httpsgitlab.combr00tontario-covid19-dashboard",
+    "dateCreated": "2020-11-20",
+    "name": "COVID-19 School Dashboard",
+    "email": "connor@covid19schooldashboard.com",
+    "description": "Reports and maps confirmed school-related cases of COVID-19 in publicly funded elementary and secondary schools in Ontario, Canada, and connects this to data on school social background characteristics.",
+    "keywords": "ontario, data visualization, covid-19, elementary schools, secondary schools",
+    "url": "http://covid19schooldashboard.com",
+    "affiliation": "Western University"
+}
