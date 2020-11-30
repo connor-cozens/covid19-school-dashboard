@@ -97,6 +97,9 @@ ui <- bootstrapPage(
                                           # daily_summary_1_dt -----------------
                                           div(tableOutput('daily_summary_1_dt'), style = 'font-size: small; width: 100%'),
                                           
+                                          #textInput(inputId = "SearchBar", label = "Search", value = "", width = '100%', placeholder = "Search for a school"),
+                                          selectizeInput(inputId = "searchBar", label = "Search", choices = as.list(school_demographics$`school name`), width = '100%'),
+                                          
                                           h6('Drag this box to move it', align = 'right')
                             )
                             
@@ -936,6 +939,17 @@ server <- function(input, output) {
             class = 'display'
         )
     })
+    
+    #searchBar---------------------------------------------------
+    observeEvent(input$searchBar,{
+        print(input$searchBar)
+        #as.list(school_demographics$`school name`)
+        leafletProxy('basemap_leaflet') %>%
+            setView(., school_demographics$longitude[school_demographics$`school name` == input$searchBar], school_demographics$latitude[school_demographics$`school name` == input$searchBar], 15)
+        print(school_demographics$longitude[school_demographics$`school name` == input$searchBar], digits = 10)
+        print(school_demographics$latitude[school_demographics$`school name` == input$searchBar], digits = 10)
+    }, ignoreInit = TRUE)
+    
 }
 
 # RUN THE APPLICATION ----------------------------------------------------------
