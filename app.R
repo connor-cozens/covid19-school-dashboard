@@ -97,9 +97,6 @@ ui <- bootstrapPage(
                                           # daily_summary_1_dt -----------------
                                           div(tableOutput('daily_summary_1_dt'), style = 'font-size: small; width: 100%'),
                                           
-                                          # searchBar --------------------------
-                                          #selectizeInput(inputId = "searchBar", label = "Search", choices = as.list(school_demographics$`school name`), width = '100%'),
-                                          
                                           h6('Drag this box to move it', align = 'right')
                             ),
                             
@@ -112,8 +109,10 @@ ui <- bootstrapPage(
                                           fixed = TRUE,
                                           draggable = FALSE, 
                                           height = 'auto',
-                                          # searchBar --------------------------
-                                          selectizeInput(inputId = "searchBar", label = "Search", choices = as.list(school_demographics$`school name`), width = '100%')
+                                          # searchCity --------------------------
+                                          selectizeInput(inputId = "searchCity", label = "Search in City", choices = as.list(school_demographics$`city`), width = '100%', options = list(maxOptions = length(unique(school_demographics$`city`)))),
+                                          # schoolSearch -----------------------
+                                          uiOutput("schoolSearch")
                             )
                             
                         )
@@ -428,7 +427,7 @@ ui <- bootstrapPage(
 
 # SHINY SERVER -----------------------------------------------------------------
 
-server <- function(input, output) {
+server <- function(input, output, session) {
     
     # basemap_leaflet ----------------------------------------------------------
     output$basemap_leaflet <- renderLeaflet({
@@ -957,11 +956,26 @@ server <- function(input, output) {
     observeEvent(input$searchBar,{
         if (input$searchBar != ""){
             print(input$searchBar)
-            #as.list(school_demographics$`school name`)
             leafletProxy('basemap_leaflet') %>%
-                setView(., school_demographics$longitude[school_demographics$`school name` == input$searchBar], school_demographics$latitude[school_demographics$`school name` == input$searchBar], 15)
-            print(school_demographics$longitude[school_demographics$`school name` == input$searchBar], digits = 10)
-            print(school_demographics$latitude[school_demographics$`school name` == input$searchBar], digits = 10)
+                setView(., school_demographics$longitude[school_demographics$`school name` == input$searchBar & school_demographics$`city` == input$searchCity], school_demographics$latitude[school_demographics$`school name` == input$searchBar & school_demographics$`city` == input$searchCity], 15)
+            print(school_demographics$longitude[school_demographics$`school name` == input$searchBar & school_demographics$`city` == input$searchCity], digits = 10)
+            print(school_demographics$latitude[school_demographics$`school name` == input$searchBar & school_demographics$`city` == input$searchCity], digits = 10)
+        }
+    }, ignoreInit = TRUE)
+    
+    #searchBar / searchCity---------------------------------------------------
+    observeEvent(input$searchCity,{
+        if (input$searchCity != ""){
+            output$schoolSearch <- renderUI({
+                selectizeInput(inputId = "searchBar", label = "Search for School", choices = as.list(school_demographics$`school name`), selected = "", width = '100%', options = list(maxOptions = length(unique(school_demographics$`school name`)), placeholder = "Search"))
+            })
+            updateSelectizeInput(session, "searchBar", choices = as.list(school_demographics$`school name`)[school_demographics$`city` == input$searchCity], selected = "", options = list(maxOptions = length(unique(school_demographics$`school name`)), placeholder = "Search"), server = TRUE)
+        }
+        else {
+            output$schoolSearch <- renderUI({
+                #Render nothing in this spot
+            })
+            updateSelectizeInput(session, "searchBar", choices = as.list(school_demographics$`school name`), selected = "", options = list(maxOptions = length(unique(school_demographics$`school name`)), placeholder = "Search"), server = TRUE)
         }
     }, ignoreInit = TRUE)
     
