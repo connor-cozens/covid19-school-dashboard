@@ -19,9 +19,60 @@ source('data_downloader.R')
 
 #' get_summary_table
 #' 
-#' generate quick view summary table
+#' generate Daily summary table
 #' 
 get_summary_table <- function() {
+    df <- covid19_schools_summary
+    idx <- order(df$collected_date)
+    df <- df[ idx, ]
+    cn <- c(
+        'collected_date', 
+        'cumulative_school_related_cases', 
+        'new_total_school_related_cases', 
+        'current_schools_with_cases', 
+        'current_schools_closed'
+    )
+    df <- df[ , cn ]
+    idx <- which(df$collected_date <= as.Date(now()))
+    idx <- max(idx)
+    df <- df[ (idx - 1):idx, ]
+    colnames(df) <- str_replace_all(colnames(df), '_', ' ')
+    df1 <- reshape2::melt(apply(df[ , -1 ], 2, diff))
+    df1$variable <- rownames(df1)
+    colnames(df1) <- c('change', 'variable')
+    df2 <- reshape2::melt(df[ 2, -1 ])
+    df <- merge(df2, df1, on = 'variable', all = TRUE)
+    colnames(df) <- c('Variable', 'Count', 'Change')
+    idx <- which(df$Change > 0)
+    df[ idx, 'Change' ] <- sprintf('+%s', df[ idx, 'Change' ])
+    df$Variable <- str_to_sentence(df$Variable)
+    df$Variable <- str_replace_all(df$Variable, ' w ', ' with ')
+    df$Variable <- str_replace_all(df$Variable, 'school related', 'school\\-related')
+    schools_count <- max(covid19_schools_summary$current_total_number_schools)
+    df$Percentage <- NA
+    df[ 2, 'Percentage' ] <- round(df[ 2, 'Count' ] / schools_count, 4) * 1e2
+    df[ 3, 'Percentage' ] <- round(df[ 3, 'Count' ] / schools_count, 4) * 1e2
+    df <- df[ c(1, 4, 3, 2), ]
+    df
+}
+
+# last_week_obtain ---------------------------------------------------------
+# Obtains the dates for the previous weeks Monday and Friday
+last_week_obtain <- function() {
+    theDate <- as.Date(max(covid19_schools_active$reported_date)) - 7
+    while(weekdays(theDate) != "Friday"){
+        theDate <- theDate + 1
+    }
+    earlyDate <- theDate - 5
+    dateString <- paste(format(earlyDate, '%d %B %Y'), "to", format(theDate, '%d %B %Y'))
+    return(dateString)
+}
+
+#' get_summary_table
+#' 
+#' generate Weekly summary table
+#' 
+get_weekly_summary_table <- function() {
     df <- covid19_schools_summary
     idx <- order(df$collected_date)
     df <- df[ idx, ]
@@ -86,18 +137,34 @@ ui <- bootstrapPage(
                                           draggable = TRUE, 
                                           height = 'auto',
                                           
-                                          h2('Quick View Daily Summary', align = 'right'),
+                                          tabsetPanel(
+                                              tabPanel(id = "daily",
+                                                       
+                                                       h2('Daily Summary', align = 'right', style="font-size:200%;"),
+                                                       
+                                                       # cumulative_case_count_text ---------
+                                                       h3(textOutput('cumulative_case_count_text'), align = 'right'),
+                                                       
+                                                       # clean_date_reactive_text -----------
+                                                       h6(textOutput('clean_date_reactive_text'), align = 'right'),
+                                                       
+                                                       # daily_summary_1_dt -----------------
+                                                       div(tableOutput('daily_summary_1_dt'), style = 'font-size: small; width: 100%'),
+                                                       
+                                                       h6('Drag this box to move it', align = 'right')
+                                                       ),
+                                              tabPanel(id = "weekly",
+                                                       
+                                                       h2('Weekly Summary', align = 'right', style="font-size:200%;"),
+                                                       
+                                                       h6(textOutput('clean_week_old_date_text'), align = 'right'),
+                                                       
+                                                       h6('Drag this box to move it', align = 'right')
+                                                       
+                                              )
+                                          )
                                           
-                                          # cumulative_case_count_text ---------
-                                          h3(textOutput('cumulative_case_count_text'), align = 'right'),
                                           
-                                          # clean_date_reactive_text -----------
-                                          h6(textOutput('clean_date_reactive_text'), align = 'right'),
-                                          
-                                          # daily_summary_1_dt -----------------
-                                          div(tableOutput('daily_summary_1_dt'), style = 'font-size: small; width: 100%'),
-                                          
-                                          h6('Drag this box to move it', align = 'right')
                             )
                             
                         )
@@ -518,6 +585,13 @@ server <- function(input, output) {
     # clean_date_reactive_text -------------------------------------------------
     output$clean_date_reactive_text <- renderText({
         format(max(covid19_schools_active$reported_date), '%d %B %Y')
+    })
+    
+    
+    
+    # clean_week_old_date_text -------------------------------------------------
+    output $clean_week_old_date_text <- renderText ({
+        last_week_obtain()
     })
     
     # cumulative_case_count_text -----------------------------------------------
