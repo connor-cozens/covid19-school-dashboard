@@ -105,7 +105,7 @@ get_weekly_summary_table <- function() {
     df <- rbind(df[idx1,], df[idx2,])
     
     #df <- df[ (idx - 1):idx, ] #here, df becomes the last 2 rows itself
-    #colnames(df) <- str_replace_all(colnames(df), '_', ' ')
+    colnames(df) <- str_replace_all(colnames(df), '_', ' ')
     
     df1 <- reshape2::melt(apply(df[ , -1 ], 2, diff))
     df1$variable <- rownames(df1)
@@ -202,6 +202,10 @@ ui <- bootstrapPage(
                         # daily_summary_2_dt -----------------------------------
                         h3('Daily Summary', align = 'left'),
                         div(tableOutput('daily_summary_2_dt'), style = 'font-size: small; width: 100%'),
+                        hr(),
+                        # weekly_summary_2_dt -----------------------------------
+                        h3('Weekly Summary', align = 'left'),
+                        div(tableOutput('weekly_summary_2_dt'), style = 'font-size: small; width: 100%'),
                         hr(),
                         # school_details_dt ------------------------------------
                         h3('Search Function and Table', align = 'left'),
@@ -585,6 +589,11 @@ server <- function(input, output) {
     
     # weekly_summary_1_dt -------------------------------------------------------
     output$weekly_summary_1_dt <- renderTable({
+        get_weekly_summary_table()
+    }, align = 'r', striped = TRUE, width = '100%')
+    
+    # weekly_summary_2_dt -------------------------------------------------------
+    output$weekly_summary_2_dt <- renderTable({
         get_weekly_summary_table()
     }, align = 'r', striped = TRUE, width = '100%')
     
