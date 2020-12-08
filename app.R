@@ -63,9 +63,10 @@ last_week_obtain <- function() {
     while(weekdays(theDate) != "Friday"){
         theDate <- theDate + 1
     }
-    earlyDate <- theDate - 5
-    dateString <- paste(format(earlyDate, '%d %B %Y'), "to", format(theDate, '%d %B %Y'))
-    return(dateString)
+    earlyDate <- theDate - 4
+    #dateString <- paste(format(earlyDate, '%d %B %Y'), "to", format(theDate, '%d %B %Y'))
+    df <- list(earlyDate, theDate)
+    return(df)
 }
 
 #' get_summary_table
@@ -84,10 +85,28 @@ get_weekly_summary_table <- function() {
         'current_schools_closed'
     )
     df <- df[ , cn ]
-    idx <- which(df$collected_date <= as.Date(now()))
-    idx <- max(idx)
-    df <- df[ (idx - 1):idx, ]
-    colnames(df) <- str_replace_all(colnames(df), '_', ' ')
+    #idx <- which(df$collected_date <= as.Date(now()))
+    #idx <- max(idx)
+    
+    #calling last_week_obtain() keeps producing could not find function errors??
+    #dates <- last_week_obtain()
+    
+    #pasting in function code to make it work for now
+    theDate <- as.Date(max(covid19_schools_active$reported_date)) - 7
+    while(weekdays(theDate) != "Friday"){
+        theDate <- theDate + 1
+    }
+    earlyDate <- theDate - 4
+    #dateString <- paste(format(earlyDate, '%d %B %Y'), "to", format(theDate, '%d %B %Y'))
+    dates <- list(earlyDate, theDate)
+    
+    idx1 <- match(dates[[1]], df[,1])
+    idx2 <- match(dates[[2]], df[,1])
+    df <- rbind(df[idx1,], df[idx2,])
+    
+    #df <- df[ (idx - 1):idx, ] #here, df becomes the last 2 rows itself
+    #colnames(df) <- str_replace_all(colnames(df), '_', ' ')
+    
     df1 <- reshape2::melt(apply(df[ , -1 ], 2, diff))
     df1$variable <- rownames(df1)
     colnames(df1) <- c('change', 'variable')
@@ -158,6 +177,9 @@ ui <- bootstrapPage(
                                                        h2('Weekly Summary', align = 'right', style="font-size:200%;"),
                                                        
                                                        h6(textOutput('clean_week_old_date_text'), align = 'right'),
+                                                       
+                                                       # daily_summary_1_dt -----------------
+                                                       div(tableOutput('weekly_summary_1_dt'), style = 'font-size: small; width: 100%'),
                                                        
                                                        h6('Drag this box to move it', align = 'right')
                                                        
@@ -561,6 +583,11 @@ server <- function(input, output) {
         get_summary_table()
     }, align = 'r', striped = TRUE, width = '100%')
     
+    # weekly_summary_1_dt -------------------------------------------------------
+    output$weekly_summary_1_dt <- renderTable({
+        get_weekly_summary_table()
+    }, align = 'r', striped = TRUE, width = '100%')
+    
     # school_details_dt --------------------------------------------------------
     output$school_details_dt <- renderDT({
         df <- covid19_schools_active_with_demographics_most_recent[ , 2:8 ]
@@ -591,7 +618,9 @@ server <- function(input, output) {
     
     # clean_week_old_date_text -------------------------------------------------
     output $clean_week_old_date_text <- renderText ({
-        last_week_obtain()
+        dates <- last_week_obtain()
+        dateString <- paste(format(dates[[1]], '%d %B %Y'), "to", format(dates[[2]], '%d %B %Y'))
+        dateString
     })
     
     # cumulative_case_count_text -----------------------------------------------
