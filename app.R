@@ -80,31 +80,16 @@ get_weekly_summary_table <- function() {
     cn <- c(
         'collected_date', 
         'cumulative_school_related_cases', 
-        'new_total_school_related_cases', 
         'current_schools_with_cases', 
         'current_schools_closed'
     )
     df <- df[ , cn ]
-    #idx <- which(df$collected_date <= as.Date(now()))
-    #idx <- max(idx)
-    
-    #calling last_week_obtain() keeps producing could not find function errors??
-    #dates <- last_week_obtain()
-    
-    #pasting in function code to make it work for now
-    theDate <- as.Date(max(covid19_schools_active$reported_date)) - 7
-    while(weekdays(theDate) != "Friday"){
-        theDate <- theDate + 1
-    }
-    earlyDate <- theDate - 4
-    #dateString <- paste(format(earlyDate, '%d %B %Y'), "to", format(theDate, '%d %B %Y'))
-    dates <- list(earlyDate, theDate)
+    dates <- last_week_obtain()
     
     idx1 <- match(dates[[1]], df[,1])
     idx2 <- match(dates[[2]], df[,1])
     df <- rbind(df[idx1,], df[idx2,])
     
-    #df <- df[ (idx - 1):idx, ] #here, df becomes the last 2 rows itself
     colnames(df) <- str_replace_all(colnames(df), '_', ' ')
     
     df1 <- reshape2::melt(apply(df[ , -1 ], 2, diff))
@@ -122,7 +107,7 @@ get_weekly_summary_table <- function() {
     df$Percentage <- NA
     df[ 2, 'Percentage' ] <- round(df[ 2, 'Count' ] / schools_count, 4) * 1e2
     df[ 3, 'Percentage' ] <- round(df[ 3, 'Count' ] / schools_count, 4) * 1e2
-    df <- df[ c(1, 4, 3, 2), ]
+    df <- df[ c(1, 3, 2), ]
     df
 }
 
@@ -622,8 +607,6 @@ server <- function(input, output) {
     output$clean_date_reactive_text <- renderText({
         format(max(covid19_schools_active$reported_date), '%d %B %Y')
     })
-    
-    
     
     # clean_week_old_date_text -------------------------------------------------
     output $clean_week_old_date_text <- renderText ({
