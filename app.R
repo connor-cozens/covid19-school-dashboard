@@ -140,39 +140,52 @@ ui <- bootstrapPage(
                                           fixed = TRUE,
                                           draggable = TRUE, 
                                           height = 'auto',
+                                          h2('Quick View Daily Summary', align = 'right', style="font-size:200%;"),
                                           
-                                          tabsetPanel(
-                                              tabPanel(id = "daily",
-                                                       
-                                                       h2('Daily Summary', align = 'right', style="font-size:200%;"),
-                                                       
-                                                       # cumulative_case_count_text ---------
-                                                       h3(textOutput('cumulative_case_count_text'), align = 'right'),
-                                                       
-                                                       # clean_date_reactive_text -----------
-                                                       h6(textOutput('clean_date_reactive_text'), align = 'right'),
-                                                       
-                                                       # daily_summary_1_dt -----------------
-                                                       div(tableOutput('daily_summary_1_dt'), style = 'font-size: small; width: 100%'),
-                                                       
-                                                       h6('Drag this box to move it', align = 'right')
-                                                       ),
-                                              tabPanel(id = "weekly",
-                                                       
-                                                       h2('Weekly Summary', align = 'right', style="font-size:200%;"),
-                                                       
-                                                       h6(textOutput('clean_week_old_date_text'), align = 'right'),
-                                                       
-                                                       # daily_summary_1_dt -----------------
-                                                       div(tableOutput('weekly_summary_1_dt'), style = 'font-size: small; width: 100%'),
-                                                       
-                                                       h6('Drag this box to move it', align = 'right')
-                                                       
-                                              )
-                                          )
+                                          # cumulative_case_count_text ---------
+                                          h3(textOutput('cumulative_case_count_text'), align = 'right'),
                                           
+                                          # clean_date_reactive_text -----------
+                                          h6(textOutput('clean_date_reactive_text'), align = 'right'),
                                           
+                                          # daily_summary_1_dt -----------------
+                                          div(tableOutput('daily_summary_1_dt'), style = 'font-size: small; width: 100%'),
+                                          
+                                          h6('Drag this box to move it', align = 'right')
                             )
+                                          
+                                          #tabsetPanel(
+                                          #    tabPanel(id = "daily",
+                                          #             
+                                          #             h2('Quick View Daily Summary', align = 'right', style="font-size:200%;"),
+                                          #             
+                                          #             # cumulative_case_count_text ---------
+                                          #             h3(textOutput('cumulative_case_count_text'), align = 'right'),
+                                          #             
+                                          #             # clean_date_reactive_text -----------
+                                          #             h6(textOutput('clean_date_reactive_text'), align = 'right'),
+                                          #             
+                                          #             # daily_summary_1_dt -----------------
+                                          #             div(tableOutput('daily_summary_1_dt'), style = 'font-size: small; width: 100%'),
+                                          #             
+                                          #             h6('Drag this box to move it', align = 'right')
+                                          #             ),
+                                              #tabPanel(id = "weekly",
+                                              #         
+                                              #         h2('Weekly Summary', align = 'right', style="font-size:200%;"),
+                                              #         
+                                              #         h6(textOutput('clean_week_old_date_text'), align = 'right'),
+                                              #         
+                                              #         # daily_summary_1_dt -----------------
+                                              #         div(tableOutput('weekly_summary_1_dt'), style = 'font-size: small; width: 100%'),
+                                              #         
+                                              #         h6('Drag this box to move it', align = 'right')
+                                              #         
+                                              #)
+                                          #)
+                                          
+                                          
+                            #)
                             
                         )
                         
@@ -188,10 +201,10 @@ ui <- bootstrapPage(
                         h3('Daily Summary', align = 'left'),
                         div(tableOutput('daily_summary_2_dt'), style = 'font-size: small; width: 100%'),
                         hr(),
-                        # weekly_summary_2_dt -----------------------------------
-                        h3('Weekly Summary', align = 'left'),
-                        div(tableOutput('weekly_summary_2_dt'), style = 'font-size: small; width: 100%'),
-                        hr(),
+                        ## weekly_summary_2_dt -----------------------------------
+                        #h3('Weekly Summary', align = 'left'),
+                        #div(tableOutput('weekly_summary_2_dt'), style = 'font-size: small; width: 100%'),
+                        #hr(),
                         # school_details_dt ------------------------------------
                         h3('Search Function and Table', align = 'left'),
                         div('Search schools, boards, municipalities for confirmed cases of COVID-19.', width = '100%', align = 'left'),
