@@ -475,10 +475,14 @@ server <- function(input, output, session) {
                          incProgress(1, 'adding markers')
                          
                          #Add markers for schools with no cases
-                         basemap <- addMarkers(basemap, 
+                         basemap <- addCircleMarkers(basemap, 
                                                      data = get_schools_no_cases(), 
                                                      lng = ~longitude, 
-                                                     lat = ~latitude,
+                                                     lat = ~latitude, 
+                                                     radius = 2,
+                                                     weight = 1, 
+                                                     color = '#25AA00',
+                                                     fillOpacity = 1,
                                                      label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>Zero confirmed cases<br/></div>', 
                                                                      get_schools_no_cases()$`school name`) %>% lapply(htmltools::HTML), 
                                                      labelOptions = labelOptions(
