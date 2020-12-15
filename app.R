@@ -56,6 +56,29 @@ get_summary_table <- function() {
     df
 }
 
+#get_schools_no_cases
+# return dataframe from school_geocodes with schools that have cases removed
+get_schools_no_cases <- function() {
+    df <- cases_per_school
+    cn <- c(
+        'school_name', 
+        'city'
+    )
+    df <- df[ , cn ]
+    df2 <- school_demographics
+    cn2 <- c(
+        'school name',
+        'latitude',
+        'longitude'
+    )
+    
+    df2 <- df2[ , cn2]
+    #The following line may not be working correctly, it seems to catch schools randomly?
+    df2 <- df2[!(df2$`school name` %in% df$school_name), ,  drop = FALSE]
+    return(df2)
+}
+
+
 # INITIALIZATION ---------------------------------------------------------------
 
 # SHINY UI ---------------------------------------------------------------------
@@ -450,6 +473,18 @@ server <- function(input, output, session) {
                          
                          # add case data markers
                          incProgress(1, 'adding markers')
+                         
+                         #Add markers for schools with no cases
+                         basemap <- addMarkers(basemap, 
+                                                     data = get_schools_no_cases(), 
+                                                     lng = ~longitude, 
+                                                     lat = ~latitude,
+                                                     label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>Zero confirmed cases<br/></div>', 
+                                                                     get_schools_no_cases()$`school name`) %>% lapply(htmltools::HTML), 
+                                                     labelOptions = labelOptions(
+                                                         style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
+                                                         textsize = '15px', direction = 'auto'))
+                         
                          basemap <- addCircleMarkers(basemap, 
                                                      data = cases_per_school, 
                                                      lng = ~lon, 
@@ -479,8 +514,12 @@ server <- function(input, output, session) {
                                                          style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
                                                          textsize = '15px', direction = 'auto'))
                          
+                         
+                         
                          basemap
                      })
+        
+        
         
     })
     
