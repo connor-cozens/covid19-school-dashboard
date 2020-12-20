@@ -69,11 +69,23 @@ last_week_obtain <- function() {
     return(df)
 }
 
+# last_two_weeks_obtain ---------------------------------------------------------
+# Obtains the dates for 2 weeks ago Monday and last weeks Friday
+last_two_weeks_obtain <- function() {
+    theDate <- as.Date(max(covid19_schools_active$reported_date)) - 7
+    while(weekdays(theDate) != "Friday"){
+        theDate <- theDate + 1
+    }
+    earlyDate <- theDate - 11
+    df <- list(earlyDate, theDate)
+    return(df)
+}
+
 #' get_summary_table
 #' 
 #' generate Weekly summary table
-#' 
-get_weekly_summary_table <- function() {
+#' if timeFrame == TRUE, 7 days view, otherwise 14 days view
+get_weekly_summary_table <- function(timeFrame) {
     df <- covid19_schools_summary
     idx <- order(df$collected_date)
     df <- df[ idx, ]
@@ -84,7 +96,14 @@ get_weekly_summary_table <- function() {
         'current_schools_closed'
     )
     df <- df[ , cn ]
-    dates <- last_week_obtain()
+    if (timeFrame == TRUE) {
+        dates <- last_week_obtain()
+    }
+    if (timeFrame == FALSE) {
+        print("Here we are")
+        dates <- last_two_weeks_obtain()
+    }
+    #dates <- last_week_obtain()
     
     idx1 <- match(dates[[1]], df[,1])
     idx2 <- match(dates[[2]], df[,1])
@@ -161,12 +180,17 @@ ui <- bootstrapPage(
                                                        
                                                        h2('Weekly Summary', align = 'right', style="font-size:200%;"),
                                                        
-                                                       h6(textOutput('clean_week_old_date_text'), align = 'right'),
+                                                       # weeklyRadio -----------
+                                                       div(
+                                                       radioButtons(
+                                                           inputId = "weeklyRadio",
+                                                           label = strong("Select a timeframe:"),
+                                                           choices = list("7-day view", "14-day view"),
+                                                           inline = TRUE
+                                                       ), align = "right"),
                                                        
-                                                       # daily_summary_1_dt -----------------
-                                                       div(tableOutput('weekly_summary_1_dt'), style = 'font-size: small; width: 100%'),
-                                                       
-                                                       h6('Drag this box to move it', align = 'right')
+                                                       #whichWeekView ----------
+                                                       uiOutput("whichWeekView")
                                                        
                                               )
                                           )
@@ -188,9 +212,18 @@ ui <- bootstrapPage(
                         h3('Daily Summary', align = 'left'),
                         div(tableOutput('daily_summary_2_dt'), style = 'font-size: small; width: 100%'),
                         hr(),
-                        # weekly_summary_2_dt -----------------------------------
+                        # weeklyRadio2 -----------------------------------
                         h3('Weekly Summary', align = 'left'),
-                        div(tableOutput('weekly_summary_2_dt'), style = 'font-size: small; width: 100%'),
+                        div(
+                            radioButtons(
+                                inputId = "weeklyRadio2",
+                                label = strong("Select a timeframe:"),
+                                choices = list("7-day view", "14-day view"),
+                                inline = TRUE
+                            ), align = "right"),
+                        
+                        #whichWeekView2 ----------
+                        uiOutput("whichWeekView2"),
                         hr(),
                         # school_details_dt ------------------------------------
                         h3('Search Function and Table', align = 'left'),
@@ -562,6 +595,62 @@ server <- function(input, output) {
         fig
     })
     
+    # whichWeekView ------------------------------------------------------------
+    observeEvent(input$weeklyRadio,{
+        if (input$weeklyRadio == "7-day view"){
+            output$whichWeekView <- renderUI({
+                div(
+                h6(textOutput('clean_week_old_date_text'), align = 'right'),
+                
+                # weekly_summary_1_dt -----------------
+                div(tableOutput('weekly_summary_1_dt'), style = 'font-size: small; width: 100%'),
+                
+                h6('Drag this box to move it', align = 'right')
+                )
+            })
+        }
+        else {
+            output$whichWeekView <- renderUI({
+                div(
+                h6(textOutput('clean_two_weeks_old_date_text'), align = 'right'),
+                
+                # weekly_summary_3_dt -----------------
+                div(tableOutput('weekly_summary_3_dt'), style = 'font-size: small; width: 100%'),
+                
+                h6('Drag this box to move it', align = 'right')
+                )
+            })
+        }
+    })
+    
+    # whichWeekView2 ------------------------------------------------------------
+    observeEvent(input$weeklyRadio2,{
+        if (input$weeklyRadio2 == "7-day view"){
+            output$whichWeekView2 <- renderUI({
+                div(
+                    h6(textOutput('clean_week_old_date_text2'), align = 'right'),
+                    
+                    # weekly_summary_1_dt -----------------
+                    div(tableOutput('weekly_summary_4_dt'), style = 'font-size: small; width: 100%'),
+                    
+                    h6('Drag this box to move it', align = 'right')
+                )
+            })
+        }
+        else {
+            output$whichWeekView2 <- renderUI({
+                div(
+                    h6(textOutput('clean_two_weeks_old_date_text2'), align = 'right'),
+                    
+                    # weekly_summary_2_dt -----------------
+                    div(tableOutput('weekly_summary_2_dt'), style = 'font-size: small; width: 100%'),
+                    
+                    h6('Drag this box to move it', align = 'right')
+                )
+            })
+        }
+    })
+    
     # daily_summary_1_dt -------------------------------------------------------
     output$daily_summary_1_dt <- renderTable({
         get_summary_table()
@@ -574,12 +663,25 @@ server <- function(input, output) {
     
     # weekly_summary_1_dt -------------------------------------------------------
     output$weekly_summary_1_dt <- renderTable({
-        get_weekly_summary_table()
+        get_weekly_summary_table(TRUE) #FIX
     }, align = 'r', striped = TRUE, width = '100%')
     
     # weekly_summary_2_dt -------------------------------------------------------
     output$weekly_summary_2_dt <- renderTable({
-        get_weekly_summary_table()
+        get_weekly_summary_table(FALSE) #FIX
+    }, align = 'r', striped = TRUE, width = '100%')
+    
+    # 1 and 4, 2 and 3  have to exist separately because separate tabs can't use them at the same time
+    #IE one tab can't be using 1 and another tab be using 1 as well
+    
+    # weekly_summary_3_dt -------------------------------------------------------
+    output$weekly_summary_3_dt <- renderTable({
+        get_weekly_summary_table(FALSE) #FIX
+    }, align = 'r', striped = TRUE, width = '100%')
+    
+    # weekly_summary_4_dt -------------------------------------------------------
+    output$weekly_summary_4_dt <- renderTable({
+        get_weekly_summary_table(TRUE) #FIX
     }, align = 'r', striped = TRUE, width = '100%')
     
     # school_details_dt --------------------------------------------------------
@@ -611,7 +713,34 @@ server <- function(input, output) {
     # clean_week_old_date_text -------------------------------------------------
     output $clean_week_old_date_text <- renderText ({
         dates <- last_week_obtain()
-        dateString <- paste(format(dates[[1]], '%d %B %Y'), "to", format(dates[[2]], '%d %B %Y'))
+        #Cheating on the dates a little bit, but the data is only updated / reported Monday-Friday anyway
+        dateString <- paste(format(dates[[1]] - 1, '%d %B %Y'), "to", format(dates[[2]] + 1, '%d %B %Y'))
+        dateString
+    })
+    
+    # clean_two_weeks_old_date_text -------------------------------------------------
+    output $clean_two_weeks_old_date_text <- renderText ({
+        dates <- last_two_weeks_obtain()
+        #Cheating on the dates a little bit, but the data is only updated / reported Monday-Friday anyway
+        dateString <- paste(format(dates[[1]] - 1, '%d %B %Y'), "to", format(dates[[2]] + 1, '%d %B %Y'))
+        dateString
+    })
+    
+    #Duplicates for logic on separate tabs, two tabs can't be using the same one at the same time!
+    
+    # clean_week_old_date_text2 -------------------------------------------------
+    output $clean_week_old_date_text2 <- renderText ({
+        dates <- last_week_obtain()
+        #Cheating on the dates a little bit, but the data is only updated / reported Monday-Friday anyway
+        dateString <- paste(format(dates[[1]] - 1, '%d %B %Y'), "to", format(dates[[2]] + 1, '%d %B %Y'))
+        dateString
+    })
+    
+    # clean_two_weeks_old_date_text2 -------------------------------------------------
+    output $clean_two_weeks_old_date_text2 <- renderText ({
+        dates <- last_two_weeks_obtain()
+        #Cheating on the dates a little bit, but the data is only updated / reported Monday-Friday anyway
+        dateString <- paste(format(dates[[1]] - 1, '%d %B %Y'), "to", format(dates[[2]] + 1, '%d %B %Y'))
         dateString
     })
     
