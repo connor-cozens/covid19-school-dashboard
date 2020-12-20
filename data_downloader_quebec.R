@@ -12,6 +12,7 @@ library(httr)
 library(rvest)
 library(stringr)
 library(xts)
+library(tabulizer)
 
 # SETTINGS ---------------------------------------------------------------------
 
@@ -52,3 +53,68 @@ if (needs_refresh | is.na(needs_refresh)) {
 		Sys.sleep(1)
 	})
 }
+
+# quebec list of schools
+ts <- as.integer(now())
+url <- sprintf('https://cdn-contenu.quebec.ca/cdn-contenu/adm/min/education/publications-adm/covid-19/reseauScolaire_listeEcoles_ANG.pdf?%s', ts)
+fname_schools <- sprintf('%s/%s', data_dir, basename(url))
+fname_schools <- str_replace_all(fname_schools, '\\?.*', '')
+needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_schools)$mtime), units = 'hours') >= max_file_age_hrs
+if (needs_refresh | is.na(needs_refresh)) { 
+	GET(url, write_disk(fname_schools, overwrite = TRUE))
+}
+
+
+tbls <- extract_tables(fname_schools, pages = 1:get_n_pages(fname_schools)) # skip page 1 for now
+cols <- sapply(tbls, ncol)
+(table(cols))
+idx <- which(cols == 5)
+lapply(idx, function(x) {
+	# browser()
+	message(sprintf('page %s has 5 columns instead of 3, fixing', x))
+	tbl <- tbls[[ x ]]
+	
+	# get rid of header rows
+	tbl <- tbl[ 3:nrow(tbl), ]
+	
+	# name columns
+	colnames(tbl) <- c('region', 'board', 'school', 'extra1', 'extra2')
+	
+	# green highlighted columns in pdf get chopped up for some reason
+	# put the school name back together as best you can
+	idx1 <- which((tbl[ , 2 ] != '') & (tbl[ , 4 ] != ''))
+	# tbl[ sort(c(idx1, idx1 + 1)), ] # visualize
+	if (length(idx1) > 1) {
+		p1 <- apply(tbl[ idx1, 4:5 ], 1, paste0, collapse = ' ') %>% str_squish
+		p2 <- apply(tbl[ idx1 + 1, 3:5 ], 1, paste0, collapse = ' ') %>% str_squish	
+	} else {
+		p1 <- paste0(tbl[ idx1, 4:5 ], collapse = ' ') %>% str_squish
+		p2 <- paste0(tbl[ idx1 + 1, 3:5 ], collapse = ' ') %>% str_squish
+	}
+	tbl[ sort(c(idx1)), 3 ] <- paste(p1, p2)
+	
+	# clean up empty rows
+	idx1 <- which(tbl[ , 2 ] != '')
+	tbl <- tbl[ idx1, ]
+	
+	# remove garbage columns
+	tbl <- tbl[ , 1:3 ]
+	
+	# clean up whitespace
+	tbl <- apply(tbl, 2, str_replace_all, '\\s+', ' ')
+	tbl <- apply(tbl, 2, str_squish)
+	
+	# print for debug
+	# print(tbl)
+	
+	# assign
+	tbls[[ x ]] <<- tbl
+})
+
+idx <- which(cols == 2)
+lapply(idx, function(x) {
+	# browser()
+	message(sprintf('page %s has 2 columns instead of 3, fixing', x))
+	tbl <- tbls[[ x ]]
+	tbl[ 5:nrow(tbl), 1 ]
+})
