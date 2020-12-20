@@ -9,6 +9,7 @@
 # DEPENDENCIES -----------------------------------------------------------------
 
 library(httr)
+library(lubridate)
 library(rvest)
 library(stringr)
 library(xts)
