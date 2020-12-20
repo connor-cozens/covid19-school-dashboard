@@ -133,7 +133,7 @@ ui <- bootstrapPage(
                                           draggable = FALSE, 
                                           height = 'auto',
                                           # searchCity --------------------------
-                                          selectizeInput(inputId = "searchCity", label = "Search in City", choices = as.list(school_demographics$`city`), width = '100%', options = list(maxOptions = length(unique(school_demographics$`city`)))),
+                                          selectizeInput(inputId = "searchCity", label = strong("Search in City"), choices = as.list(school_demographics$`city`), width = '100%', options = list(maxOptions = length(unique(school_demographics$`city`)))),
                                           # schoolSearch -----------------------
                                           uiOutput("schoolSearch")
                             )
@@ -481,7 +481,7 @@ server <- function(input, output, session) {
                                                      lat = ~latitude, 
                                                      radius = 2,
                                                      weight = 1, 
-                                                     color = '#25AA00',
+                                                     color = '#3B3B3B',
                                                      fillOpacity = 1,
                                                      label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>Zero confirmed cases<br/></div>', 
                                                                      get_schools_no_cases()$`school name`) %>% lapply(htmltools::HTML), 
@@ -1010,7 +1010,7 @@ server <- function(input, output, session) {
     observeEvent(input$searchCity,{
         if (input$searchCity != ""){
             output$schoolSearch <- renderUI({
-                selectizeInput(inputId = "searchBar", label = "Search for School", choices = as.list(school_demographics$`school name`), selected = "", width = '100%', options = list(maxOptions = length(unique(school_demographics$`school name`)), placeholder = "Search"))
+                selectizeInput(inputId = "searchBar", label = strong("Search for School"), choices = as.list(school_demographics$`school name`), selected = "", width = '100%', options = list(maxOptions = length(unique(school_demographics$`school name`)), placeholder = "Search"))
             })
             updateSelectizeInput(session, "searchBar", choices = as.list(school_demographics$`school name`)[school_demographics$`city` == input$searchCity], selected = "", options = list(maxOptions = length(unique(school_demographics$`school name`)), placeholder = "Search"), server = TRUE)
         }
