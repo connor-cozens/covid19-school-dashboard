@@ -1,0 +1,10 @@
+# set server timezone to Canada/Eastern
+---
+
+- hosts: unconfigured_generic_server
+  remote_user: ubuntu
+  become: true
+  tasks:
+    - name: set timezone to Canada/Eastern
+      timezone:
+        name: Canada/Eastern

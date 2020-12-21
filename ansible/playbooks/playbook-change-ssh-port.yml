@@ -1,0 +1,16 @@
+# install OS packages required to support a data gatherer
+---
+
+- hosts: unconfigured_generic_server
+  remote_user: ubuntu
+  become: true
+  tasks:
+    - name: Setup alternate SSH port
+      lineinfile:
+        dest: "/etc/ssh/sshd_config"
+        regexp: "^Port"
+        line: "Port 63912"
+    - name: Restart sshd
+      service:
+        name: sshd
+        state: restarted

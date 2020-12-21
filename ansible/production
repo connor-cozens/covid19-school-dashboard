@@ -1,0 +1,5 @@
+[production_servers]
+
+
+[unconfigured_generic_server]
+shiny01 ansible_ssh_host=vps-dcf4820e.vps.ovh.ca ansible_port=63912

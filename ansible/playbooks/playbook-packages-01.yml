@@ -1,0 +1,20 @@
+# install OS packages required to support a shiny server web node with ossec hids
+---
+
+- hosts: unconfigured_generic_server
+  remote_user: ubuntu
+  become: true
+  tasks:
+    - name: Install list of packages
+      apt:
+        pkg: 
+          - ntp
+          - fail2ban
+          - build-essential
+          - htop
+          - iotop
+          - postfix # for ossec
+          - libevent-dev # for ossec
+          - zlib1g-dev # for ossec
+          - libssl-dev # for ossec
+        state: present
