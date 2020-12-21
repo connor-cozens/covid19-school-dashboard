@@ -17,4 +17,6 @@
           - libevent-dev # for ossec
           - zlib1g-dev # for ossec
           - libssl-dev # for ossec
+          - r-base # for shiny
+          - gdebi-core # for shiny
         state: present

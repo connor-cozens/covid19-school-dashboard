@@ -1,8 +1,8 @@
 # Data Gatherer Node Deployment Recipe
 
-For this example, assume we are configuring the server `vps-dcf4820e.vps.ovh.ca` 
+For this example, assume we are configuring the OVH VPS server `vps-dcf4820e.vps.ovh.ca` 
 
-1.   Log in to server as root using instructions in welcome email
+1.   Log in to server as user "ubuntu" using the instructions in your OVH welcome email
 
 `ssh ubuntu@vps-dcf4820e.vps.ovh.ca -p22`
 
@@ -131,6 +131,12 @@ ansible -i production -m shell -a 'reboot' -u ubuntu --become unconfigured_gener
 ```
 
 17. install shiny server
+
+```
+ansible -i production -m shell -a "R -e 'install.packages(\"shiny\", repos=\"https://cran.rstudio.com/\")' -u ubuntu --become unconfigured_generic_server
+ansible -i production -m shell -a "wget https://download3.rstudio.org/ubuntu-14.04/x86_64/shiny-server-1.5.15.953-amd64.deb; sudo gdebi shiny-server-1.5.15.953-amd64.deb" -u ubuntu unconfigured_generic_server
+ansible -i production -m shell -a "service shiny-server restart; service shiny-server status" -u ubuntu --become unconfigured_generic_server
+```
 
 18. update shiny configuration
 
