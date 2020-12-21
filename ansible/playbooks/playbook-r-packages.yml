@@ -1,0 +1,30 @@
+# Add Ubuntu R repo to the /etc/apt/sources.list file
+
+---
+
+- hosts: unconfigured_generic_server
+  remote_user: ubuntu
+  tasks:
+    - name: Install required R packages using all repos
+      command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "setRepositories(ind = 1:9); if (! ('{{ item }}' %in% installed.packages()[ , 'Package' ])) install.packages(pkgs = '{{ item }}', repos = c('https://cloud.r-project.org'))"
+      with_items:
+        - data.table
+        - DT
+        - ggmap
+        - httr
+        - leaflet
+        - lubridate
+        - plotly
+        - readxl
+        - RColorBrewer
+        - reshape2
+        - rgdal
+        - rgeos
+        - rvest
+        - shiny
+        - shinythemes
+        - sp
+        - stringdist
+        - stringr
+        - xts
+        - utils

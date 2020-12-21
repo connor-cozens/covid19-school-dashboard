@@ -55,7 +55,7 @@ ansible-playbook playbooks/playbook-apply-inventory-hostname.yml -i production
 9.   Install the OS packages required to support data gatherer functionality:
 
 ```
-ansible-playbook playbooks/playbook-packages-01.yml -i production
+ansible-playbook playbooks/playbook-os-packages.yml -i production
 ```
 
 10.   Start the NTP service
@@ -137,6 +137,14 @@ ansible -i production -m shell -a "R -e 'install.packages(\"shiny\", repos=\"htt
 ansible -i production -m shell -a "wget https://download3.rstudio.org/ubuntu-14.04/x86_64/shiny-server-1.5.15.953-amd64.deb; sudo gdebi shiny-server-1.5.15.953-amd64.deb" -u ubuntu unconfigured_generic_server
 ansible -i production -m shell -a "service shiny-server restart; service shiny-server status" -u ubuntu --become unconfigured_generic_server
 ```
+
+18. install R packages required to support the school dashboard shiny web application
+
+```
+ansible-playbook playbooks/playbook-r-packages.yml -i production
+ansible -i production -m shell -a "service shiny-server restart; service shiny-server status" -u ubuntu --become unconfigured_generic_server
+```
+
 
 18. update shiny configuration
 
