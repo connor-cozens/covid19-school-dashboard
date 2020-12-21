@@ -14,7 +14,7 @@ For this example, assume we are configuring the OVH VPS server `vps-dcf4820e.vps
 
 `sudo sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config; sudo systemctl restart ssh`
 
-4.   Deploy your ssh public key to ubuntu and root user on all new servers
+4.   Deploy your ssh public key to ubuntu and root users on all new servers
 
 ```
 ssh-copy-id ubuntu@vps-dcf4820e.vps.ovh.ca
@@ -86,7 +86,7 @@ ansible-playbook playbooks/playbook-change-ssh-port.yml -i production
 shiny01 ansible_ssh_host=vps-dcf4820e.vps.ovh.ca ansible_port=63912
 ```
 
-14.   Download, compile and configure ossec (see also: https://github.com/ossec/ossec-hids/issues/1663 and https://www.libellux.com/ossec/#troubleshooting)
+14.   Download, compile and configure ossec (see also: https://github.com/ossec/ossec-hids/issues/1663 and https://www.libellux.com/ossec/#troubleshooting). Perform the following commands on the server (TODO: automate this process with a playbook):
 
 ```
 wget https://github.com/ossec/ossec-hids/archive/3.6.0.tar.gz
