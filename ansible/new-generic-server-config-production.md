@@ -49,13 +49,13 @@ ansible -i production -m shell -a 'reboot' -u ubuntu --become unconfigured_gener
 8.   Change server hostname to shiny_xx (as specified in the ansible/production inventory file) and add the new name to /etc/hosts
 
 ```
-ansible-playbook playbooks/playbook-apply-inventory-hostname.yml -i production
+ansible-playbook playbooks/playbook-hostname.yml -i production
 ```
 
 9.   Install the OS packages required to support data gatherer functionality:
 
 ```
-ansible-playbook playbooks/playbook-os-packages.yml -i production
+ansible-playbook playbooks/playbook-packages-os.yml -i production
 ```
 
 10.   Start the NTP service
@@ -67,13 +67,13 @@ ansible -i production -m shell -a 'service ntp start && ntpq -p' -u ubuntu --bec
 11.   Set server timezone is set to Canada/Eastern
 
 ```
-ansible-playbook playbooks/playbook-set-timezone.yml -i production
+ansible-playbook playbooks/playbook-timezone.yml -i production
 ```
 
 12.   Change SSH port from 22 to 63912
 
 ```
-ansible-playbook playbooks/playbook-change-ssh-port.yml -i production
+ansible-playbook playbooks/playbook-ssh.yml -i production
 ```
 
 13.   Update ansible/production inventory file to reflect the new ssh port
@@ -120,7 +120,7 @@ sudo service ossec status
 15. Configure ufw firewall on new nodes to allow access from administrator locations
 
 ```
-ansible-playbook playbooks/playbook-configure-ufw.yml -i production
+ansible-playbook playbooks/playbook-ufw.yml -i production
 ansible -i production -m shell -a 'ufw status numbered' -u ubuntu --become unconfigured_generic_server
 ```
 
@@ -141,7 +141,7 @@ ansible -i production -m shell -a "service shiny-server restart; service shiny-s
 18. install R packages required to support the school dashboard shiny web application
 
 ```
-ansible-playbook playbooks/playbook-r-packages.yml -i production
+ansible-playbook playbooks/playbook-packages-r.yml -i production
 ansible -i production -m shell -a "service shiny-server restart; service shiny-server status" -u ubuntu --become unconfigured_generic_server
 ```
 
