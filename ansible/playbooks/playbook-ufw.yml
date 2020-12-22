@@ -17,3 +17,6 @@
         - 96.21.63.237/32 # admin 1 office
         - 38.69.157.15/32 # admin 2 office
         # - XXX.XXX.XXX.XXX/32 # admin 3 office
+        # - XXX.XXX.XXX.XXX/32 # cloudflare ip 1
+        # - XXX.XXX.XXX.XXX/32 # cloudflare ip 2
+        # - XXX.XXX.XXX.XXX/32 # cloudflare ip 3
