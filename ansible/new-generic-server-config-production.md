@@ -6,7 +6,7 @@
 sudo snap install multipass --classic --beta  
 ```
 
-2. update the cloud-config.yaml to include your ssh public key
+2. update the multipass-instance-config.yaml to include your ssh public key
 
 3. launch multipass instance to test this recipe
 
