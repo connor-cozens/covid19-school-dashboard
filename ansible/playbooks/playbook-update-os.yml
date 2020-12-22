@@ -1,0 +1,13 @@
+# update os on all servers
+---
+
+- hosts: unconfigured_generic_server, production_servers
+  remote_user: ubuntu
+  become: true
+  tasks:
+  - name: apt-get update, dist-upgrade, autoclean, autoremove on all hosts to keep oses fresh and shiny
+    apt:
+      autoclean: yes
+      autoremove: yes
+      update_cache: yes
+      upgrade: dist

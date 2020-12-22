@@ -53,10 +53,7 @@ shiny01 ansible_ssh_host=vps-dcf4820e.vps.ovh.ca ansible_port=22
 5. Update the OS on all new servers
 
 ```
-ansible -i production -a "apt-get clean all" -u ubuntu --become unconfigured_generic_server
-ansible -i production -m apt -a "update_cache=yes upgrade=dist autoremove=yes autoclean=yes" -u ubuntu --become unconfigured_generic_server
-ansible -i production -a "apt-get -y autoremove" -u ubuntu --become unconfigured_generic_server
-ansible -i production -a "apt-get -y autoclean" -u ubuntu --become unconfigured_generic_server
+ansible-playbook playbooks/playbook-update-os.yml -i production
 ```
 
 6. Change server hostname to shiny_xx (as specified in the ansible/production inventory file) and add the new name to /etc/hosts

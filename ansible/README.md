@@ -21,7 +21,7 @@ sudo apt-get install ansible
 ## playbook: update all servers apt-get dist-upgrade
 
 ```
-ansible-playbook playbooks/unconfigured-generic-server/playbook-production-update-os-all-servers.yml -i production_servers
+ansible-playbook playbooks/playbook-update-os.yml -i production
 ```
 
 # general
@@ -29,18 +29,18 @@ ansible-playbook playbooks/unconfigured-generic-server/playbook-production-updat
 ## shell: basic diagnostic commands
 
 ```
-ansible -i production -m ping all
-ansible -i production -m shell -a "whoami" all
-ansible -i production -m shell -a "free -m" all
-ansible -i production -m shell -a "grep -c ^processor /proc/cpuinfo" all
-ansible -i production -m shell -a "cat /proc/cpuinfo | grep 'model name' | uniq" all
-ansible -i production -m shell -a "ifconfig" all
-ansible -i production -m shell -a "hostname -A" all
+ansible -i production -m ping -u ubuntu all
+ansible -i production -m shell -a "whoami" -u ubuntu all
+ansible -i production -m shell -a "free -m" -u ubuntu all
+ansible -i production -m shell -a "grep -c ^processor /proc/cpuinfo" -u ubuntu all
+ansible -i production -m shell -a "cat /proc/cpuinfo | grep 'model name' | uniq" -u ubuntu all
+ansible -i production -m shell -a "ifconfig" -u ubuntu all
+ansible -i production -m shell -a "hostname -A" -u ubuntu all
 ansible -i production -m shell -a "cat /etc/hosts" --become -u ubuntu all
-ansible -i production -m shell -a "df -h" all
+ansible -i production -m shell -a "df -h" -u ubuntu all
 ansible -i production -m shell -a "ufw status numbered" --become -u ubuntu all
 ansible -i production -m shell -a "service ossec restart && service ossec status" --become -u ubuntu all
-ansible -i production -m shell -a "Rscript -e 'R.Version()[[ \"version.string\" ]]'" all
+ansible -i production -m shell -a "Rscript -e 'R.Version()[[ \"version.string\" ]]'" -u ubuntu all
 ansible -i production -m shell -a "service shiny-server status" --become -u ubuntu all
 ```
 
