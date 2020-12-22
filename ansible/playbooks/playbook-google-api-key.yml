@@ -1,0 +1,20 @@
+# playbook to allow wheel group passwordless sudo
+# add user ubuntu to wheel group
+---
+
+- hosts: shiny01
+  remote_user: ubuntu
+  vars:
+    sudoers:
+    - ubuntu
+  vars_prompt:
+    - name: apikey
+      prompt: What google maps api key would you like to inject into data_downloader.R?
+      private: no
+  tasks:
+    - name: Enter the google maps api key into the data_downloader.R script
+      lineinfile:
+        dest: /home/ubuntu/ontario-covid19-dashboard/data_downloader.R
+        state: present
+        regexp: '^google_api_key'
+        line: "google_api_key <- '{{apikey}}' # you need a google api key with maps javascript api and geocoding api enabled"

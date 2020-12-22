@@ -62,7 +62,7 @@ ansible-playbook playbooks/playbook-update-os.yml -i production
 ansible-playbook playbooks/playbook-hostname.yml -i production
 ```
 
-7. Install the OS packages required to support data gatherer functionality:
+7. Install the OS packages required to support dashboard functionality:
 
 ```
 ansible-playbook playbooks/playbook-packages-os.yml -i production
@@ -167,12 +167,20 @@ ansible -i production -m shell -a 'rm -Rf ~/ontario-covid19-dashboard; env GIT_S
 ansible-playbook playbooks/playbook-shiny-server.yml -i production
 ```
 
-17. Reboot all new servers
+17. Inject google maps api key into data_downloader.R script
+
+```
+ansible-playbook playbooks/playbook-google-api-key.yml -i production
+```
+
+18. Reboot all new servers
 
 ```
 ansible -i production -m shell -a 'reboot' -u ubuntu --become unconfigured_generic_server
 ```
 
-18. Test functionality
+19. Test functionality
+
+Visit the following page in a web browser to ensure the dashboard is functional: http://vps-dcf4820e.vps.ovh.ca/
 
 19. If all is working as expected, modify the ansible/production inventory files so that the new nodes are moved from the `[unconfigured_generic_server]` section to the appropriate section in the production hosts inventory file
