@@ -18,5 +18,7 @@
           - zlib1g-dev # for ossec
           - libssl-dev # for ossec
           - r-base # for shiny
-          - gdebi-core # for shiny
+          - gdebi-core # for shiny-server deb package installation
+          - libcurl4-openssl-dev # for curl, httr r packages
+          - libgdal-dev # for rgdal r package
         state: present

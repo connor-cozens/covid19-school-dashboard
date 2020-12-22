@@ -5,6 +5,10 @@
 - hosts: unconfigured_generic_server
   remote_user: ubuntu
   tasks:
+    - name: create local package install directory
+      file:
+        path: /home/ubuntu/R/x86_64-pc-linux-gnu-library/3.6
+        state: directory
     - name: Install required R packages using all repos
       command: /usr/bin/Rscript --slave --no-save --no-restore-history -e "setRepositories(ind = 1:9); if (! ('{{ item }}' %in% installed.packages()[ , 'Package' ])) install.packages(pkgs = '{{ item }}', repos = c('https://cloud.r-project.org'))"
       with_items:
@@ -27,4 +31,3 @@
         - stringdist
         - stringr
         - xts
-        - utils

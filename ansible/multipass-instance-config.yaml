@@ -1,0 +1,5 @@
+users:
+  - name: ubuntu
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDbrcaEPbAA9QfIlu3kaG6vD0uzsmYO4Ll79KsbjsvRFjjeWCZF4jYXG6KwUDw1XhQPRbb92CKxeSOv1aoBFUcdT7s6GWn3/L92y/W5N4NHaFQDJ3yO5zxOqfnJ0vqRp70gSyidyMt9U4rAPhyzo3SPYPLHsIbwocVgEtALgWSgsHLK+PZBcsSnFZOMEEhfEwDe37TztyuHxkjYnnocrOJEZq3VJcmI9quN4du9I0yx0fg/MnwZz22JgVaDOkHizdDsM8A89r1+FTScn348+ygmR5gNyJ9f/llbCSfAFyYZ20Oy8RiF33ba29jFx55PQ/YCJfQCyVIJpgd1VuLbBjLXTLkUFxZ9xRDJFfIyMuNZGkZdcd/WVq1kULzRMQItiKWWZhoRB0wjW6E3NfAa1qGCBSrKPc49Xg6J02lyjfsl8YmMuaW+0NZKkEYdw5k3nTlWeSuzYvtbeGdEgkbzpG5joIsTzySo8eHQOCN8PKPjCF9RCPIfGHW/h26K9rTBkPzlD90sIH6x1o2/dW2bznWQ5ZRs2sByS8mO4S0oq+pbsVcoSgOIM+3ewWQAKETqkptmwf1mC5Ni++a3m7YVzGqUyu5DDTcIgnwOOig5PskEhj2FWvmPinhQ0rvt9Y6WytiVN4yhAnVqF1zqNp+S4vFfD2MDenPHm5yCuahfbX3huw== br00t@enceladus # put your ssh key here
+      - passwd $6$rounds=4096$iYB4aKIHKe2Caa$hWFFYSfy90FdHHNkhIdLJwMeHBL.WY5zBEEo5AiSC.aNx5acA8V.iKL.SZNCoozoYj.V/Lr2oVmFVWXSOA62o. # password123!, generate with: mkpasswd --method=SHA-512 --rounds=4096

@@ -1,4 +1,24 @@
-# Data Gatherer Node Deployment Recipe
+# Multipass virtual instance setup
+
+1. install multipass (https://snapcraft.io/multipass)
+
+```
+sudo snap install multipass --classic --beta  
+```
+
+2. update the cloud-config.yaml to include your ssh public key
+
+3. launch multipass instance to test this recipe
+
+```
+multipass stop covid19schooldash
+multipass delete covid19schooldash
+multipass purge
+multipass launch --cloud-init multipass-instance-config.yaml --name covid19schooldash --disk 50G --mem 4G
+multipass info covid19schooldash
+```
+
+# Shiny web application server deployment recipe
 
 For this example, assume we are configuring the OVH VPS server `vps-dcf4820e.vps.ovh.ca` 
 
@@ -14,7 +34,13 @@ ssh-copy-id ubuntu@vps-dcf4820e.vps.ovh.ca
 ssh ubuntu@vps-dcf4820e.vps.ovh.ca -p22
 ```
 
-3. Add all new hosts you want to configure to the ansible/production file (add them under the `[unconfigured_generic_server]` section). Here is an example:
+3. Make user "ubuntu" passwordless sudoer
+
+```
+ansible-playbook -i production --ask-become-pass playbooks/playbook-sudoers.yml
+```
+
+4. Add all new hosts you want to configure to the ansible/production file (add them under the `[unconfigured_generic_server]` section). Here is an example:
 
 ```
 [production_servers]
@@ -24,19 +50,13 @@ ssh ubuntu@vps-dcf4820e.vps.ovh.ca -p22
 shiny01 ansible_ssh_host=vps-dcf4820e.vps.ovh.ca ansible_port=22
 ```
 
-4. Update the OS on all new servers
+5. Update the OS on all new servers
 
 ```
 ansible -i production -a "apt-get clean all" -u ubuntu --become unconfigured_generic_server
 ansible -i production -m apt -a "update_cache=yes upgrade=dist autoremove=yes autoclean=yes" -u ubuntu --become unconfigured_generic_server
 ansible -i production -a "apt-get -y autoremove" -u ubuntu --become unconfigured_generic_server
 ansible -i production -a "apt-get -y autoclean" -u ubuntu --become unconfigured_generic_server
-```
-
-5. Reboot all new servers
-
-```
-ansible -i production -m shell -a 'reboot' -u ubuntu --become unconfigured_generic_server
 ```
 
 6. Change server hostname to shiny_xx (as specified in the ansible/production inventory file) and add the new name to /etc/hosts
@@ -110,35 +130,51 @@ sudo service ossec start
 sudo service ossec status
 ```
 
-13. Configure ufw firewall on new nodes to allow access from administrator locations
+13. Configure ufw firewall on new nodes to allow access from administrator locations (don't do this in multipass test environment!)
 
 ```
 ansible-playbook playbooks/playbook-ufw.yml -i production
 ansible -i production -m shell -a 'ufw status numbered' -u ubuntu --become unconfigured_generic_server
 ```
 
-14. Reboot all new servers
+14. install shiny server
 
 ```
-ansible -i production -m shell -a 'reboot' -u ubuntu --become unconfigured_generic_server
-```
-
-15. install shiny server
-
-```
-ansible -i production -m shell -a "R -e 'install.packages(\"shiny\", repos=\"https://cran.rstudio.com/\")' -u ubuntu --become unconfigured_generic_server
-ansible -i production -m shell -a "wget https://download3.rstudio.org/ubuntu-14.04/x86_64/shiny-server-1.5.15.953-amd64.deb; sudo gdebi shiny-server-1.5.15.953-amd64.deb" -u ubuntu unconfigured_generic_server
+ansible -i production -m shell -a "wget https://download3.rstudio.org/ubuntu-14.04/x86_64/shiny-server-1.5.15.953-amd64.deb; gdebi -n shiny-server-1.5.15.953-amd64.deb" -u ubuntu --become unconfigured_generic_server
 ansible -i production -m shell -a "service shiny-server restart; service shiny-server status" -u ubuntu --become unconfigured_generic_server
 ```
 
-16. install R packages required to support the school dashboard shiny web application
+15. install R packages required to support the school dashboard shiny web application
 
 ```
 ansible-playbook playbooks/playbook-packages-r.yml -i production
 ansible -i production -m shell -a "service shiny-server restart; service shiny-server status" -u ubuntu --become unconfigured_generic_server
 ```
 
-17. update shiny configuration
+16. check out source code for covid19 dashboard application from gitlab
+
+```
+ansible -i production -m shell -a 'cat /dev/zero | ssh-keygen -q -N ""; echo; echo; cat /home/ubuntu/.ssh/id_rsa.pub' -u ubuntu unconfigured_generic_server
+```
+
+take the public keys and add them to the ssh keys for your user on gitlab
+
+```
+ansible -i production -m shell -a 'ssh-keyscan gitlab.com >> ~/.ssh/known_hosts' -u ubuntu unconfigured_generic_server
+ansible -i production -m shell -a 'rm -Rf ~/ontario-covid19-dashboard; git clone git@gitlab.com:br00t/ontario-covid19-dashboard.git' -u ubuntu unconfigured_generic_server
+```
+
+16. update shiny configuration
+
+```
+ansible-playbook playbooks/playbook-shiny-server.yml -i production
+```
+
+17. Reboot all new servers
+
+```
+ansible -i production -m shell -a 'reboot' -u ubuntu --become unconfigured_generic_server
+```
 
 18. Test functionality
 
