@@ -2,4 +2,6 @@
 
 
 [unconfigured_generic_server]
-shiny01 ansible_ssh_host=vps-dcf4820e.vps.ovh.ca ansible_port=63912
+shiny01 ansible_ssh_host=vps-dcf4820e.vps.ovh.ca ansible_port=22
+shiny02 ansible_ssh_host=XXX.vps.ovh.ca ansible_port=22
+# shiny02 ansible_ssh_host=10.234.185.88 ansible_port=63912
