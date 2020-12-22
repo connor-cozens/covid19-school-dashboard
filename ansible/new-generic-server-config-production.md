@@ -161,7 +161,7 @@ take the public keys and add them to the ssh keys for your user on gitlab
 
 ```
 ansible -i production -m shell -a 'ssh-keyscan gitlab.com >> ~/.ssh/known_hosts' -u ubuntu unconfigured_generic_server
-ansible -i production -m shell -a 'rm -Rf ~/ontario-covid19-dashboard; git clone git@gitlab.com:br00t/ontario-covid19-dashboard.git' -u ubuntu unconfigured_generic_server
+ansible -i production -m shell -a 'rm -Rf ~/ontario-covid19-dashboard; env GIT_SSL_NO_VERIFY=true git clone git@gitlab.com:br00t/ontario-covid19-dashboard.git' -u ubuntu unconfigured_generic_server
 ```
 
 16. update shiny configuration
