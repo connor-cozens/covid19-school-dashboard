@@ -1,6 +1,6 @@
 [production_servers]
-shiny01 ansible_ssh_host=vps-dcf4820e.vps.ovh.ca ansible_port=22
+shiny01 ansible_ssh_host=vps-dcf4820e.vps.ovh.ca ansible_port=63912
 
 [unconfigured_generic_server]
-shiny02 ansible_ssh_host=XXX.vps.ovh.ca ansible_port=22
+shiny02 ansible_ssh_host=vps-6bb5a26c.vps.ovh.ca ansible_port=22
 # shiny02 ansible_ssh_host=10.234.185.88 ansible_port=63912
