@@ -34,13 +34,7 @@ ssh-copy-id ubuntu@vps-dcf4820e.vps.ovh.ca
 ssh ubuntu@vps-dcf4820e.vps.ovh.ca -p22
 ```
 
-3. Make user "ubuntu" passwordless sudoer
-
-```
-ansible-playbook -i production --ask-become-pass playbooks/playbook-sudoers.yml
-```
-
-4. Add all new hosts you want to configure to the ansible/production file (add them under the `[unconfigured_generic_server]` section). Here is an example:
+3. Add all new hosts you want to configure to the ansible/production file (add them under the `[unconfigured_generic_server]` section). Here is an example:
 
 ```
 [production_servers]
@@ -48,6 +42,12 @@ ansible-playbook -i production --ask-become-pass playbooks/playbook-sudoers.yml
 
 [unconfigured_generic_server]
 shiny01 ansible_ssh_host=vps-dcf4820e.vps.ovh.ca ansible_port=22
+```
+
+4. Make user "ubuntu" passwordless sudoer
+
+```
+ansible-playbook -i production --ask-become-pass playbooks/playbook-sudoers.yml
 ```
 
 5. Update the OS on all new servers
@@ -113,7 +113,7 @@ en
 local
 /var/ossec
 y
-peter.taylor@taypeinternational.com
+admin@covid19schooldashboard.com
 y
 y
 y
