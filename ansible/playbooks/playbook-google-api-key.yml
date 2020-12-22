@@ -2,7 +2,7 @@
 # add user ubuntu to wheel group
 ---
 
-- hosts: shiny01
+- hosts: all
   remote_user: ubuntu
   vars:
     sudoers:
