@@ -8,6 +8,9 @@ library(shinythemes)
 library(sp)
 library(plotly)
 library(xts)
+# library(renv)
+
+# renv::init()
 
 # LOAD DATA --------------------------------------------------------------------
 
@@ -1048,3 +1051,6 @@ server <- function(input, output) {
 
 # RUN THE APPLICATION ----------------------------------------------------------
 shinyApp(ui = ui, server = server)
+
+# DEPENDENCY MANAGEMENT --------------------------------------------------------
+# renv::snapshot()
