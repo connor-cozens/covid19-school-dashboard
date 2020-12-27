@@ -184,3 +184,35 @@ ansible -i production -m shell -a 'reboot' -u ubuntu --become unconfigured_gener
 Visit the following page in a web browser to ensure the dashboard is functional: http://vps-dcf4820e.vps.ovh.ca/
 
 19. If all is working as expected, modify the ansible/production inventory files so that the new nodes are moved from the `[unconfigured_generic_server]` section to the appropriate section in the production hosts inventory file
+
+# Alternate Approach
+
+Containerize the application and deploy to kubernetes cluster(https://www.statworx.com/at/blog/how-to-dockerize-shinyapps/, https://rstudio.github.io/renv/articles/renv.html, https://towardsdatascience.com/deploy-rshiny-on-kubernetes-with-a-helm-chart-fa07e4572942)
+
+1. Build docker image of shiny app
+
+```
+cd ~/R/workspace/experimental-code/covid19-ontario-schools
+sudo docker build -t covid19schooldashboard .
+```
+
+2. Push the docker image into docker hub per https://ropenscilabs.github.io/r-docker-tutorial/04-Dockerhub.html, you will need dockerhub login credentials
+
+```
+sudo docker login --username=br00t
+sudo docker images
+docker tag <IMAGE_ID> br00t/covid19schooldashboard:<TAG>
+docker push br00t/covid19schooldashboard:<TAG>
+```
+
+3. create OVH kubernetes cluster and obtain the kubeconfig.yml file per https://docs.ovh.com/ca/en/kubernetes/creating-a-cluster/
+
+3. Use `helm` to deploy the application to OVH kubernetes cluster 
+
+```
+helm --kubeconfig kubeconfig.yml dep up covid19
+helm --kubeconfig kubeconfig.yml uninstall covid19
+helm --kubeconfig kubeconfig.yml upgrade --install covid19 ./covid19
+kubectl --kubeconfig kubeconfig.yml get pods
+kubectl --kubeconfig kubeconfig.yml get svc
+```
