@@ -160,6 +160,9 @@ ui <- bootstrapPage(
                                           draggable = TRUE, 
                                           height = 'auto',
                                           
+                                          tags$style(HTML(".tabbable > .nav > li[class=active] > a {color:#e95420;}")),
+                                          tags$style(HTML(".tabbable > .nav > li > a {color:#777777;}")),
+                                          
                                           tabsetPanel(
                                               tabPanel(id = "daily",
                                                        
