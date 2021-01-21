@@ -66,14 +66,7 @@ get_schools_no_cases <- function() {
     )
     df <- df[ , cn ]
     df2 <- school_demographics
-    cn2 <- c(
-        'school name',
-        'latitude',
-        'longitude'
-    )
     
-    df2 <- df2[ , cn2]
-    #The following line may not be working correctly, it seems to catch schools randomly?
     df2 <- df2[!(df2$`school name` %in% df$school_name), ,  drop = FALSE]
     return(df2)
 }
@@ -133,7 +126,7 @@ ui <- bootstrapPage(
                                           draggable = FALSE, 
                                           height = 'auto',
                                           # searchCity --------------------------
-                                          selectizeInput(inputId = "searchCity", label = strong("Search in City"), choices = as.list(school_demographics$`city`), width = '100%', options = list(maxOptions = length(unique(school_demographics$`city`)))),
+                                          selectizeInput(inputId = "searchCity", label = strong("Search in Town / City"), choices = as.list(school_demographics$`city`), width = '100%', options = list(maxOptions = length(unique(school_demographics$`city`)))),
                                           # schoolSearch -----------------------
                                           uiOutput("schoolSearch")
                             )
@@ -475,16 +468,28 @@ server <- function(input, output, session) {
                          incProgress(1, 'adding markers')
                          
                          #Add markers for schools with no cases
-                         basemap <- addCircleMarkers(basemap, 
+                         basemap <- addCircles(basemap, 
                                                      data = get_schools_no_cases(), 
                                                      lng = ~longitude, 
                                                      lat = ~latitude, 
-                                                     radius = 2,
+                                                     radius = 50,
                                                      weight = 1, 
-                                                     color = '#3B3B3B',
+                                                     color = '#dfd700',
                                                      fillOpacity = 1,
-                                                     label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>Zero confirmed cases<br/></div>', 
-                                                                     get_schools_no_cases()$`school name`) %>% lapply(htmltools::HTML), 
+                                                     label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Parents have some university education: %s%%<br/><strong>Zero Confirmed Cases</strong></div>', 
+                                                                     get_schools_no_cases()$`school name`,
+                                                                     get_schools_no_cases()$city,
+                                                                     get_schools_no_cases()$`school level`,
+                                                                     get_schools_no_cases()$`board name`,
+                                                                     get_schools_no_cases()$`school language`,
+                                                                     get_schools_no_cases()$enrolment, 
+                                                                     get_schools_no_cases()$`percentage of school-aged children who live in low-income households`, 
+                                                                     get_schools_no_cases()$`percentage of students whose first language is not english`, 
+                                                                     get_schools_no_cases()$`percentage of students who are new to canada from a non-english speaking country`, 
+                                                                     get_schools_no_cases()$`percentage of students whose first language is not english`, 
+                                                                     get_schools_no_cases()$`percentage of students who are new to canada from a non-french speaking country`, 
+                                                                     get_schools_no_cases()$`percentage of students whose parents have some university education`
+                                                                     ) %>% lapply(htmltools::HTML), 
                                                      labelOptions = labelOptions(
                                                          style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
                                                          textsize = '15px', direction = 'auto'))
