@@ -193,7 +193,20 @@ Containerize the application and deploy to kubernetes cluster(https://www.statwo
 
 ```
 cd ~/R/workspace/experimental-code/covid19-ontario-schools
-sudo docker build -t covid19schooldashboard .
+sudo DOCKER_BUILDKIT=1 docker build --ssh default=~/.ssh/covid19schooldashboard/id_rsa . # build with ssh agent to forward keys into machine
+```
+
+2. test the image, this will launch the image attached so you can see console output from the shiny app, visit web browser http://localhost:3838 to test the web app
+
+```
+sudo docker run -p localhost:3838:3838 covid19schooldashboard
+```
+
+alternately you can launch the image detached:
+
+```
+sudo docker run -d -p localhost:3838:3838 covid19schooldashboard
+sudo docker ps
 ```
 
 2. Push the docker image into docker hub per https://ropenscilabs.github.io/r-docker-tutorial/04-Dockerhub.html, you will need dockerhub login credentials
@@ -207,6 +220,15 @@ docker push br00t/covid19schooldashboard:<TAG>
 
 3. create OVH kubernetes cluster and obtain the kubeconfig.yml file per https://docs.ovh.com/ca/en/kubernetes/creating-a-cluster/
 
+4. create registry credentials per: 
+https://stackoverflow.com/questions/49669077/helm-chart-deployment-and-private-docker-repository
+https://helm.sh/docs/howto/charts_tips_and_tricks/#creating-image-pull-secrets
+https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+
+```
+kubectl create secret docker-registry regcred --docker-server=<your-registry-server> --docker-username=<your-name> --docker-password=<your-pword> --docker-email=<your-email>
+```
+
 3. Use `helm` to deploy the application to OVH kubernetes cluster 
 
 ```
@@ -216,3 +238,5 @@ helm --kubeconfig kubeconfig.yml upgrade --install covid19 ./covid19
 kubectl --kubeconfig kubeconfig.yml get pods
 kubectl --kubeconfig kubeconfig.yml get svc
 ```
+
+
