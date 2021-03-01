@@ -149,7 +149,7 @@ ui <- bootstrapPage(
                                           h3(textOutput('cumulative_case_count_text'), align = 'right'),
                                           
                                           # clean_date_reactive_text -----------
-                                          h6(textOutput('clean_date_reactive_text'), align = 'right'),
+                                          h6(div('Data reported on ', textOutput('clean_date_reactive_text'), style = 'width: 100%'), align = 'right'),
                                           
                                           # daily_summary_1_dt -----------------
                                           div(tableOutput('daily_summary_1_dt'), style = 'font-size: small; width: 100%'),
@@ -372,6 +372,7 @@ ui <- bootstrapPage(
                         br(),
                         h4('Update frequency'),
                         p('This site is automatically updated every weekday (excluding public holidays) following the release of school-related COVID-19 case data by the Ontario Ministry of Education. Cumulative totals represent all total cases reported to the Ministry of Education as of 5 September 2020, including resolved cases. The first school-related cases appeared in the dataset on 10 September 2020.'),
+                        
                         p('This site uses the latest publicly available data on school information and student demographics released by the Ontario Ministry of Education for school background characteristics. This dataset is updated by the Ministry monthly.'),
                         p('See "Data Sources and Source Code" tab for more information on data sources used.'),
                         br(),
@@ -384,6 +385,12 @@ ui <- bootstrapPage(
                         p('Pandemic-related school closures in Ontario affected over 2 million elementary and secondary school students. The province’s first school closure announcement was issued on 12 March 2020 for an initial period from 14 March to 4 April 2020. This compelled all publicly funded elementary and secondary schools to close. Public school closures were extended another three times – first until 4 May, then 31 May, and finally until the end of June 2020.'),
                         p('Phased reopening of publicly funded schools in the province began on 8 September 2020 and continued until 21 September 2020, by which time all schools should have opened.'),
                         p('When interpreting the data, it is important to keep in mind that data on COVID-19 school-related cases prior to 21 September 2020 will reflect partial education system reopening. The first school-related cases appeared in the dataset on 10 September 2020.'),
+                        p('At the provincial level, the winter break commenced as on 21 December 2020 for an initial planned return to in-person instruction on 4 January 2021 for elementary and secondary schools.'),
+                        p('On 21 December 2020, the provincial government announced a ', a(href = 'https://news.ontario.ca/en/release/59790/ontario-announces-provincewide-shutdown-to-stop-spread-of-covid-19-and-save-lives', target = '_blank', 'province-wide shutdown'), '. Virtual learning was announced for all schools for the period 4-8 January 2021.'),
+                        p('Return to in-person instruction was planned for elementary and secondary schools on 11 January 2021 in the following public health units: Algoma, North Bay Parry Sound, Northwestern, Porcupine, Sudbury and District, Thunder Bay, Timiskaming.'),
+                        p('For the rest of the province, return to in-person instruction was planned for 11 January for elementary schools and 25 January 2021 for secondary schools.'),
+                        p('On 7 January 2020, the provincial government ', a(href = 'https://news.ontario.ca/en/release/59890/ontario-extends-teacher-led-online-learning-until-january-25-to-keep-students-and-staff-safe-in-sout', target = '_blank', 'extended the province-wide shutdown'), '. This extended virtual instruction for all elementary schools in Ontario until 25 January 2021, and extending the shutdown in Northern Ontario, aligning with the shutdown in Southern Ontario.'),
+                        p('On 12 January 2021, the provincial government issued a ', a('second state of emergency', href = 'https://news.ontario.ca/en/release/59922/ontario-declares-second-provincial-emergency-to-address-covid-19-crisis-and-save-lives', target = '_blank'), '. This included a further extension for virtual learning for all elementary and secondary schools in four regions: Hamilton, Peel, Toronto, Windsor-Essex, and York, until 10 February 2021.'),
                         br(),
                         h3('HOW TO NAVIGATE THE SITE'),
                         h4('Mapper - Affected Ontario Schools Tab'),
