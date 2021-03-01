@@ -415,6 +415,7 @@ if (needs_refresh | is.na(needs_refresh)) {
 	
 	# 7. clean active cases data -----------------------------------------------
 	
+	message('cleaning active cases data')
 	colnames(covid19_schools_active) <- tolower(colnames(covid19_schools_active))
 	colnames(covid19_schools_active) <- str_replace_all(colnames(covid19_schools_active), '[^a-z_]', '')
 	covid19_schools_active$collected_date <- as.Date(covid19_schools_active$collected_date)
@@ -427,6 +428,7 @@ if (needs_refresh | is.na(needs_refresh)) {
 	
 	# 8. clean summary data ----------------------------------------------------
 	
+	message('cleaning summary data')
 	colnames(covid19_schools_summary) <- tolower(colnames(covid19_schools_summary))
 	colnames(covid19_schools_summary) <- str_replace_all(colnames(covid19_schools_summary), '[^a-z_]', '')
 	covid19_schools_summary$collected_date <- as.Date(covid19_schools_summary$collected_date)
@@ -441,6 +443,7 @@ if (needs_refresh | is.na(needs_refresh)) {
 	
 	# 7. clean all cases data --------------------------------------------------
 	
+	message('cleaning all cases data')
 	colnames(covid19_all_cases) <- tolower(colnames(covid19_all_cases))
 	covid19_all_cases$accurate_episode_date <- as.Date(covid19_all_cases$accurate_episode_date)
 	covid19_all_cases$case_reported_date <- as.Date(covid19_all_cases$case_reported_date)
@@ -450,6 +453,7 @@ if (needs_refresh | is.na(needs_refresh)) {
 	
 	# 8. clean school demographics data ----------------------------------------
 	
+	message('cleaning demographic data')
 	colnames(school_demographics) <- tolower(colnames(school_demographics))
 	school_demographics$`board name` <- str_replace_all(school_demographics$`board name`, '’', '\'')
 	covid19_schools_active$school_board <- str_replace_all(covid19_schools_active$school_board, '’', '\'')
@@ -461,6 +465,7 @@ if (needs_refresh | is.na(needs_refresh)) {
 	
 	# 9. clean risk assessment data --------------------------------------------
 	
+	message('cleaning risk assessment data')
 	risk_rank_elementary <- risk_rank_elementary[ , c(1:9, 13) ]
 	colnames(risk_rank_elementary) <- tolower(colnames(risk_rank_elementary))
 	fn <- file.path(data_dir, 'risk_rank_elementary.rdata')
@@ -473,6 +478,7 @@ if (needs_refresh | is.na(needs_refresh)) {
 	
 	# 9. build/refresh school geocodes db --------------------------------------
 	
+	message('building geocodes db')
 	cached_geocodes <- data.frame(geo_query_str = NA, lon = NA, lat = NA)
 	if (file.exists(geocodes_cache_file)) base::load(file = geocodes_cache_file)
 	# create query strings
