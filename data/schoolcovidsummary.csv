@@ -1,4 +1,4 @@
-﻿collected_date,reported_date,current_schools_w_cases,current_schools_closed,current_total_number_schools,new_total_school_related_cases,new_school_related_student_cases,new_school_related_staff_cases,new_school_related_unspecified_cases,recent_total_school_related_cases,recent_school_related_student_cases,recent_school_related_staff_cases,recent_school_related_unspecified_cases,past_total_school_related_cases,past_school_related_student_cases,past_school_related_staff_cases,past_school_related_unspecified_cases,cumulative_school_related_cases,cumulative_school_related_student_cases,cumulative_school_related_staff_cases,cumulative_school_related_unspecified_cases
+collected_date,reported_date,current_schools_w_cases,current_schools_closed,current_total_number_schools,new_total_school_related_cases,new_school_related_student_cases,new_school_related_staff_cases,new_school_related_unspecified_cases,recent_total_school_related_cases,recent_school_related_student_cases,recent_school_related_staff_cases,recent_school_related_unspecified_cases,past_total_school_related_cases,past_school_related_student_cases,past_school_related_staff_cases,past_school_related_unspecified_cases,cumulative_school_related_cases,cumulative_school_related_student_cases,cumulative_school_related_staff_cases,cumulative_school_related_unspecified_cases
 2020-09-10,2020-09-11,13,0,4828,0,0,0,,,,,,,,,,13,4,9,
 2020-09-11,2020-09-14,15,0,4828,2,1,1,,,,,,,,,,15,5,10,
 2020-09-14,2020-09-15,27,0,4828,14,4,4,6,,,,,,,,,29,9,14,6
@@ -104,3 +104,9 @@
 2021-02-24,2021-02-25,430,18,4828,83,70,12,1,675,564,104,7,7686,5301,1261,1124,8361,5865,1365,1131
 2021-02-25,2021-02-26,468,18,4828,101,89,12,0,735,620,108,7,7717,5326,1267,1124,8452,5946,1375,1131
 2021-02-26,2021-03-01,530,20,4828,116,99,15,2,844,715,120,9,7719,5328,1267,1124,8563,6043,1387,1133
+2021-03-01,2021-03-02,640,23,4828,262,231,30,1,1072,913,149,10,7741,5349,1268,1124,8813,6262,1417,1134
+2021-03-02,2021-03-03,672,24,4828,160,138,21,1,1141,967,164,10,7811,5412,1274,1125,8952,6379,1438,1135
+2021-03-03,2021-03-04,683,26,4828,101,77,21,3,1168,991,164,13,7881,5464,1292,1125,9049,6455,1456,1138
+2021-03-04,2021-03-05,703,29,4828,96,82,13,1,1196,1022,161,13,7947,5517,1305,1125,9143,6539,1466,1138
+2021-03-05,2021-03-08,734,30,4828,95,84,11,0,1230,1050,167,13,8003,5568,1310,1125,9233,6618,1477,1138
+2021-03-08,2021-03-09,780,34,4828,263,209,45,9,1324,1121,183,20,8177,5711,1339,1127,9501,6832,1522,1147
