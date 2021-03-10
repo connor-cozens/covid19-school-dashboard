@@ -172,7 +172,7 @@ ui <- bootstrapPage(
                                                        h3(textOutput('cumulative_case_count_text'), align = 'right'),
                                                        
                                                        # clean_date_reactive_text -----------
-                                                       h6(textOutput('clean_date_reactive_text'), align = 'right'),
+                                                       h6(div('Data reported on'), textOutput('clean_date_reactive_text'), align = 'right'),
                                                        
                                                        # daily_summary_1_dt -----------------
                                                        div(tableOutput('daily_summary_1_dt'), style = 'font-size: small; width: 100%'),
@@ -603,7 +603,7 @@ server <- function(input, output) {
         if (input$weeklyRadio == "7-day view"){
             output$whichWeekView <- renderUI({
                 div(
-                h6(textOutput('clean_week_old_date_text'), align = 'right'),
+                h6(div('Data reported from'), ('clean_week_old_date_text'), align = 'right'),
                 
                 # weekly_summary_1_dt -----------------
                 div(tableOutput('weekly_summary_1_dt'), style = 'font-size: small; width: 100%'),
