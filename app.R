@@ -162,10 +162,6 @@ ui <- bootstrapPage(
                                           fixed = TRUE,
                                           draggable = TRUE, 
                                           height = 'auto',
-                                          h2('Quick View Daily Summary', align = 'right', style="font-size:200%;"),
-                                          
-                                          # cumulative_case_count_text ---------
-                                          h3(textOutput('cumulative_case_count_text'), align = 'right'),
                                           
                                           tags$style(HTML(".tabbable > .nav > li[class=active] > a {color:#e95420;}")),
                                           tags$style(HTML(".tabbable > .nav > li > a {color:#777777;}")),
@@ -185,19 +181,19 @@ ui <- bootstrapPage(
                                                        div(tableOutput('daily_summary_1_dt'), style = 'font-size: small; width: 100%'),
                                                        
                                                        h6('Drag this box to move it', align = 'right')
-                                                       ),
+                                              ),
                                               tabPanel(id = "weekly",
                                                        
                                                        h2('Weekly Summary', align = 'right', style="font-size:200%;"),
                                                        
                                                        # weeklyRadio -----------
                                                        div(
-                                                       radioButtons(
-                                                           inputId = "weeklyRadio",
-                                                           label = strong("Select a timeframe:"),
-                                                           choices = list("7-day view", "14-day view"),
-                                                           inline = TRUE
-                                                       ), align = "right"),
+                                                           radioButtons(
+                                                               inputId = "weeklyRadio",
+                                                               label = strong("Select a timeframe:"),
+                                                               choices = list("7-day view", "14-day view"),
+                                                               inline = TRUE
+                                                           ), align = "right"),
                                                        
                                                        #whichWeekView ----------
                                                        uiOutput("whichWeekView")
@@ -205,49 +201,12 @@ ui <- bootstrapPage(
                                               )
                                           )
                                           
-                                          # daily_summary_1_dt -----------------
-                                          div(tableOutput('daily_summary_1_dt'), style = 'font-size: small; width: 100%'),
                                           
-                                          h6('Drag this box to move it', align = 'right')
                             )
-                                          
-                                          #tabsetPanel(
-                                          #    tabPanel(id = "daily",
-                                          #             
-                                          #             h2('Quick View Daily Summary', align = 'right', style="font-size:200%;"),
-                                          #             
-                                          #             # cumulative_case_count_text ---------
-                                          #             h3(textOutput('cumulative_case_count_text'), align = 'right'),
-                                          #             
-                                          #             # clean_date_reactive_text -----------
-                                          #             h6(textOutput('clean_date_reactive_text'), align = 'right'),
-                                          #             
-                                          #             # daily_summary_1_dt -----------------
-                                          #             div(tableOutput('daily_summary_1_dt'), style = 'font-size: small; width: 100%'),
-                                          #             
-                                          #             h6('Drag this box to move it', align = 'right')
-                                          #             ),
-                                              #tabPanel(id = "weekly",
-                                              #         
-                                              #         h2('Weekly Summary', align = 'right', style="font-size:200%;"),
-                                              #         
-                                              #         h6(textOutput('clean_week_old_date_text'), align = 'right'),
-                                              #         
-                                              #         # daily_summary_1_dt -----------------
-                                              #         div(tableOutput('weekly_summary_1_dt'), style = 'font-size: small; width: 100%'),
-                                              #         
-                                              #         h6('Drag this box to move it', align = 'right')
-                                              #         
-                                              #)
-                                          #)
-                                          
-                                          
-                            #)
                             
                         )
                         
                ),
-               
                # TAB: Overview and Search --------------------------------------
                tabPanel('Overview and Search',
                         # cumulative_plot --------------------------------------
@@ -680,7 +639,7 @@ server <- function(input, output) {
         if (input$weeklyRadio == "7-day view"){
             output$whichWeekView <- renderUI({
                 div(
-                h6(div('Data reported from'), ('clean_week_old_date_text'), align = 'right'),
+                h6(div('Data reported from'), textOutput('clean_week_old_date_text'), align = 'right'),
                 
                 # weekly_summary_1_dt -----------------
                 div(tableOutput('weekly_summary_1_dt'), style = 'font-size: small; width: 100%'),
@@ -692,7 +651,7 @@ server <- function(input, output) {
         else {
             output$whichWeekView <- renderUI({
                 div(
-                h6(textOutput('clean_two_weeks_old_date_text'), align = 'right'),
+                h6(div('Data reported from'), textOutput('clean_two_weeks_old_date_text'), align = 'right'),
                 
                 # weekly_summary_3_dt -----------------
                 div(tableOutput('weekly_summary_3_dt'), style = 'font-size: small; width: 100%'),
@@ -708,7 +667,7 @@ server <- function(input, output) {
         if (input$weeklyRadio2 == "7-day view"){
             output$whichWeekView2 <- renderUI({
                 div(
-                    h6(textOutput('clean_week_old_date_text2'), align = 'right'),
+                    h6(div('Data reported from'), textOutput('clean_week_old_date_text2'), align = 'right'),
                     
                     # weekly_summary_1_dt -----------------
                     div(tableOutput('weekly_summary_4_dt'), style = 'font-size: small; width: 100%'),
@@ -720,7 +679,7 @@ server <- function(input, output) {
         else {
             output$whichWeekView2 <- renderUI({
                 div(
-                    h6(textOutput('clean_two_weeks_old_date_text2'), align = 'right'),
+                    h6(div('Data reported from'), textOutput('clean_two_weeks_old_date_text2'), align = 'right'),
                     
                     # weekly_summary_2_dt -----------------
                     div(tableOutput('weekly_summary_2_dt'), style = 'font-size: small; width: 100%'),
