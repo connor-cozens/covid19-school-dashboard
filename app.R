@@ -8,6 +8,9 @@ library(shinythemes)
 library(sp)
 library(plotly)
 library(xts)
+# library(renv)
+
+# renv::init()
 
 # LOAD DATA --------------------------------------------------------------------
 
@@ -159,6 +162,10 @@ ui <- bootstrapPage(
                                           fixed = TRUE,
                                           draggable = TRUE, 
                                           height = 'auto',
+                                          h2('Quick View Daily Summary', align = 'right', style="font-size:200%;"),
+                                          
+                                          # cumulative_case_count_text ---------
+                                          h3(textOutput('cumulative_case_count_text'), align = 'right'),
                                           
                                           tags$style(HTML(".tabbable > .nav > li[class=active] > a {color:#e95420;}")),
                                           tags$style(HTML(".tabbable > .nav > li > a {color:#777777;}")),
@@ -198,8 +205,44 @@ ui <- bootstrapPage(
                                               )
                                           )
                                           
+                                          # daily_summary_1_dt -----------------
+                                          div(tableOutput('daily_summary_1_dt'), style = 'font-size: small; width: 100%'),
                                           
+                                          h6('Drag this box to move it', align = 'right')
                             )
+                                          
+                                          #tabsetPanel(
+                                          #    tabPanel(id = "daily",
+                                          #             
+                                          #             h2('Quick View Daily Summary', align = 'right', style="font-size:200%;"),
+                                          #             
+                                          #             # cumulative_case_count_text ---------
+                                          #             h3(textOutput('cumulative_case_count_text'), align = 'right'),
+                                          #             
+                                          #             # clean_date_reactive_text -----------
+                                          #             h6(textOutput('clean_date_reactive_text'), align = 'right'),
+                                          #             
+                                          #             # daily_summary_1_dt -----------------
+                                          #             div(tableOutput('daily_summary_1_dt'), style = 'font-size: small; width: 100%'),
+                                          #             
+                                          #             h6('Drag this box to move it', align = 'right')
+                                          #             ),
+                                              #tabPanel(id = "weekly",
+                                              #         
+                                              #         h2('Weekly Summary', align = 'right', style="font-size:200%;"),
+                                              #         
+                                              #         h6(textOutput('clean_week_old_date_text'), align = 'right'),
+                                              #         
+                                              #         # daily_summary_1_dt -----------------
+                                              #         div(tableOutput('weekly_summary_1_dt'), style = 'font-size: small; width: 100%'),
+                                              #         
+                                              #         h6('Drag this box to move it', align = 'right')
+                                              #         
+                                              #)
+                                          #)
+                                          
+                                          
+                            #)
                             
                         )
                         
@@ -378,6 +421,33 @@ ui <- bootstrapPage(
                # 
                # ),
                
+               # TAB: Media Section --------------------------------------------
+               tabPanel
+               ('Media',
+                    tags$div(),
+                    h3('Covid-19 School Dashboard in the Media'),
+                    p('Here you\'ll find an archive of articles and news pieces that we have been involved with or had written about us. If you know of one that we\'ve missed, or you want to reach out for a media request, please send us an email at media@covid19schooldashboard.com'),
+                    h4('November 23, 2020'),
+                    a("CTV London, Ontario - \'New website helps simplify and track school COVID-19 case data\'", href='https://london.ctvnews.ca/new-website-helps-simplify-and-track-school-covid-19-case-data-1.5201172'),
+                   h4('November 24, 2020'),
+                   a('Western University News - \'New interactive dashboard tracks COVID-19 cases in Ontario schools\'', href='https://news.westernu.ca/2020/11/new-interactive-dashboard-tracks-covid-19-cases-in-ontario-schools/'),
+                   h4('November 25, 2020'),
+                    a("980AM Radio Show - \'Mapping COVID-19 in Ontario schools to better understand the virus' impacts\'", href='https://omny.fm/shows/am980/mapping-covid-19-in-ontario-schools-to-better-unde'),
+                   br(),
+                   a("DailyHive News Toronto - \'There's a map showing COVID-19 cases in Ontario schools\'", href='https://dailyhive.com/toronto/covid-19-map-ontario-schools'),
+                    br(),
+                    a("Global News - \'Coronavirus: expert in global education launches interactive map of Ontario school cases\'", href='https://globalnews.ca/news/7481210/coronavirus-interactive-map-ontario-school-cases-covid-19/'),
+                   h4('November 26, 2020'), 
+                   a('CBC News \'Ontario News with Rita Celli\' - \'Are schools safe enough?\'', href='https://www.cbc.ca/listen/live-radio/1-45-ontario-today/clip/15811055-are-schools-safe-enough'),
+                   h4('November 29, 2020'), 
+                    a('CityNews Toronto - \'Covid-19 school data base to assist parents\'', href='https://toronto.citynews.ca/video/2020/11/29/covid-19-school-data-base-to-assist-parents/'), 
+                    h4('November 30, 2020'),
+                    a("The London Free Press - \'Western professor's tool makes school COVID-19 data easier to find, grasp\'", href='https://lfpress.com/news/local-news/western-professors-tool-makes-school-covid-19-data-easier-to-find-grasp'),
+                   h4('December 29, 2020'),
+                   a('The Standard Hong Kong - \'Help in dash to reopen schools\'', href='https://www.thestandard.com.hk/section-news/fc/4/226080/Help-in-dash-to-reopen-schools'),
+                   
+                ),
+               
                # TAB: About this site ------------------------------------------
                tabPanel('About This Site',
                         tags$div(),
@@ -392,6 +462,7 @@ ui <- bootstrapPage(
                         br(),
                         h4('Update frequency'),
                         p('This site is automatically updated every weekday (excluding public holidays) following the release of school-related COVID-19 case data by the Ontario Ministry of Education. Cumulative totals represent all total cases reported to the Ministry of Education as of 5 September 2020, including resolved cases. The first school-related cases appeared in the dataset on 10 September 2020.'),
+                        
                         p('This site uses the latest publicly available data on school information and student demographics released by the Ontario Ministry of Education for school background characteristics. This dataset is updated by the Ministry monthly.'),
                         p('See "Data Sources and Source Code" tab for more information on data sources used.'),
                         br(),
@@ -404,6 +475,12 @@ ui <- bootstrapPage(
                         p('Pandemic-related school closures in Ontario affected over 2 million elementary and secondary school students. The province’s first school closure announcement was issued on 12 March 2020 for an initial period from 14 March to 4 April 2020. This compelled all publicly funded elementary and secondary schools to close. Public school closures were extended another three times – first until 4 May, then 31 May, and finally until the end of June 2020.'),
                         p('Phased reopening of publicly funded schools in the province began on 8 September 2020 and continued until 21 September 2020, by which time all schools should have opened.'),
                         p('When interpreting the data, it is important to keep in mind that data on COVID-19 school-related cases prior to 21 September 2020 will reflect partial education system reopening. The first school-related cases appeared in the dataset on 10 September 2020.'),
+                        p('At the provincial level, the winter break commenced as on 21 December 2020 for an initial planned return to in-person instruction on 4 January 2021 for elementary and secondary schools.'),
+                        p('On 21 December 2020, the provincial government announced a ', a(href = 'https://news.ontario.ca/en/release/59790/ontario-announces-provincewide-shutdown-to-stop-spread-of-covid-19-and-save-lives', target = '_blank', 'province-wide shutdown'), '. Virtual learning was announced for all schools for the period 4-8 January 2021.'),
+                        p('Return to in-person instruction was planned for elementary and secondary schools on 11 January 2021 in the following public health units: Algoma, North Bay Parry Sound, Northwestern, Porcupine, Sudbury and District, Thunder Bay, Timiskaming.'),
+                        p('For the rest of the province, return to in-person instruction was planned for 11 January for elementary schools and 25 January 2021 for secondary schools.'),
+                        p('On 7 January 2020, the provincial government ', a(href = 'https://news.ontario.ca/en/release/59890/ontario-extends-teacher-led-online-learning-until-january-25-to-keep-students-and-staff-safe-in-sout', target = '_blank', 'extended the province-wide shutdown'), '. This extended virtual instruction for all elementary schools in Ontario until 25 January 2021, and extending the shutdown in Northern Ontario, aligning with the shutdown in Southern Ontario.'),
+                        p('On 12 January 2021, the provincial government issued a ', a('second state of emergency', href = 'https://news.ontario.ca/en/release/59922/ontario-declares-second-provincial-emergency-to-address-covid-19-crisis-and-save-lives', target = '_blank'), '. This included a further extension for virtual learning for all elementary and secondary schools in four regions: Hamilton, Peel, Toronto, Windsor-Essex, and York, until 10 February 2021.'),
                         br(),
                         h3('HOW TO NAVIGATE THE SITE'),
                         h4('Mapper - Affected Ontario Schools Tab'),
@@ -1167,3 +1244,6 @@ server <- function(input, output) {
 
 # RUN THE APPLICATION ----------------------------------------------------------
 shinyApp(ui = ui, server = server)
+
+# DEPENDENCY MANAGEMENT --------------------------------------------------------
+# renv::snapshot()

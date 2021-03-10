@@ -1,0 +1,20 @@
+# apply the inventory_hostname specified in the inventory file to the host
+---
+
+- hosts: unconfigured_generic_server
+  remote_user: ubuntu
+  become: true
+  tasks:
+    - name: Set the hostname to shiny_xx (or whatever) to mirror inventory_hostname
+      hostname:
+        name: "{{ item }}"
+      with_items: "{{ inventory_hostname }}"
+    - name: Add new hostname to /etc/hosts
+      lineinfile:
+        path: /etc/hosts
+        regexp: '^127\.0\.0\.1'
+        line: '127.0.0.1    localhost    {{ item }}'
+        owner: root
+        group: root
+        mode: 0644
+      with_items: "{{ inventory_hostname }}"

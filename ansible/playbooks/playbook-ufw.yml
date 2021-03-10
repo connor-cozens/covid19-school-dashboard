@@ -1,0 +1,31 @@
+# create user br00t and add authorized_key from local file system
+---
+
+- hosts: unconfigured_generic_server
+  remote_user: ubuntu
+  become: true
+  tasks:
+    - name: Allow all access to ssh on port 63912 from known admin addresses
+      ufw:
+        state: enabled
+        rule: allow
+        port: 63912
+        proto: tcp
+        comment: 'Allow SSH access from known admin ips added {{ ansible_date_time.date }}'
+        src: '{{ item }}'
+      with_items:
+        - 96.21.63.237/32 # admin 1 office
+        - 38.69.157.15/32 # admin 2 office
+        # - XXX.XXX.XXX.XXX/32 # admin 3 office
+    - name: Allow all access to http on port 80 from known cloudflare addresses
+      ufw:
+        state: enabled
+        rule: allow
+        port: 80
+        proto: tcp
+        comment: 'Allow HTTP access to shiny servcer from known cloudflare ips added {{ ansible_date_time.date }}'
+        src: '{{ item }}'
+      with_items:
+        # - XXX.XXX.XXX.XXX/32 # cloudflare ip 1
+        # - XXX.XXX.XXX.XXX/32 # cloudflare ip 2
+        # - XXX.XXX.XXX.XXX/32 # cloudflare ip 3        

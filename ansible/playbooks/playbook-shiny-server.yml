@@ -1,0 +1,29 @@
+- hosts: unconfigured_generic_server
+  remote_user: ubuntu
+  become: true
+  vars:
+    sudoers:
+    - ubuntu
+  tasks:
+    - name: Modify shiny server configuration to point to covid19 dashboard app
+      lineinfile:
+        dest: /etc/shiny-server/shiny-server.conf
+        state: present
+        regexp: 'site_dir'
+        line: 'site_dir /home/ubuntu/ontario-covid19-dashboard;'
+    - name: Modify shiny server port configuration
+      lineinfile:
+        dest: /etc/shiny-server/shiny-server.conf
+        state: present
+        regexp: 'listen'
+        line: 'listen 80;'
+    - name: Modify shiny server user configuration
+      lineinfile:
+        dest: /etc/shiny-server/shiny-server.conf
+        state: present
+        regexp: 'run_as'
+        line: 'run_as ubuntu;'
+    - name: Restart shiny-server service
+      service:
+        name: shiny-server
+        state: restarted        

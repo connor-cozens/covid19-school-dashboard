@@ -260,6 +260,7 @@ clean_all_names <- function(dirty_names) {
 	clean_names <- str_replace_all(clean_names, '^city calc$', 'calc')
 	clean_names <- str_replace_all(clean_names, '^clifton drive$', 'clifton')
 	clean_names <- str_replace_all(clean_names, '^de hearst$', 'hearst')
+	clean_names <- str_replace_all(clean_names, 'dr j edgar davey new', 'dr j edgar davey')
 	clean_names <- str_replace_all(clean_names, 'provincial demonstration s', 'e c drury trillium demonstration')
 	clean_names <- str_replace_all(clean_names, 'dunrankin drive', 'dunrankin')
 	clean_names <- str_replace_all(clean_names, 'father henri nouwen', 'father henri j m nouwen')
@@ -298,6 +299,19 @@ clean_all_names <- function(dirty_names) {
 
 # 1. download data -------------------------------------------------------------
 
+# if we need refresh make sure newer data files are not available in git first
+url <- 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/7fbdbb48-d074-45d9-93cb-f7de58950418/download/schoolcovidsummary.csv'
+fname_summary <- sprintf('%s/%s', data_dir, basename(url))
+needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_summary)$mtime), units = 'hours') >= max_file_age_hrs
+if (needs_refresh | is.na(needs_refresh)) {
+	message('data file refresh required, trying git first')
+	try(expr = {
+		git2r::pull()		
+	})
+	needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_summary)$mtime), units = 'hours') >= max_file_age_hrs
+	message('needs_refresh = ', needs_refresh)
+}
+
 # school summary data
 url <- 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/7fbdbb48-d074-45d9-93cb-f7de58950418/download/schoolcovidsummary.csv'
 fname_summary <- sprintf('%s/%s', data_dir, basename(url))
@@ -333,7 +347,6 @@ if (needs_refresh | is.na(needs_refresh)) {
 	message('updating student demographics data file')
 	GET(url, write_disk(fname_demographics, overwrite = TRUE))
 }
-
 
 if (needs_refresh | is.na(needs_refresh)) {
 	
@@ -402,7 +415,9 @@ if (needs_refresh | is.na(needs_refresh)) {
 	
 	# 7. clean active cases data -----------------------------------------------
 	
+	message('cleaning active cases data')
 	colnames(covid19_schools_active) <- tolower(colnames(covid19_schools_active))
+	colnames(covid19_schools_active) <- str_replace_all(colnames(covid19_schools_active), '[^a-z_]', '')
 	covid19_schools_active$collected_date <- as.Date(covid19_schools_active$collected_date)
 	covid19_schools_active$reported_date <- as.Date(covid19_schools_active$reported_date)
 	covid19_schools_active$school <- str_squish(covid19_schools_active$school)
@@ -413,7 +428,9 @@ if (needs_refresh | is.na(needs_refresh)) {
 	
 	# 8. clean summary data ----------------------------------------------------
 	
+	message('cleaning summary data')
 	colnames(covid19_schools_summary) <- tolower(colnames(covid19_schools_summary))
+	colnames(covid19_schools_summary) <- str_replace_all(colnames(covid19_schools_summary), '[^a-z_]', '')
 	covid19_schools_summary$collected_date <- as.Date(covid19_schools_summary$collected_date)
 	covid19_schools_summary$reported_date <- as.Date(covid19_schools_summary$reported_date)
 	colnames(covid19_schools_summary) <- str_replace(colnames(covid19_schools_summary), 'current_schools_w_cases', 'current_schools_with_cases')
@@ -426,6 +443,7 @@ if (needs_refresh | is.na(needs_refresh)) {
 	
 	# 7. clean all cases data --------------------------------------------------
 	
+	message('cleaning all cases data')
 	colnames(covid19_all_cases) <- tolower(colnames(covid19_all_cases))
 	covid19_all_cases$accurate_episode_date <- as.Date(covid19_all_cases$accurate_episode_date)
 	covid19_all_cases$case_reported_date <- as.Date(covid19_all_cases$case_reported_date)
@@ -435,6 +453,7 @@ if (needs_refresh | is.na(needs_refresh)) {
 	
 	# 8. clean school demographics data ----------------------------------------
 	
+	message('cleaning demographic data')
 	colnames(school_demographics) <- tolower(colnames(school_demographics))
 	school_demographics$`board name` <- str_replace_all(school_demographics$`board name`, '’', '\'')
 	covid19_schools_active$school_board <- str_replace_all(covid19_schools_active$school_board, '’', '\'')
@@ -446,6 +465,7 @@ if (needs_refresh | is.na(needs_refresh)) {
 	
 	# 9. clean risk assessment data --------------------------------------------
 	
+	message('cleaning risk assessment data')
 	risk_rank_elementary <- risk_rank_elementary[ , c(1:9, 13) ]
 	colnames(risk_rank_elementary) <- tolower(colnames(risk_rank_elementary))
 	fn <- file.path(data_dir, 'risk_rank_elementary.rdata')
@@ -458,8 +478,9 @@ if (needs_refresh | is.na(needs_refresh)) {
 	
 	# 9. build/refresh school geocodes db --------------------------------------
 	
+	message('building geocodes db')
 	cached_geocodes <- data.frame(geo_query_str = NA, lon = NA, lat = NA)
-	if (file.exists(geocodes_cache_file)) load(file = geocodes_cache_file)
+	if (file.exists(geocodes_cache_file)) base::load(file = geocodes_cache_file)
 	# create query strings
 	geo_query_str <- sprintf('%s,%s,Ontario,Canada', 
 							 str_trim(covid19_schools_active$school), 
@@ -822,27 +843,37 @@ if (needs_refresh | is.na(needs_refresh)) {
 	fn <- file.path(data_dir, 'cases_per_school.rdata')
 	save('cases_per_school', file = fn)
 	
+	# do git push
+	try(expr = {
+		message('committing updated data files to git')
+		git2r::add(path = 'data/*.rdata')
+		git2r::add(path = 'data/*.csv')
+		git2r::add(path = 'data/*.xlsx')
+		git2r::commit(message = sprintf('automated update of data files'))
+		git2r::push()	
+	})
+	
 } else {
 	# LOAD ALL CACHED DATA -----------------------------------------------------
 	fn <- file.path(data_dir, 'covid19_schools_active.rdata')
-	load(file = fn, envir = .GlobalEnv)
+	base::load(file = fn, envir = .GlobalEnv)
 	fn <- file.path(data_dir, 'covid19_schools_summary.rdata')
-	load(file = fn, envir = .GlobalEnv)
+	base::load(file = fn, envir = .GlobalEnv)
 	fn <- file.path(data_dir, 'covid19_all_cases.rdata')
-	load(file = fn, envir = .GlobalEnv)
+	base::load(file = fn, envir = .GlobalEnv)
 	fn <- file.path(data_dir, 'school_demographics.rdata')
-	load(file = fn, envir = .GlobalEnv)
+	base::load(file = fn, envir = .GlobalEnv)
 	fn <- file.path(data_dir, 'covid19_schools_active_with_demographics.rdata')
-	load(file = fn, envir = .GlobalEnv)
+	base::load(file = fn, envir = .GlobalEnv)
 	fn <- file.path(data_dir, 'covid19_schools_active_with_demographics_most_recent.rdata')
-	load(file = fn, envir = .GlobalEnv)
+	base::load(file = fn, envir = .GlobalEnv)
 	fn <- file.path(data_dir, 'cases_per_school.rdata')
-	load(file = fn, envir = .GlobalEnv)
+	base::load(file = fn, envir = .GlobalEnv)
 	fn <- file.path(data_dir, 'risk_rank_elementary.rdata')
-	load(file = fn, envir = .GlobalEnv)
+	base::load(file = fn, envir = .GlobalEnv)
 	fn <- file.path(data_dir, 'risk_rank_secondary.rdata')
-	load(file = fn, envir = .GlobalEnv)
+	base::load(file = fn, envir = .GlobalEnv)
 	fn <- file.path(data_dir, 'risk_rank_neighborhood.rdata')
-	load(file = fn, envir = .GlobalEnv)
+	base::load(file = fn, envir = .GlobalEnv)
 }
 
