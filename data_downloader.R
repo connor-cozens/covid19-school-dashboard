@@ -136,10 +136,16 @@ clean_all_names <- function(dirty_names) {
 		str_replace_all(., '<c3><89>', 'e') %>%
 		str_replace_all(., '<c3><a8>', 'e') %>%
 		str_replace_all(., '<c3><a9>', 'e') %>%
+		str_replace_all(., '<c3><aa>', 'e') %>%
+		str_replace_all(., '<c3><ab>', 'e') %>%
 		str_replace_all(., '<c3><83><c2><af>', 'i') %>%
 		str_replace_all(., '<c3><ae>', 'i') %>%
+		str_replace_all(., '<c3><af>', 'i') %>%
 		str_replace_all(., '<c5><93>', 'oe') %>%
 		str_replace_all(., '<c3><85><e2><80><9c>', 'oe') %>%
+		str_replace_all(., '<c3><83><c2><bb>', 'u') %>%
+		str_replace_all(., '<c3><bb>', 'u') %>%
+		str_replace_all(., '<c3><83>', 'a') %>%
 		str_squish
 	
 	stopwords <- c('<c3><89><c3><89>c', 
