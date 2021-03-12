@@ -57,7 +57,10 @@ tbl_contingency <- table(infection_rate_categorical,
 print(tbl_contingency)
 
 ### perform chi-squared test ---------------------------------------------------
-chisq.test(tbl_contingency)
+chisq_results <- chisq.test(tbl_contingency)
+print(chisq_results)
+# print(chisq_results$expected)
+# print(chisq_results$observed)
 
 
 ## analyze school enrolment ----------------------------------------------------
