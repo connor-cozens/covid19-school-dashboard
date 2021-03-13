@@ -6,7 +6,9 @@ library(plotly)
 source('data_downloader.R')
 
 # SCRIPT SETTINGS --------------------------------------------------------------
+
 data_length_days <- 180L
+
 data_start_date <- min(covid19_schools_active$reported_date)
 
 message('data starts on ', data_start_date)
@@ -15,7 +17,7 @@ message('data ends on ', data_end_date)
 
 # EXPLORATORY DATA ANALYSIS ----------------------------------------------------
 
-## relationship between poverty and infecion rates -----------------------------
+## relationship between poverty and infection rates ----------------------------
 
 ### create poverty rates categorical variable and analyze ----------------------
 poverty_rates <- as.integer(school_demographics$`percentage of school-aged children who live in low-income households`)
@@ -35,6 +37,7 @@ high_infection_rate_threshold <- as.numeric(quantile(infection_rates, na.rm = TR
 infection_rate_categorical <- cut(infection_rates, 
 								  breaks = c(0, high_infection_rate_threshold, 1), 
 								  labels = c('low', 'high'))
+prop.table(table(infection_rate_categorical))
 
 ### plot case counts vs poverty rates categorical ------------------------------
 tbl <- tapply(cases_per_school$cases_per_school, 
@@ -45,15 +48,15 @@ barplot(tbl, main = 'case counts by poverty rate')
 
 ### plot infection rates vs poverty rates categorical --------------------------
 tbl <- tapply(infection_rates, 
-	   poverty_rate_categorical,
-	   median)
+			  poverty_rate_categorical,
+			  median)
 print(tbl)
 barplot(tbl, main = 'infection rates by poverty rate')
 # is the relationship between infection rates and poverty rates statistically significant?
 
 ### create contingency table ---------------------------------------------------
 tbl_contingency <- table(infection_rate_categorical,
-			poverty_rate_categorical)
+						 poverty_rate_categorical)
 print(tbl_contingency)
 
 ### perform chi-squared test ---------------------------------------------------
@@ -62,8 +65,9 @@ print(chisq_results)
 # print(chisq_results$expected)
 # print(chisq_results$observed)
 
+## relationship between school enrolment and infection rates -------------------
 
-## analyze school enrolment ----------------------------------------------------
+### analyze school enrolment ---------------------------------------------------
 # table(school_demographics$`school level`)
 idx <- which(school_demographics$`school level` == 'Elementary')
 enrolment <- as.integer(school_demographics$enrolment[ idx ])
@@ -78,41 +82,52 @@ hist(enrolment,
 summary(enrolment)
 enrolment_secondary_cuts <- as.integer(quantile(enrolment, na.rm = TRUE))[ 2:5 ]
 
-## cases by enrolment elementary -----------------------------------------------
+### cases by enrolment elementary ----------------------------------------------
 idx <- which(cases_per_school$school_level == 'Elementary')
 enrolment_elementary <- as.integer(cases_per_school$school_enrolment[ idx ])
+enrolment_elementary_categorical <- cut(enrolment_elementary, 
+										breaks = enrolment_primary_cuts, 
+										labels = c('small', 'medium', 'large'))
 case_count_elementary <- as.integer(cases_per_school$cases_per_school[ idx ])
 tapply(case_count_elementary, 
-	   cut(enrolment_elementary, breaks = enrolment_primary_cuts, labels = c('small', 'medium', 'large')), 
+	   enrolment_elementary_categorical, 
 	   sum) %>%
 	barplot(main = 'infection counts by elementary school size')
 tapply(case_count_elementary / enrolment_elementary, 
-	   cut(enrolment_elementary, breaks = enrolment_primary_cuts, labels = c('small', 'medium', 'large')), 
+	   enrolment_elementary_categorical, 
 	   median) %>% 
 	barplot(main = 'infection rates by elementary school size')
 
-## cases by enrolment secondary ------------------------------------------------
+### cases by enrolment secondary -----------------------------------------------
 idx <- which(cases_per_school$school_level == 'Secondary')
 enrolment_secondary <- as.integer(cases_per_school$school_enrolment[ idx ])
+enrolment_secondary_categorical <- cut(enrolment_secondary, 
+									   breaks = enrolment_primary_cuts, 
+									   labels = c('small', 'medium', 'large'))
 case_count_secondary <- as.integer(cases_per_school$cases_per_school[ idx ])
 tapply(case_count_secondary, 
-	   cut(enrolment_secondary, breaks = enrolment_secondary_cuts, labels = c('small', 'medium', 'large')), 
+	   enrolment_secondary_categorical, 
 	   sum) %>%
 	barplot(main = 'infection counts by secondary school size')
 tapply(case_count_secondary / enrolment_secondary, 
-	   cut(enrolment_secondary, breaks = enrolment_secondary_cuts, labels = c('small', 'medium', 'large')), 
+	   enrolment_secondary_categorical, 
 	   median) %>%
 	barplot(main = 'infection rates by secondary school size')
 
-## school sizes by school board ------------------------------------------------
+### school sizes by school board -----------------------------------------------
 idx <- which(cases_per_school$school_level == 'Secondary')
+enrolment_secondary <- as.integer(cases_per_school$school_enrolment[ idx ])
+enrolment_secondary_categorical <- cut(enrolment_secondary, 
+									   breaks = enrolment_primary_cuts, 
+									   labels = c('small', 'medium', 'large'))
 sizes_tbl <- table(cases_per_school$school_board[ idx ],
-				   cut(enrolment_secondary, breaks = enrolment_secondary_cuts, labels = c('small', 'medium', 'large')))
+				   enrolment_secondary_categorical)
 # sizes_tbl <- as.data.frame(sizes_tbl)
 large_school_rate <- sizes_tbl[ , 3 ] / rowSums(sizes_tbl)
 
-## cases rates by school board -------------------------------------------------
-tapply(cases_per_school$cases_per_school / cases_per_school$school_enrolment, 
+### cases rates by school board ------------------------------------------------
+infection_rates <- cases_per_school$cases_per_school / cases_per_school$school_enrolment
+tapply(infection_rates, 
 	   cases_per_school$school_board, 
 	   median) %>% 
 	sort
