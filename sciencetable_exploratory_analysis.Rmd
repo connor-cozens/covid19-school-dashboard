@@ -32,6 +32,12 @@ message('data starts on ', data_start_date)
 data_end_date <- data_start_date + days(data_length_days)
 message('data ends on ', data_end_date)
 
+# LOAD DATA --------------------------------------------------------------------
+
+## load policy tracing data set ------------------------------------------------
+policy_tracing <- read.csv('data/policy_tracing.csv', sep = '|')
+policy_tracing$Date <- as.Date(policy_tracing$Date, format =  '%d %b %Y')
+
 ```
 
 # Source Data
@@ -241,6 +247,14 @@ We therefore reject the null hypothesis that the `infection_rate_categorical` an
 
 # Additional Plots
 
+## Policy Events
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+print(policy_tracing)
+```
+
+## Cumulative school-related cases
+
 ```{r plot1, echo=FALSE, warning=FALSE, message=FALSE}
 
 # PLOTS ------------------------------------------------------------------------
@@ -254,9 +268,25 @@ fig <- fig %>% add_trace(y = ~cumulative_school_related_staff_cases, name = 'Cum
 fig <- fig %>% add_trace(y = ~cumulative_school_related_unidentified_cases, name = 'Cumulative school-related unidentified cases', mode = 'lines+markers')
 fig <- fig %>% layout(title = 'Cumulative school-related cases',
 					  xaxis = list(title = 'Collected date'),
-					  yaxis = list (title = 'Cumulative cases'))
+					  yaxis = list (title = 'Cumulative cases'), 
+					  hovermode = 'x unified',
+					  legend = list(x = 0.1, y = 0.9))
+event_lines <- lapply(policy_tracing$Date, function(x) {
+	list(
+		type = 'line', 
+		y0 = 0, 
+		y1 = 1,
+		yref = 'paper', # i.e. y as a proportion of visible region
+		x0 = x, 
+		x1 = x, 
+		line = list(width = 0.25, dash = 'dash', color = 'green')
+	)
+})
+fig <- fig %>% layout(shapes = event_lines)
 fig
 ```
+
+## New school-related cases
 
 ```{r plot2, echo=FALSE, warning=FALSE, message=FALSE}
 ## school_related_new_cases_details_plot ---------------------------------------
@@ -269,9 +299,25 @@ fig <- fig %>% add_trace(y = ~new_school_related_staff_cases, name = 'New school
 fig <- fig %>% add_trace(y = ~new_school_related_unidentified_cases, name = 'New school-related unidentified cases', mode = 'lines+markers')
 fig <- fig %>% layout(title = 'New school-related cases',
 					  xaxis = list(title = 'Collected date'),
-					  yaxis = list (title = 'New cases'))
+					  yaxis = list (title = 'New cases'), 
+					  hovermode = 'x unified',
+					  legend = list(x = 0.1, y = 0.9))
+event_lines <- lapply(policy_tracing$Date, function(x) {
+	list(
+		type = 'line', 
+		y0 = 0, 
+		y1 = 1,
+		yref = 'paper', # i.e. y as a proportion of visible region
+		x0 = x, 
+		x1 = x, 
+		line = list(width = 0.25, dash = 'dash', color = 'green')
+	)
+})
+fig <- fig %>% layout(shapes = event_lines)
 fig
 ```
+
+## Schools with cases
 
 ```{r plot3, echo=FALSE, warning=FALSE, message=FALSE}
 ## schools_with_cases_plot -----------------------------------------------------
@@ -281,9 +327,25 @@ df <- df[ idx, ]
 fig <- plot_ly(df, x = ~collected_date, y = ~current_schools_with_cases, name = 'Current schools with cases', type = 'scatter', mode = 'lines+markers')
 fig <- fig %>% layout(title = 'Schools with cases',
 					  xaxis = list(title = 'Collected date'),
-					  yaxis = list (title = 'Schools'))
+					  yaxis = list (title = 'Schools'), 
+					  hovermode = 'x unified',
+					  legend = list(x = 0.1, y = 0.9))
+event_lines <- lapply(policy_tracing$Date, function(x) {
+	list(
+		type = 'line', 
+		y0 = 0, 
+		y1 = 1,
+		yref = 'paper', # i.e. y as a proportion of visible region
+		x0 = x, 
+		x1 = x, 
+		line = list(width = 0.25, dash = 'dash', color = 'green')
+	)
+})
+fig <- fig %>% layout(shapes = event_lines)
 fig
 ```
+
+## Active school cases by municipality (top 10)
 
 ```{r plot4, echo=FALSE, warning=FALSE, message=FALSE}
 ## active_cases_by_municipality_plot -------------------------------------------
@@ -328,9 +390,25 @@ code_str <- sprintf('
 fig <- parse(text = code_str) %>% eval
 fig <- fig %>% layout(title = 'Active school cases by municipality (top 10)',
 					  xaxis = list(title = 'Collected date'),
-					  yaxis = list (title = 'Active cases'))
+					  yaxis = list (title = 'Active cases'), 
+					  hovermode = 'x unified',
+					  legend = list(x = 0.1, y = 0.9))
+event_lines <- lapply(policy_tracing$Date, function(x) {
+	list(
+		type = 'line', 
+		y0 = 0, 
+		y1 = 1,
+		yref = 'paper', # i.e. y as a proportion of visible region
+		x0 = x, 
+		x1 = x, 
+		line = list(width = 0.25, dash = 'dash', color = 'green')
+	)
+})
+fig <- fig %>% layout(shapes = event_lines)
 fig
 ```
+
+## Active school cases by school board (top 10)
 
 ```{r plot5, echo=FALSE, warning=FALSE, message=FALSE}
 ## active_cases_by_board_plot --------------------------------------------------
@@ -375,7 +453,21 @@ code_str <- sprintf('
 fig <- parse(text = code_str) %>% eval
 fig <- fig %>% layout(title = 'Active school cases by school board (top 10)',
 					  xaxis = list(title = 'Collected date'),
-					  yaxis = list (title = 'Active cases'))
+					  yaxis = list (title = 'Active cases'), 
+					  hovermode = 'x unified',
+					  legend = list(x = 0.1, y = 0.9))
+event_lines <- lapply(policy_tracing$Date, function(x) {
+	list(
+		type = 'line', 
+		y0 = 0, 
+		y1 = 1,
+		yref = 'paper', # i.e. y as a proportion of visible region
+		x0 = x, 
+		x1 = x, 
+		line = list(width = 0.25, dash = 'dash', color = 'green')
+	)
+})
+fig <- fig %>% layout(shapes = event_lines)
 fig
 
 # POLICY CHANGES ---------------------------------------------------------------
