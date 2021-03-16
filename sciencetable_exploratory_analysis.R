@@ -323,7 +323,7 @@ fig <- parse(text = code_str) %>% eval
 fig <- fig %>% layout(title = 'Active school cases by school board (top 10)',
 					  xaxis = list(title = 'Collected date'),
 					  yaxis = list (title = 'Active cases'),
-					  legend = list(x = 0.1, y = 0.9))
+					  legend = list(x = 0.1, y = 0.9, bgcolor = 'rgba(0,0,0,0)'))
 event_lines <- apply(policy_tracing, 1, function(x) {
 	list(
 		type = 'line', 

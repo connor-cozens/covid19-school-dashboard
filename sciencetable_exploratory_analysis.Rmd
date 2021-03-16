@@ -38,6 +38,8 @@ message('data ends on ', data_end_date)
 policy_tracing <- read.csv('data/policy_tracing.csv', sep = '|')
 policy_tracing$Date <- as.Date(policy_tracing$Date, format =  '%d %b %Y')
 
+# CLEAN DATA -------------------------------------------------------------------
+
 ```
 
 # Source Data
@@ -50,8 +52,8 @@ See: <https://data.ontario.ca/dataset/d85f68c5-fcb0-4b4d-aec5-3047db47dcd5/resou
 write.csv2(school_demographics, "./school_demographics.csv")
 
 readLines("./school_demographics.csv") %>% 
-  paste0(collapse="\n") %>% 
-  openssl::base64_encode() -> encoded
+	paste0(collapse="\n") %>% 
+	openssl::base64_encode() -> encoded
 ```
 
 [Download Student Demographics CSV](`r sprintf('data:text/csv;base64,%s', encoded)`)
@@ -64,8 +66,8 @@ See: <https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resou
 write.csv2(cases_per_school, "./cases_per_school.csv")
 
 readLines("./cases_per_school.csv") %>% 
-  paste0(collapse="\n") %>% 
-  openssl::base64_encode() -> encoded
+	paste0(collapse="\n") %>% 
+	openssl::base64_encode() -> encoded
 ```
 
 [Download School Cases and Demographics CSV](`r sprintf('data:text/csv;base64,%s', encoded)`)
@@ -270,7 +272,7 @@ fig <- fig %>% layout(title = 'Cumulative school-related cases',
 					  xaxis = list(title = 'Collected date'),
 					  yaxis = list (title = 'Cumulative cases'), 
 					  hovermode = 'x unified',
-					  legend = list(x = 0.1, y = 0.9))
+					  legend = list(x = 0.01, y = 0.99, bgcolor = 'rgba(0,0,0,0)'))
 event_lines <- lapply(policy_tracing$Date, function(x) {
 	list(
 		type = 'line', 
@@ -283,6 +285,16 @@ event_lines <- lapply(policy_tracing$Date, function(x) {
 	)
 })
 fig <- fig %>% layout(shapes = event_lines)
+# fig <- fig %>% add_annotations(x = policy_tracing$Date,
+# 							   y = 2500,
+# 							   text = format(policy_tracing$Date, '%m-%d'),
+# 							   xref = 'x',
+# 							   yref = 'y',
+# 							   showarrow = TRUE,
+# 							   arrowhead = 4,
+# 							   arrowsize = .5,
+# 							   ax = 20,
+# 							   ay = -40)
 fig
 ```
 
@@ -301,7 +313,7 @@ fig <- fig %>% layout(title = 'New school-related cases',
 					  xaxis = list(title = 'Collected date'),
 					  yaxis = list (title = 'New cases'), 
 					  hovermode = 'x unified',
-					  legend = list(x = 0.1, y = 0.9))
+					  legend = list(x = 0.01, y = 0.99, bgcolor = 'rgba(0,0,0,0)'))
 event_lines <- lapply(policy_tracing$Date, function(x) {
 	list(
 		type = 'line', 
@@ -329,7 +341,7 @@ fig <- fig %>% layout(title = 'Schools with cases',
 					  xaxis = list(title = 'Collected date'),
 					  yaxis = list (title = 'Schools'), 
 					  hovermode = 'x unified',
-					  legend = list(x = 0.1, y = 0.9))
+					  legend = list(x = 0.01, y = 0.99, bgcolor = 'rgba(0,0,0,0)'))
 event_lines <- lapply(policy_tracing$Date, function(x) {
 	list(
 		type = 'line', 
@@ -392,7 +404,7 @@ fig <- fig %>% layout(title = 'Active school cases by municipality (top 10)',
 					  xaxis = list(title = 'Collected date'),
 					  yaxis = list (title = 'Active cases'), 
 					  hovermode = 'x unified',
-					  legend = list(x = 0.1, y = 0.9))
+					  legend = list(x = 0.01, y = 0.99, bgcolor = 'rgba(0,0,0,0)'))
 event_lines <- lapply(policy_tracing$Date, function(x) {
 	list(
 		type = 'line', 
@@ -455,7 +467,7 @@ fig <- fig %>% layout(title = 'Active school cases by school board (top 10)',
 					  xaxis = list(title = 'Collected date'),
 					  yaxis = list (title = 'Active cases'), 
 					  hovermode = 'x unified',
-					  legend = list(x = 0.1, y = 0.9))
+					  legend = list(x = 0.01, y = 0.99, bgcolor = 'rgba(0,0,0,0)'))
 event_lines <- lapply(policy_tracing$Date, function(x) {
 	list(
 		type = 'line', 
