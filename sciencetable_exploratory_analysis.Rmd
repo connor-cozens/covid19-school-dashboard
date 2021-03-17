@@ -16,6 +16,7 @@ suppressPackageStartupMessages(expr = {
 	
 	library(plotly)
 	library(magrittr)
+	library(xtable)
 	
 	# load all data
 	source('data_downloader.R')	
@@ -29,7 +30,7 @@ data_length_days <- 180L
 data_start_date <- min(covid19_schools_active$reported_date)
 
 message('data starts on ', data_start_date)
-data_end_date <- data_start_date + days(data_length_days)
+data_end_date <- as.Date('2021-02-28') # data_start_date + days(data_length_days)
 message('data ends on ', data_end_date)
 
 # LOAD DATA --------------------------------------------------------------------
@@ -251,8 +252,8 @@ We therefore reject the null hypothesis that the `infection_rate_categorical` an
 
 ## Policy Events
 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
-print(policy_tracing)
+```{r echo=FALSE, warning=FALSE, message=FALSE, results='asis'}
+print(xtable(apply(policy_tracing, 2, as.character)), type = 'html', include.rownames = FALSE)
 ```
 
 ## Cumulative school-related cases
@@ -285,16 +286,19 @@ event_lines <- lapply(policy_tracing$Date, function(x) {
 	)
 })
 fig <- fig %>% layout(shapes = event_lines)
-# fig <- fig %>% add_annotations(x = policy_tracing$Date,
-# 							   y = 2500,
-# 							   text = format(policy_tracing$Date, '%m-%d'),
-# 							   xref = 'x',
-# 							   yref = 'y',
-# 							   showarrow = TRUE,
-# 							   arrowhead = 4,
-# 							   arrowsize = .5,
-# 							   ax = 20,
-# 							   ay = -40)
+fig <- fig %>% add_annotations(x = policy_tracing$Date,
+							   y = 2500,
+							   text = format(policy_tracing$Date, '%m-%d'),
+							   xref = 'x',
+							   yref = 'y',
+							   showarrow = TRUE,
+							   arrowhead = 4,
+							   arrowsize = 0.5,
+							   arrowwidth = 0.75,
+							   textangle = 90,
+							   textsize = 0.25,
+							   ax = 20,
+							   ay = -40)
 fig
 ```
 
@@ -326,6 +330,19 @@ event_lines <- lapply(policy_tracing$Date, function(x) {
 	)
 })
 fig <- fig %>% layout(shapes = event_lines)
+fig <- fig %>% add_annotations(x = policy_tracing$Date,
+							   y = 200,
+							   text = format(policy_tracing$Date, '%m-%d'),
+							   xref = 'x',
+							   yref = 'y',
+							   showarrow = TRUE,
+							   arrowhead = 4,
+							   arrowsize = 0.5,
+							   arrowwidth = 0.75,
+							   textangle = 90,
+							   textsize = 0.25,
+							   ax = 20,
+							   ay = -40)
 fig
 ```
 

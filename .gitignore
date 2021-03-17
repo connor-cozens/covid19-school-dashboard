@@ -5,3 +5,5 @@
 covid19-ontario-schools.Rproj
 rsconnect
 renv
+school_demographics.csv
+cases_per_school.csv
