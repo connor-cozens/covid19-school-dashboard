@@ -223,6 +223,29 @@ event_lines <- lapply(policy_tracing$Date, function(x) {
 fig <- fig %>% layout(shapes = event_lines)
 fig
 
+## schools_with_cases_percentage_plot ------------------------------------------
+df <- covid19_schools_summary[ , c('collected_date', 'current_schools_with_cases') ]
+idx <- which((df$collected_date >= data_start_date) & (df$collected_date <= data_end_date))
+df <- df[ idx, ]
+df$percent <- df$current_schools_with_cases / nrow(school_demographics)
+fig <- plot_ly(df, x = ~collected_date, y = ~percent, name = 'Current schools with cases', type = 'scatter', mode = 'lines+markers')
+fig <- fig %>% layout(title = 'Proportion of schools with cases',
+					  xaxis = list(title = 'Collected date'),
+					  yaxis = list (title = 'Schools'))
+event_lines <- lapply(policy_tracing$Date, function(x) {
+	list(
+		type = 'line', 
+		y0 = 0, 
+		y1 = 1,
+		yref = 'paper', # i.e. y as a proportion of visible region
+		x0 = x, 
+		x1 = x, 
+		line = list(width = 0.25, dash = 'dash', color = 'green')
+	)
+})
+fig <- fig %>% layout(shapes = event_lines)
+fig
+
 ## active_cases_by_municipality_plot -------------------------------------------
 active_cases_by_municipality <- tapply(covid19_schools_active$municipality,
 									   list(covid19_schools_active$collected_date,
