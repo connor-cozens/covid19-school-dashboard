@@ -22,7 +22,7 @@ if (refresh_data) {
 }
 
 ## 1b. load private school contact info data into memory -----------------------
-school_types <- read_xlsx(fname)
+private_school_contact_info <- read_xlsx(fname)
 
 ## 2a. download statistics canada school type data set -------------------------
 # https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=3710010901
@@ -32,6 +32,9 @@ if (refresh_data) {
 	message('updating statscan school type data file')
 	GET(url, verbose(), write_disk(path = fname, overwrite = TRUE))
 }
+
+## 2b. load statistics canada school type data into memory ---------------------
+statscan_school_types <- read.csv(fname)
 
 ## 3a. download schools demographic data set -----------------------------------
 # https://data.ontario.ca/dataset/school-information-and-student-demographics
@@ -73,10 +76,47 @@ summary(private_school_enrolment)
 
 # ANALYZE DATA -----------------------------------------------------------------
 
-sum(private_school_enrolment$Total.Male.Enrolment, private_school_enrolment$Total.Female.Enrolment, na.rm = TRUE)
-sum(unknown_males, unknown_females)
+## estimate total private school enrolment -------------------------------------
+enr1 <- sum(private_school_enrolment$Total.Male.Enrolment, 
+			private_school_enrolment$Total.Female.Enrolment, 
+			na.rm = TRUE) +
+	sum(unknown_males, unknown_females)
+message('total private school enrolment according to province of ontario: ', enr1)
 
+## get statscan total private school enrolment ---------------------------------
+idx <- which(statscan_school_types$School.type == 'Private/independent schools' &
+			 	statscan_school_types$Program.type == 'Regular programs for youth')
+enr2 <- statscan_school_types[ idx, 'VALUE' ]
+message('total private school enrolment according to statistics canada: ',
+		enr2)
+
+## estimate total public school enrolment --------------------------------------
 idx <- which(school_demographics$Enrolment %in% c('SP', ''))
 school_demographics$Enrolment[ idx ] <- NA
 school_demographics$Enrolment <- as.integer(school_demographics$Enrolment)
-sum(school_demographics$Enrolment, na.rm = TRUE)
+enr3 <- sum(school_demographics$Enrolment, na.rm = TRUE)
+message('total public school enrolment according to province of ontario: ', enr3)
+
+## get statscan total public school enrolment ----------------------------------
+idx <- which(statscan_school_types$School.type == 'Public schools' &
+			 	statscan_school_types$Program.type == 'Regular programs for youth')
+enr4 <- statscan_school_types[ idx, 'VALUE' ]
+message('total public school enrolment according to statistics canada: ',
+		enr4)
+
+## estimate total school enrolment ---------------------------------------------
+message('total school enrolment according to province of ontario (public + private): ', enr1 + enr3)
+
+## get statscan total public school enrolment ----------------------------------
+message('total school enrolment according to statistics canada (public + private, excl home schools): ',
+		enr2 + enr4)
+
+## estimate proportion of private school students ------------------------------
+message('proportion of students in private school according to province of ontario: ', round(enr1 / (enr1 + enr3), 2))
+message('proportion of students in private school according to statistics canada: ', round(enr2 / (enr2 + enr4), 2))
+
+## what types of schools are in the provincial private schools data set? -------
+public_schools_count <- nrow(school_demographics)
+private_schools_count <- nrow(private_school_contact_info)
+message('proportion of public schools: ', 
+		round(public_schools_count / (public_schools_count + private_schools_count), 2))
