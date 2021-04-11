@@ -835,7 +835,7 @@ if (needs_refresh | is.na(needs_refresh)) {
 	cases_per_school <- merge(cases_per_school, school_geocodes, by = 'geo_query_str')
 	cases_per_school$school_name <- str_split(cases_per_school$geo_query_str, ',') %>% sapply('[', 1)
 	cases_per_school$city <- str_split(cases_per_school$geo_query_str, ',') %>% sapply('[', 2)
-	cases_per_school$school_board <- sapply(cases_per_school$geo_query_str, function(x) school_board[[ x ]][ 1 ]) %>% as.character
+	cases_per_school$school_board <- sapply(cases_per_school$geo_query_str, function(x) school_board[[match(x, geo_query_str)]][1]) %>% as.character
 	cases_per_school$school_level <- sapply(cases_per_school$geo_query_str, function(x) school_level[[ x ]][ 1 ]) %>% as.character
 	cases_per_school$school_language <- sapply(cases_per_school$geo_query_str, function(x) school_language[[ x ]][ 1 ]) %>% as.character
 	cases_per_school$school_enrolment <- sapply(cases_per_school$geo_query_str, function(x) school_enrolment[[ x ]][ 1 ]) %>% as.integer
