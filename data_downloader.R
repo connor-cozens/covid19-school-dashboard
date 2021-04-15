@@ -836,16 +836,16 @@ if (needs_refresh | is.na(needs_refresh)) {
 	cases_per_school$school_name <- str_split(cases_per_school$geo_query_str, ',') %>% sapply('[', 1)
 	cases_per_school$city <- str_split(cases_per_school$geo_query_str, ',') %>% sapply('[', 2)
 	cases_per_school$school_board <- sapply(cases_per_school$geo_query_str, function(x) school_board[[match(x, geo_query_str)]][1]) %>% as.character
-	cases_per_school$school_level <- sapply(cases_per_school$geo_query_str, function(x) school_level[[ x ]][ 1 ]) %>% as.character
-	cases_per_school$school_language <- sapply(cases_per_school$geo_query_str, function(x) school_language[[ x ]][ 1 ]) %>% as.character
-	cases_per_school$school_enrolment <- sapply(cases_per_school$geo_query_str, function(x) school_enrolment[[ x ]][ 1 ]) %>% as.integer
-	cases_per_school$low_income <- sapply(cases_per_school$geo_query_str, function(x) low_income[[ x ]][ 1 ]) %>% as.integer
+	cases_per_school$school_level <- sapply(cases_per_school$geo_query_str, function(x) school_level[[match(x, geo_query_str)]][1]) %>% as.character
+	cases_per_school$school_language <- sapply(cases_per_school$geo_query_str, function(x) school_language[[match(x, geo_query_str)]][ 1 ]) %>% as.character
+	cases_per_school$school_enrolment <- sapply(cases_per_school$geo_query_str, function(x) school_enrolment[[match(x, geo_query_str)]][ 1 ]) %>% as.integer
+	cases_per_school$low_income <- sapply(cases_per_school$geo_query_str, function(x) low_income[[match(x, geo_query_str)]][ 1 ]) %>% as.integer
 	# cases_per_school$special_education <- sapply(cases_per_school$geo_query_str, function(x) special_education[[ x ]][ 1 ]) %>% as.integer
-	cases_per_school$non_english <- sapply(cases_per_school$geo_query_str, function(x) non_english[[ x ]][ 1 ]) %>% as.integer
-	cases_per_school$non_french <- sapply(cases_per_school$geo_query_str, function(x) non_french[[ x ]][ 1 ]) %>% as.integer
-	cases_per_school$from_non_english <- sapply(cases_per_school$geo_query_str, function(x) from_non_english[[ x ]][ 1 ]) %>% as.integer
-	cases_per_school$from_non_french <- sapply(cases_per_school$geo_query_str, function(x) from_non_french[[ x ]][ 1 ]) %>% as.integer
-	cases_per_school$some_university <- sapply(cases_per_school$geo_query_str, function(x) some_university[[ x ]][ 1 ]) %>% as.integer
+	cases_per_school$non_english <- sapply(cases_per_school$geo_query_str, function(x) non_english[[match(x, geo_query_str)]][ 1 ]) %>% as.integer
+	cases_per_school$non_french <- sapply(cases_per_school$geo_query_str, function(x) non_french[[match(x, geo_query_str)]][ 1 ]) %>% as.integer
+	cases_per_school$from_non_english <- sapply(cases_per_school$geo_query_str, function(x) from_non_english[[match(x, geo_query_str)]][ 1 ]) %>% as.integer
+	cases_per_school$from_non_french <- sapply(cases_per_school$geo_query_str, function(x) from_non_french[[match(x, geo_query_str)]][ 1 ]) %>% as.integer
+	cases_per_school$some_university <- sapply(cases_per_school$geo_query_str, function(x) some_university[[match(x, geo_query_str)]][ 1 ]) %>% as.integer
 	fn <- file.path(data_dir, 'cases_per_school.rdata')
 	save('cases_per_school', file = fn)
 	
