@@ -380,32 +380,6 @@ ui <- bootstrapPage(
                # 
                # ),
                
-               # TAB: Media Section --------------------------------------------
-               tabPanel
-               ('Media',
-                    tags$div(),
-                    h3('Covid-19 School Dashboard in the Media'),
-                    p('Here you\'ll find an archive of articles and news pieces that we have been involved with or had written about us.'),
-                    h4('November 23, 2020'),
-                    a("CTV London, Ontario - \'New website helps simplify and track school COVID-19 case data\'", href='https://london.ctvnews.ca/new-website-helps-simplify-and-track-school-covid-19-case-data-1.5201172'),
-                   h4('November 24, 2020'),
-                   a('Western University News - \'New interactive dashboard tracks COVID-19 cases in Ontario schools\'', href='https://news.westernu.ca/2020/11/new-interactive-dashboard-tracks-covid-19-cases-in-ontario-schools/'),
-                   h4('November 25, 2020'),
-                    a("980AM Radio Show - \'Mapping COVID-19 in Ontario schools to better understand the virus' impacts\'", href='https://omny.fm/shows/am980/mapping-covid-19-in-ontario-schools-to-better-unde'),
-                   br(),
-                   a("DailyHive News Toronto - \'There's a map showing COVID-19 cases in Ontario schools\'", href='https://dailyhive.com/toronto/covid-19-map-ontario-schools'),
-                    br(),
-                    a("Global News - \'Coronavirus: expert in global education launches interactive map of Ontario school cases\'", href='https://globalnews.ca/news/7481210/coronavirus-interactive-map-ontario-school-cases-covid-19/'),
-                   h4('November 26, 2020'), 
-                   a('CBC News \'Ontario News with Rita Celli\' - \'Are schools safe enough?\'', href='https://www.cbc.ca/listen/live-radio/1-45-ontario-today/clip/15811055-are-schools-safe-enough'),
-                   h4('November 29, 2020'), 
-                    a('CityNews Toronto - \'Covid-19 school data base to assist parents\'', href='https://toronto.citynews.ca/video/2020/11/29/covid-19-school-data-base-to-assist-parents/'), 
-                    h4('November 30, 2020'),
-                    a("The London Free Press - \'Western professor's tool makes school COVID-19 data easier to find, grasp\'", href='https://lfpress.com/news/local-news/western-professors-tool-makes-school-covid-19-data-easier-to-find-grasp'),
-                   h4('December 29, 2020'),
-                   a('The Standard Hong Kong - \'Help in dash to reopen schools\'', href='https://www.thestandard.com.hk/section-news/fc/4/226080/Help-in-dash-to-reopen-schools')
-                ),
-               
                # TAB: About this site ------------------------------------------
                tabPanel('About This Site',
                         tags$div(),
@@ -570,6 +544,9 @@ ui <- bootstrapPage(
                         ),
                         p('We invite users to suggest further indicators for integration. Further web optimization and dynamic display features are also planned.'),
                         br(),
+                        p('We are open to feedback and continuous improvements. Please report any data discrepancies or other suggestions.'),
+                        p('Contact: ', a(href = 'mailto:info@covid19schooldashboard.com', 'info@covid19schooldashboard.com')),
+                        br(),
                         h3('AUTHORSHIP, ATTRIBUTIONS, CITATION'),
                         h4('Cite the COVID-19 School Dashboard as:'),
                         p('Srivastava, P. (2020). ', tags$em('COVID-19 school dashboard (1.0 Nov 2020). '), '[Web application]. ', a(href = 'http://covid19schooldashboard.com/', 'http://covid19schooldashboard.com/')),
@@ -589,14 +566,44 @@ ui <- bootstrapPage(
                         br(),
                         br()
                ),
-               # TAB: About this site ------------------------------------------
+               
+               # TAB: Media Section --------------------------------------------
+               tabPanel
+               ('Media',
+                    tags$div(),
+                    h3('Covid-19 School Dashboard in the Media'),
+                    p('Here you\'ll find an archive of articles and news pieces that we have been involved with or had written about us.'),
+                    h4('November 23, 2020'),
+                    a("CTV London, Ontario - \'New website helps simplify and track school COVID-19 case data\'", href='https://london.ctvnews.ca/new-website-helps-simplify-and-track-school-covid-19-case-data-1.5201172'),
+                   h4('November 24, 2020'),
+                   a('Western University News - \'New interactive dashboard tracks COVID-19 cases in Ontario schools\'', href='https://news.westernu.ca/2020/11/new-interactive-dashboard-tracks-covid-19-cases-in-ontario-schools/'),
+                   h4('November 25, 2020'),
+                    a("980AM Radio Show - \'Mapping COVID-19 in Ontario schools to better understand the virus' impacts\'", href='https://omny.fm/shows/am980/mapping-covid-19-in-ontario-schools-to-better-unde'),
+                   br(),
+                   a("DailyHive News Toronto - \'There's a map showing COVID-19 cases in Ontario schools\'", href='https://dailyhive.com/toronto/covid-19-map-ontario-schools'),
+                    br(),
+                    a("Global News - \'Coronavirus: expert in global education launches interactive map of Ontario school cases\'", href='https://globalnews.ca/news/7481210/coronavirus-interactive-map-ontario-school-cases-covid-19/'),
+                   h4('November 26, 2020'), 
+                   a('CBC News \'Ontario News with Rita Celli\' - \'Are schools safe enough?\'', href='https://www.cbc.ca/listen/live-radio/1-45-ontario-today/clip/15811055-are-schools-safe-enough'),
+                   h4('November 29, 2020'), 
+                    a('CityNews Toronto - \'Covid-19 school data base to assist parents\'', href='https://toronto.citynews.ca/video/2020/11/29/covid-19-school-data-base-to-assist-parents/'), 
+                    h4('November 30, 2020'),
+                    a("The London Free Press - \'Western professor's tool makes school COVID-19 data easier to find, grasp\'", href='https://lfpress.com/news/local-news/western-professors-tool-makes-school-covid-19-data-easier-to-find-grasp'),
+                   h4('December 29, 2020'),
+                   a('The Standard Hong Kong - \'Help in dash to reopen schools\'', href='https://www.thestandard.com.hk/section-news/fc/4/226080/Help-in-dash-to-reopen-schools')
+                ),
+               
+               # TAB: Our Team ------------------------------------------
                tabPanel('Our Team',
                         tags$div(),
+                        p('We are open to feedback and continuous improvements. Please report any data discrepancies or other suggestions.'),
+                        p('Contact: ', a(href = 'mailto:info@covid19schooldashboard.com', 'info@covid19schooldashboard.com')),
+                        br(),
                         h3('THE TEAM AND CONTACT'),
                         h4('Dr. Prachi Srivastava'),
                         p(em('Principal Investigator and Project Lead, Western University')),
                         p('Dr. Prachi Srivastava is tenured Associate Professor, Western University, specialising in education and global development. She is also Member, World Bank Expert Advisory Council on Citizen Engagement, and Senior Research Fellow, NORRAG. Previously, she served with the United Nations Mission in Kosovo and the International Rescue Committee. She holds a doctorate from the University of Oxford.'),
-                        p('For personal inquiries, contact Dr. Srivastava at: ', a(href = 'mailto:prachi.srivastava@uwo.ca', 'prachi.srivastava@uwo.ca')),
+                        p('For inquiries, contact Dr. Srivastava at: ', a(href = 'mailto:prachi.srivastava@uwo.ca', 'prachi.srivastava@uwo.ca')),
                         p(a(href = 'https://twitter.com/PrachiSrivas', target = "_blank", tags$img(src = 'twitter_logo.png', height = '32', width = '32')), ' - ', a(href = 'https://www.linkedin.com/in/prachi-srivastava-9ab6122/', target = "_blank", tags$img(src = 'linkedin_logo.png', height = '32', width = '32')), ' - ', a(href = 'https://www.edu.uwo.ca/faculty-profiles/prachi-srivastava.html', target = "_blank", tags$img(src = 'uwo_logo.png', height = '32', width = '150'))),
                         br(),
                         h4('Peter J. Taylor'),
@@ -613,7 +620,7 @@ ui <- bootstrapPage(
                         h4('Justin Marshall'),
                         p(em('Developer')),
                         p('Justin graduated from Western University with an Honors BSc in Computer Science and a Minor in Software Engineering and is currently open to full-time roles and opportunies. In addition to data visualization, Justin is interested in fields including Game Development, and is currently working on creating his own games and building up a portfolio.'),
-                        p('For dashboard inquiries, contact Justin  at: ', a(href = 'mailto:justin@covid19schooldashboard.com', 'connor@covid19schooldashboard.com')),
+                        p('For dashboard inquiries, contact Justin  at: ', a(href = 'mailto:justin@covid19schooldashboard.com', 'justin@covid19schooldashboard.com')),
                         p('For personal inquiries, contact Justin at: ', a(href = 'mailto:powtatow@gmail.com', 'powtatow@gmail.com')),
                         p(a(href = 'https://twitter.com/JuiceMarsh', target = "_blank", tags$img(src = 'twitter_logo.png', height = '32', width = '32')), ' - ', a(href = 'https://www.linkedin.com/in/JustinMarshall1998/', target = "_blank", tags$img(src = 'linkedin_logo.png', height = '32', width = '32')), ' - ', a(href = 'https://github.com/JustinMarshall98', target = "_blank", tags$img(src = 'github_logo.png', height = '32', width = '32'))),
                )
