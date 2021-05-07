@@ -814,7 +814,8 @@ server <- function(input, output) {
     
     # clean_date_reactive_text -------------------------------------------------
     output$clean_date_reactive_text <- renderText({
-        format(max(covid19_schools_active$reported_date), '%d %B %Y')
+        #Changed from covid19_schools_active to covid19_schools_summary, which has the correct latest date matching with the case count given
+        format(max(covid19_schools_summary$reported_date), '%d %B %Y')
     })
     
     # clean_week_old_date_text -------------------------------------------------
