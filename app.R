@@ -291,7 +291,7 @@ ui <- bootstrapPage(
                             tags$li(a(href = 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/7fbdbb48-d074-45d9-93cb-f7de58950418/download/schoolcovidsummary.csv', 'Summary of cases in schools dataset (.csv)', target = '_blank'))
                         ),
                         h3('Source Code'),
-                        p('Source code for this site can be found ', a(href = 'https://gitlab.com/br00t/ontario-covid19-dashboard', 'here', target = '_blank'))
+                        p('Source code for this site can be found ', a(href = 'https://github.com/connor-cozens/covid19-school-dashboard', 'here', target = '_blank'))
                ),
                
                # TAB: Plots ----------------------------------------------------
@@ -531,7 +531,7 @@ ui <- bootstrapPage(
                         p('Lists all publicly available data sources used to generate the COVID-19 School Dashboard.'),
                         br(),
                         h5(('Source code')),
-                        p('Source code for this site can be found ', a(href = 'https://gitlab.com/br00t/ontario-covid19-dashboard', 'here', target = "_blank")),
+                        p('Source code for this site can be found ', a(href = 'https://github.com/connor-cozens/covid19-school-dashboard', 'here', target = "_blank")),
                         br(),
                         h3('COMING SOON'),
                         p('The COVID-19 School Dashboard will soon add more indicators. Version 1.0 of the site has been published to balance the need for expedience in view of the need for timely public information given the effects of COVID-19 on education.'),
@@ -549,7 +549,7 @@ ui <- bootstrapPage(
                         br(),
                         h3('AUTHORSHIP, ATTRIBUTIONS, CITATION'),
                         h4('Cite the COVID-19 School Dashboard as:'),
-                        p('Srivastava, P. (2020). ', tags$em('COVID-19 school dashboard (1.0 Nov 2020). '), '[Web application]. ', a(href = 'http://covid19schooldashboard.com/', 'http://covid19schooldashboard.com/')),
+                        p('Srivastava, P., & Taylor, P.J. (2020). ', tags$em('COVID-19 school dashboard (1.0 Nov 2020). '), '[Web application]. ', a(href = 'http://covid19schooldashboard.com/', 'http://covid19schooldashboard.com/')),
                         br(),
                         p(a(href = 'https://www.edu.uwo.ca/faculty-profiles/prachi-srivastava.html', 'Dr. Prachi Srivastava'), ', Associate Professor, Faculty of Education, University of Western Ontario, Canada.'),
                         p(a(href = 'mailto:prachi.srivastava@uwo.ca', 'Prachi.srivastava@uwo.ca')),
