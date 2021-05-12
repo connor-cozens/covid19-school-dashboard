@@ -2,6 +2,14 @@ input[type="number"] {
   max-width: 80%;
 }
 
+.navbar-brand {
+  font-size: 16px;
+}
+
+nav {
+  font-size: 13px;
+}
+
 div.outer {
   position: fixed;
   top: 50px;

@@ -250,7 +250,7 @@ ui <- bootstrapPage(
                                      DTOutput('school_summary_data_dt'),
                                      br(),
                                      'Adapted from data published by Government of Ontario: ', 
-                                     a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools', 'Summary of cases in schools'),
+                                     a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools', target = '_blank', 'Summary of cases in schools'),
                                      br(), 
                                      hr(),
                                      h3('Data dictionary'),
@@ -266,9 +266,9 @@ ui <- bootstrapPage(
                                      DTOutput('school_cases_demo_data_dt'),
                                      br(),
                                      'Adapted from data published by Government of Ontario: ', 
-                                     a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools', 'Schools with active COVID-19 cases'),
+                                     a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools', target = '_blank', 'Schools with active COVID-19 cases'),
                                      ', ',
-                                     a(href = 'https://data.ontario.ca/dataset/school-information-and-student-demographics', 'School information and student demographics'),
+                                     a(href = 'https://data.ontario.ca/dataset/school-information-and-student-demographics', target = '_blank', 'School information and student demographics'),
                                      br(), 
                                      hr(),
                                      h3('Data dictionary'),
@@ -291,7 +291,7 @@ ui <- bootstrapPage(
                             tags$li(a(href = 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/7fbdbb48-d074-45d9-93cb-f7de58950418/download/schoolcovidsummary.csv', 'Summary of cases in schools dataset (.csv)', target = '_blank'))
                         ),
                         h3('Source Code'),
-                        p('Source code for this site can be found ', a(href = 'https://gitlab.com/br00t/ontario-covid19-dashboard', 'here', target = '_blank'))
+                        p('Source code for this site can be found ', a(href = 'https://github.com/connor-cozens/covid19-school-dashboard', 'here', target = '_blank'))
                ),
                
                # TAB: Plots ----------------------------------------------------
@@ -380,32 +380,6 @@ ui <- bootstrapPage(
                # 
                # ),
                
-               # TAB: Media Section --------------------------------------------
-               tabPanel
-               ('Media',
-                    tags$div(),
-                    h3('Covid-19 School Dashboard in the Media'),
-                    p('Here you\'ll find an archive of articles and news pieces that we have been involved with or had written about us.'),
-                    h4('November 23, 2020'),
-                    a("CTV London, Ontario - \'New website helps simplify and track school COVID-19 case data\'", href='https://london.ctvnews.ca/new-website-helps-simplify-and-track-school-covid-19-case-data-1.5201172'),
-                   h4('November 24, 2020'),
-                   a('Western University News - \'New interactive dashboard tracks COVID-19 cases in Ontario schools\'', href='https://news.westernu.ca/2020/11/new-interactive-dashboard-tracks-covid-19-cases-in-ontario-schools/'),
-                   h4('November 25, 2020'),
-                    a("980AM Radio Show - \'Mapping COVID-19 in Ontario schools to better understand the virus' impacts\'", href='https://omny.fm/shows/am980/mapping-covid-19-in-ontario-schools-to-better-unde'),
-                   br(),
-                   a("DailyHive News Toronto - \'There's a map showing COVID-19 cases in Ontario schools\'", href='https://dailyhive.com/toronto/covid-19-map-ontario-schools'),
-                    br(),
-                    a("Global News - \'Coronavirus: expert in global education launches interactive map of Ontario school cases\'", href='https://globalnews.ca/news/7481210/coronavirus-interactive-map-ontario-school-cases-covid-19/'),
-                   h4('November 26, 2020'), 
-                   a('CBC News \'Ontario News with Rita Celli\' - \'Are schools safe enough?\'', href='https://www.cbc.ca/listen/live-radio/1-45-ontario-today/clip/15811055-are-schools-safe-enough'),
-                   h4('November 29, 2020'), 
-                    a('CityNews Toronto - \'Covid-19 school data base to assist parents\'', href='https://toronto.citynews.ca/video/2020/11/29/covid-19-school-data-base-to-assist-parents/'), 
-                    h4('November 30, 2020'),
-                    a("The London Free Press - \'Western professor's tool makes school COVID-19 data easier to find, grasp\'", href='https://lfpress.com/news/local-news/western-professors-tool-makes-school-covid-19-data-easier-to-find-grasp'),
-                   h4('December 29, 2020'),
-                   a('The Standard Hong Kong - \'Help in dash to reopen schools\'', href='https://www.thestandard.com.hk/section-news/fc/4/226080/Help-in-dash-to-reopen-schools')
-                ),
-               
                # TAB: About this site ------------------------------------------
                tabPanel('About This Site',
                         absolutePanel(id = 'contents', 
@@ -490,10 +464,10 @@ ui <- bootstrapPage(
                         p('All schools in the following 7 schools boards could resume in-person learning on January 25: Limestone District School Board; Renfrew County District School Board; Hastings and Prince Edward District School Board; Bruce-Grey Catholic District School Board; Renfrew County Catholic District School Board; Algonquin and Lakeshore Catholic District School Board; and Bluewater District School Board.'),
                         p('Some additional school boards (9) that span multiple PHUs could have some schools that resume in-person: Kawartha Pine Ridge District School Board; Trillium Lakelands District School Board; Upper Canada District School Board; Catholic District School Board of Eastern Ontario; Peterborough Victoria Northumberland and Clarington Catholic DSB; Conseil des écoles publiques de l`Est de l`Ontario; Conseil scolaire catholique Providence; Conseil scolaire catholique Mon Avenir; Conseil scolaire de district catholique du Centre-Est de l\'Ontario  '),
                         p('Northern PHUs that were permitted to return to in-person learning on 11 January, 2021 would continue in-person learning unless otherwise directed by local PHUs. '),
-                        p('On 28 January 2021 it was announced that ', a(href='https://news.ontario.ca/en/statement/60154/280000-more-ontario-students-to-return-to-class', 'elementary and secondary schools in the following 4 additional PHUs can return to in-person learning on 1 February 2021'), ': Eastern Ontario Health Unit; Middlesex-London Health Unit; Southwestern Public Health; Ottawa Public Health. '),
+                        p('On 28 January 2021 it was announced that ', a(href='https://news.ontario.ca/en/statement/60154/280000-more-ontario-students-to-return-to-class', target = '_blank', 'elementary and secondary schools in the following 4 additional PHUs can return to in-person learning on 1 February 2021'), ': Eastern Ontario Health Unit; Middlesex-London Health Unit; Southwestern Public Health; Ottawa Public Health. '),
                         p('All schools in the following 9 schools boards could resume in-person learning: Catholic District School Board of Eastern Ontario; Conseil des écoles publiques de l\'Est de l\'Ontario; Conseil scolaire de district catholique de l\'Est ontarien; Conseil scolaire de district catholique du Centre-Est de l\'Ontario; London District Catholic School Board; Ottawa Catholic District School Board; Ottawa-Carleton District School Board; Thames Valley District School Board; Upper Canada District School Board'),
                         p('And schools in 2 additional school boards that span multiple PHUs can have schools in the appropriate PHU resume in-person learning: Conseil scolaire catholique Providence; Conseil scolaire Viamonde.'),
-                        p('On 3 February 2021, it was announced ', a(href='https://news.ontario.ca/en/release/60228/enhanced-safety-measures-in-place-as-in-person-learning-resumes-across-ontario', 'all elementary and secondary schools in the following 13 PHUs could return to in-person learning on 8 February 2021'), ': Brant County Health Unit; Chatham-Kent Public Health; Durham Region Health Department; Haldimand-Norfolk Health Unit; Halton Region Public Health; City of Hamilton Public Health Services; Huron Perth Public Health; Lambton Public Health; Niagara Region Public Health; Simcoe-Muskoka District Health Unit; Region of Waterloo Public Health and Emergency Services; Wellington-Dufferin-Guelph Public Health; Windsor-Essex County Health Unit.'),
+                        p('On 3 February 2021, it was announced ', a(href='https://news.ontario.ca/en/release/60228/enhanced-safety-measures-in-place-as-in-person-learning-resumes-across-ontario', target = '_blank', 'all elementary and secondary schools in the following 13 PHUs could return to in-person learning on 8 February 2021'), ': Brant County Health Unit; Chatham-Kent Public Health; Durham Region Health Department; Haldimand-Norfolk Health Unit; Halton Region Public Health; City of Hamilton Public Health Services; Huron Perth Public Health; Lambton Public Health; Niagara Region Public Health; Simcoe-Muskoka District Health Unit; Region of Waterloo Public Health and Emergency Services; Wellington-Dufferin-Guelph Public Health; Windsor-Essex County Health Unit.'),
                         p('And, all elementary and secondary schools in the following 3 PHUs to in-person learning on 16 February 2021: Peel Public Health, Toronto Public Health, and York Region Public Health.'),
                         p('On 12 April 2021, it was announced that ', a(href = 'https://news.ontario.ca/en/release/61106/ontario-moves-schools-to-remote-learning-following-spring-break', target='_blank', 'all schools would revert to virtual schooling as of 19 April 2021'), 'following the re-scheduled April Break of 12-16 April 2021 during which time schools were closed.'),
                         br(),
@@ -568,7 +542,7 @@ ui <- bootstrapPage(
                         h5(('Summary of cases in schools')),
                         p('Presents raw data of cases in schools. Data table can be manipulated in ascending or descending order by variable of interest. Table can be downloaded as a .CSV file for independent analysis.'),
                         p('Variables included: collected date; reported date; current schools with cases; current schools closed; current total number of schools; new (total school-related cases; student; staff; unidentified); recent (total school-related cases; student; staff; unidentified); past (total school-related cases; student; staff; unidentified); cumulative (total school-related cases; student; staff; unidentified).'),
-                        p('Recent and past case data available as from 1 October 2020. See ', a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools/resource/7fbdbb48-d074-45d9-93cb-f7de58950418', 'Summary of cases in schools')),
+                        p('Recent and past case data available as from 1 October 2020. See ', a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools/resource/7fbdbb48-d074-45d9-93cb-f7de58950418', target = '_blank', 'Summary of cases in schools')),
                         br(),
                         h5('Schools with active cases and school demographic data'),
                         p('Presents raw data of cases in schools combined with demographic data. Data table can be manipulated in ascending or descending order by variable of interest. Table can be downloaded as a .CSV file for independent analysis.'),
@@ -585,7 +559,7 @@ ui <- bootstrapPage(
                         p('Lists all publicly available data sources used to generate the COVID-19 School Dashboard.'),
                         br(),
                         h5(('Source code')),
-                        p('Source code for this site can be found ', a(href = 'https://gitlab.com/br00t/ontario-covid19-dashboard', 'here', target = "_blank")),
+                        p('Source code for this site can be found ', a(href = 'https://github.com/connor-cozens/covid19-school-dashboard', 'here', target = "_blank")),
                         br(),
                         h3(id = "Future Developments", 'COMING SOON'),
                         p('The COVID-19 School Dashboard will soon add more indicators. Version 1.0 of the site has been published to balance the need for expedience in view of the need for timely public information given the effects of COVID-19 on education.'),
@@ -598,55 +572,85 @@ ui <- bootstrapPage(
                         ),
                         p('We invite users to suggest further indicators for integration. Further web optimization and dynamic display features are also planned.'),
                         br(),
+                        p('We are open to feedback and continuous improvements. Please report any data discrepancies or other suggestions.'),
+                        p('Contact: ', a(href = 'mailto:info@covid19schooldashboard.com', 'info@covid19schooldashboard.com')),
+                        br(),
                         h3(id = "Authorship", 'AUTHORSHIP, ATTRIBUTIONS, CITATION'),
                         h4('Cite the COVID-19 School Dashboard as:'),
-                        p('Srivastava, P. (2020). ', tags$em('COVID-19 school dashboard (1.0 Nov 2020). '), '[Web application]. ', a(href = 'http://covid19schooldashboard.com/', 'http://covid19schooldashboard.com/')),
+                        p('Srivastava, P., & Taylor, P.J. (2020). ', tags$em('COVID-19 school dashboard (1.0 Nov 2020). '), '[Web application]. ', a(href = 'http://covid19schooldashboard.com/', 'http://covid19schooldashboard.com/')),
                         br(),
-                        p(a(href = 'https://www.edu.uwo.ca/faculty-profiles/prachi-srivastava.html', 'Dr. Prachi Srivastava'), ', Associate Professor, Faculty of Education, University of Western Ontario, Canada.'),
+                        p(a(href = 'https://www.edu.uwo.ca/faculty-profiles/prachi-srivastava.html', target = '_blank', 'Dr. Prachi Srivastava'), ', Associate Professor, Faculty of Education, University of Western Ontario, Canada.'),
                         p(a(href = 'mailto:prachi.srivastava@uwo.ca', 'Prachi.srivastava@uwo.ca')),
-                        p(a(href = 'https://twitter.com/PrachiSrivas', '@PrachiSrivas')),
-                        p(a(href = 'https://orcid.org/0000-0003-4865-8963', 'ORCID iD: 0000-0003-4865-8963')),
+                        p(a(href = 'https://twitter.com/PrachiSrivas', target = '_blank', '@PrachiSrivas')),
+                        p(a(href = 'https://orcid.org/0000-0003-4865-8963', target = '_blank', 'ORCID iD: 0000-0003-4865-8963')),
                         br(),
                         p('COVID-19 School Dashboard technical development and design: Peter J. Taylor'),
                         br(),
                         h5('Preliminary site structure based on:'),
-                        p('Parker, E., & Leclerc, Q. (2020). ', tags$em('COVID-19 tracker. '), '[Web application]. ',  a(href = 'https://vac-lshtm.shinyapps.io/ncov_tracker/', 'https://vac-lshtm.shinyapps.io/ncov_tracker/')),
+                        p('Parker, E., & Leclerc, Q. (2020). ', tags$em('COVID-19 tracker. '), '[Web application]. ',  a(href = 'https://vac-lshtm.shinyapps.io/ncov_tracker/', target = '_blank', 'https://vac-lshtm.shinyapps.io/ncov_tracker/')),
                         br(),
                         br(),
-                        a(href = 'https://www.edu.uwo.ca', tags$img(src = 'uwo_logo.png', height = '58', width = '243')),
+                        a(href = 'https://www.edu.uwo.ca', target = '_blank', tags$img(src = 'uwo_logo.png', height = '58', width = '243')),
                         br(),
                         br()
                ),
-               # TAB: Our Team Section ------------------------------------------
+               
+               # TAB: Media Section --------------------------------------------
+               tabPanel
+               ('Media',
+                    tags$div(),
+                    h3('Covid-19 School Dashboard in the Media'),
+                    p('Here you\'ll find an archive of articles and news pieces that we have been involved with or had written about us.'),
+                    h4('May 3rd, 2021'),
+                    a('UWO COVID Next Campaign', href='https://uwo.ca/research/excellence/covidnext/#view/2a', target = '_blank'),
+                    h4('December 29, 2020'),
+                    a('The Standard Hong Kong - \'Help in dash to reopen schools\'', href='https://www.thestandard.com.hk/section-news/fc/4/226080/Help-in-dash-to-reopen-schools', target = '_blank'),
+                    h4('November 30, 2020'),
+                    a("The London Free Press - \'Western professor's tool makes school COVID-19 data easier to find, grasp\'", href='https://lfpress.com/news/local-news/western-professors-tool-makes-school-covid-19-data-easier-to-find-grasp', target = '_blank'), 
+                    h4('November 29, 2020'), 
+                    a('CityNews Toronto - \'Covid-19 school data base to assist parents\'', href='https://toronto.citynews.ca/video/2020/11/29/covid-19-school-data-base-to-assist-parents/', target = '_blank'), 
+                    h4('November 26, 2020'), 
+                    a('CBC News \'Ontario News with Rita Celli\' - \'Are schools safe enough?\'', href='https://www.cbc.ca/listen/live-radio/1-45-ontario-today/clip/15811055-are-schools-safe-enough', target = '_blank'),
+                    h4('November 25, 2020'),
+                    a("980AM Radio Show - \'Mapping COVID-19 in Ontario schools to better understand the virus' impacts\'", href='https://omny.fm/shows/am980/mapping-covid-19-in-ontario-schools-to-better-unde', target = '_blank'),
+                    br(),
+                    a("DailyHive News Toronto - \'There's a map showing COVID-19 cases in Ontario schools\'", href='https://dailyhive.com/toronto/covid-19-map-ontario-schools', target = '_blank'),
+                    br(),
+                    a("Global News - \'Coronavirus: expert in global education launches interactive map of Ontario school cases\'", href='https://globalnews.ca/news/7481210/coronavirus-interactive-map-ontario-school-cases-covid-19/', target = '_blank'),
+                    h4('November 24, 2020'),
+                    a('Western University News - \'New interactive dashboard tracks COVID-19 cases in Ontario schools\'', href='https://news.westernu.ca/2020/11/new-interactive-dashboard-tracks-covid-19-cases-in-ontario-schools/', target = '_blank'),
+                    h4('November 23, 2020'),
+                    a("CTV London, Ontario - \'New website helps simplify and track school COVID-19 case data\'", href='https://london.ctvnews.ca/new-website-helps-simplify-and-track-school-covid-19-case-data-1.5201172', target = '_blank')
+                ),
+               
+               # TAB: Our Team ------------------------------------------
                tabPanel('Our Team',
                         tags$div(),
+                        p('We are open to feedback and continuous improvements. Please report any data discrepancies or other suggestions.'),
+                        p('Contact: ', a(href = 'mailto:info@covid19schooldashboard.com', 'info@covid19schooldashboard.com')),
+                        br(),
                         h3('THE TEAM AND CONTACT'),
                         h4('Dr. Prachi Srivastava'),
                         p(em('Principal Investigator and Project Lead, Western University')),
                         p('Dr. Prachi Srivastava is tenured Associate Professor, Western University, specialising in education and global development. She is also Member, World Bank Expert Advisory Council on Citizen Engagement, and Senior Research Fellow, NORRAG. Previously, she served with the United Nations Mission in Kosovo and the International Rescue Committee. She holds a doctorate from the University of Oxford.'),
-                        p('For dashboard inquiries, contact Dr. Srivastava at: ', a(href = 'mailto:prachi@covid19schooldashboard.com', 'prachi@covid19schooldashboard.com')),
-                        p('For personal inquiries, contact Dr. Srivastava at: ', a(href = 'mailto:prachi.srivastava@uwo.ca', 'prachi.srivastava@uwo.ca')),
-                        p(a(href = 'https://twitter.com/PrachiSrivas', tags$img(src = 'twitter_logo.png', height = '32', width = '32')), ' - ', a(href = 'https://www.linkedin.com/in/prachi-srivastava-9ab6122/', tags$img(src = 'linkedin_logo.png', height = '32', width = '32')), ' - ', a(href = 'https://www.edu.uwo.ca/faculty-profiles/prachi-srivastava.html', tags$img(src = 'uwo_logo.png', height = '32', width = '150'))),
+                        p('For inquiries, contact Dr. Srivastava at: ', a(href = 'mailto:prachi.srivastava@uwo.ca', 'prachi.srivastava@uwo.ca')),
+                        p(a(href = 'https://twitter.com/PrachiSrivas', target = "_blank", tags$img(src = 'twitter_logo.png', height = '32', width = '36')), ' - ', a(href = 'https://www.linkedin.com/in/prachi-srivastava-9ab6122/', target = "_blank", tags$img(src = 'linkedin_logo.png', height = '32', width = '32')), ' - ', a(href = 'https://www.edu.uwo.ca/faculty-profiles/prachi-srivastava.html', target = "_blank", tags$img(src = 'uwo_logo.png', height = '32', width = '150'))),
                         br(),
                         h4('Peter J. Taylor'),
                         p(em('Technical Lead and Lead Developer')),
-                        p('For dashboard inquiries, contact Peter at: ', a(href = 'mailto:peter@covid19schooldashboard.com', 'peter@covid19schooldashboard.com')),
-                        p('For personal inquiries, contact Peter at: ', a(href = 'mailto:peter.taylor@taypeinternational.com', 'peter.taylor@taypeinternational.com')),
-                        p(a(href = 'https://twitter.com/br00t4c', tags$img(src = 'twitter_logo.png', height = '32', width = '32'))),
+                        p(a(href = 'https://twitter.com/br00t4c', target = "_blank", tags$img(src = 'twitter_logo.png', height = '32', width = '36')), ' - ', a(href = 'https://gitlab.com/br00t', target = "_blank", tags$img(src = 'gitlab_logo.png', height = '64', width = '64'))),
                         br(),
                         h4('Connor Cozens'),
                         p(em('Developer')),
                         p('Connor is a recent graduate from Western University with an Honors BSc in Computer Science and a Minor in Software Engineering. He is currently joining the IPDP program at RBC as a Tech & Operations Associate in Toronto. Connor is passionate about Artificial Intelligence and Data Science and is always looking for projects in these areas to get involved with to learn and contribute to the growing research fields in these areas.'),
                         p('For dashboard inquiries, contact Connor at: ', a(href = 'mailto:connor@covid19schooldashboard.com', 'connor@covid19schooldashboard.com')),
-                        p('For personal inquiries, contact Connor at: ', a(href = 'mailto:cozcon@gmail.com', 'cozcon@gmail.com')),
-                        p(a(href = 'https://twitter.com/ConnorCozens', tags$img(src = 'twitter_logo.png', height = '32', width = '32')), ' - ', a(href = 'https://www.linkedin.com/in/connorcozens/', tags$img(src = 'linkedin_logo.png', height = '32', width = '32')), ' - ', a(href = 'https://github.com/connor-cozens', tags$img(src = 'github_logo.png', height = '32', width = '32'))),
+                        p(a(href = 'https://twitter.com/ConnorCozens', target = "_blank", tags$img(src = 'twitter_logo.png', height = '32', width = '36')), ' - ', a(href = 'https://www.linkedin.com/in/connorcozens/', target = "_blank", tags$img(src = 'linkedin_logo.png', height = '32', width = '32')), ' - ', a(href = 'https://github.com/connor-cozens', target = "_blank", tags$img(src = 'github_logo.png', height = '32', width = '32'))),
                         br(),
                         h4('Justin Marshall'),
                         p(em('Developer')),
                         p('Justin graduated from Western University with an Honors BSc in Computer Science and a Minor in Software Engineering and is currently open to full-time roles and opportunies. In addition to data visualization, Justin is interested in fields including Game Development, and is currently working on creating his own games and building up a portfolio.'),
-                        p('For dashboard inquiries, contact Justin  at: ', a(href = 'mailto:justin@covid19schooldashboard.com', 'connor@covid19schooldashboard.com')),
-                        p('For personal inquiries, contact Justin at: ', a(href = 'mailto:powtatow@gmail.com', 'powtatow@gmail.com')),
-                        p(a(href = 'https://twitter.com/JuiceMarsh', tags$img(src = 'twitter_logo.png', height = '32', width = '32')), ' - ', a(href = 'https://www.linkedin.com/in/JustinMarshall1998/', tags$img(src = 'linkedin_logo.png', height = '32', width = '32')), ' - ', a(href = 'https://github.com/JustinMarshall1998', tags$img(src = 'github_logo.png', height = '32', width = '32'))),
+                        p('For dashboard inquiries, contact Justin  at: ', a(href = 'mailto:justin@covid19schooldashboard.com', 'justin@covid19schooldashboard.com')),
+                        p(a(href = 'https://twitter.com/JuiceMarsh', target = "_blank", tags$img(src = 'twitter_logo.png', height = '32', width = '36')), ' - ', a(href = 'https://www.linkedin.com/in/JustinMarshall1998/', target = "_blank", tags$img(src = 'linkedin_logo.png', height = '32', width = '32')), ' - ', a(href = 'https://github.com/JustinMarshall98', target = "_blank", tags$img(src = 'github_logo.png', height = '32', width = '32'))),
                )
                
     )          
@@ -838,7 +842,8 @@ server <- function(input, output) {
     
     # clean_date_reactive_text -------------------------------------------------
     output$clean_date_reactive_text <- renderText({
-        format(max(covid19_schools_active$reported_date), '%d %B %Y')
+        #Changed from covid19_schools_active to covid19_schools_summary, which has the correct latest date matching with the case count given
+        format(max(covid19_schools_summary$reported_date), '%d %B %Y')
     })
     
     # clean_week_old_date_text -------------------------------------------------
