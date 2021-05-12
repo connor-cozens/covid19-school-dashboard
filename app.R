@@ -610,7 +610,7 @@ ui <- bootstrapPage(
                         br(),
                         h4('Peter J. Taylor'),
                         p(em('Technical Lead and Lead Developer')),
-                        p(a(href = 'https://twitter.com/br00t4c', target = "_blank", tags$img(src = 'twitter_logo.png', height = '32', width = '36'))),
+                        p(a(href = 'https://twitter.com/br00t4c', target = "_blank", tags$img(src = 'twitter_logo.png', height = '32', width = '36')), ' - ', a(href = 'https://gitlab.com/br00t', target = "_blank", tags$img(src = 'gitlab_logo.png', height = '64', width = '64'))),
                         br(),
                         h4('Connor Cozens'),
                         p(em('Developer')),
