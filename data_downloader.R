@@ -40,7 +40,7 @@ library(stringdist)
 
 # SETTINGS ---------------------------------------------------------------------
 
-google_api_key <- 'AIzaSyDkr8MXsXD09WAq-VRhuAzCJIV2E-MvwbQ' # you need a google api key with maps javascript api and geocoding api enabled
+google_api_key <- 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX' # you need a google api key with maps javascript api and geocoding api enabled
 
 data_dir <- 'data'
 
