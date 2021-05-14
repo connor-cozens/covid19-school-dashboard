@@ -137,7 +137,15 @@ get_weekly_summary_table <- function(timeFrame) {
 
 # SHINY UI ---------------------------------------------------------------------
 ui <- bootstrapPage(
-    tags$head(includeHTML('gtag.html')),
+    tags$head(includeHTML('gtag.html'),
+              tags$style(HTML("
+                              @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans&display=swap');
+                              p { font-family: 'Nunito Sans';},
+                              h1 { font-family: 'Nunito Sans';},
+                              h2 { font-family: 'Nunito Sans';},
+                              h3 { font-family: 'Nunito Sans';},
+                              h4 { font-family: 'Nunito Sans';},
+                              "))),
     navbarPage(theme = shinytheme('united'), 
                collapsible = TRUE,
                'COVID-19 School Dashboard', 
@@ -447,11 +455,11 @@ ui <- bootstrapPage(
                             p('The figure below shows the main Ontario-level school closure and re-opening periods from September 2020 – April 2021.'),
                             img(src='timeline.png', width='100%'),
                             tags$style("#subnote {font-size: 8px;}"),
-                            p(id = "subnote", tags$i('Figure 1 Ontario-level school closures and reopening policy tracing (March 2020 – April 2021)')),
+                            p(id = "subnote", tags$b('Figure 1 Ontario-level school closures and reopening policy tracing (March 2020 – April 2021)')),
+                            p(id = "subnote", 'Cite as: Srivastava, P., Taylor, P.J. (2021). COVID-19 school dashboard (1.1 May 2021). [Web application]. http://covid19schooldashboard.com/'),
                             p(id = "subnote", 'Notes. *: School closures: defined here as the suspension of in-school, face-to-face instruction. Public schools only. Special provisions for face-to-face instruction were made for special education needs services. These are not presented here. Only provincial-level decisions are presented. Individual school boards and PHUs may have additionally instituted localised school closures. These are not presented here.'),
                             p(id = "subnote", tags$sup("1"), ': All schools in PHUs of Algoma, North Bay Parry Sound, Northwestern, Porcupine, Sudbury, Thunder Bay, Timiskaming. ', tags$sup("2"), ': All schools in PHUs of Grey Bruce, Haliburton, Kawartha, Pine Ridge, Hastings and Prince Edward Counties, Kingston, Frontenac and Lennox & Addington, Leeds, Grenville and Lanark, Peterborough, Renfrew County. ', tags$sup("3"), ': All schools in PHUs of Eastern Ontario, Middlesex-London, Ottawa, Southwestern. ', tags$sup("4"),': All schools in PHUs of: Brant County, Chatham-Kent, Durham, Haldimand-Norfolk, Halton, Hamilton, Huron Perth, Lambton, Niagara, Simcoe-Muskoka, Waterloo, Wellington-Dufferin-Guelph, Windsor-Essex. ', tags$sup("5"),': All schools in PHUs of: Peel, Toronto, York.'),
                             p(id = "subnote", 'Source. Data extracted from official provincial government announcements  and verified on ICES COVID-19 Dashboard.'),
-                            p(id = "subnote", 'Cite as: Srivastava, P. (2020). COVID-19 school dashboard (1.0 Nov 2020). [Web application]. http://covid19schooldashboard.com/'),
                             p(id = "subnote", tags$br(), tags$sup("i"), 'https://news.ontario.ca/en/release/59790/ontario-announces-provincewide-shutdown-to-stop-spread-of-covid-19-and-save-lives'),
                             p(id = "subnote", 'https://news.ontario.ca/en/statement/60033/over-100000-ontario-students-return-to-class-beginning-next-week'),
                             p(id = "subnote", 'https://news.ontario.ca/en/statement/60154/280000-more-ontario-students-to-return-to-class'),
@@ -482,7 +490,7 @@ ui <- bootstrapPage(
                             p('Schools in 2 additional school boards that span multiple PHUs could have schools in the appropriate PHU resume in-person learning: Conseil scolaire catholique Providence; Conseil scolaire Viamonde.'),
                             p('On 3 February 2021, it was announced ', a(href='https://news.ontario.ca/en/release/60228/enhanced-safety-measures-in-place-as-in-person-learning-resumes-across-ontario', target = '_blank', 'all elementary and secondary schools in the following 13 PHUs could return to in-person learning on 8 February 2021'), ': Brant County Health Unit; Chatham-Kent Public Health; Durham Region Health Department; Haldimand-Norfolk Health Unit; Halton Region Public Health; City of Hamilton Public Health Services; Huron Perth Public Health; Lambton Public Health; Niagara Region Public Health; Simcoe-Muskoka District Health Unit; Region of Waterloo Public Health and Emergency Services; Wellington-Dufferin-Guelph Public Health; Windsor-Essex County Health Unit.'),
                             p('And, all elementary and secondary schools in the following 3 PHUs to in-person learning on 16 February 2021: Peel Public Health, Toronto Public Health, and York Region Public Health.'),
-                            p('On 12 April 2021, it was announced that ', a(href = 'https://news.ontario.ca/en/release/61106/ontario-moves-schools-to-remote-learning-following-spring-break', target='_blank', 'all schools would revert to virtual schooling as of 19 April 2021'), 'following the re-scheduled April Break of 12-16 April 2021 during which time schools were closed.'),
+                            p('On 12 April 2021, it was announced that ', a(href = 'https://news.ontario.ca/en/release/61106/ontario-moves-schools-to-remote-learning-following-spring-break', target='_blank', 'all schools would revert to virtual schooling for an indeterminate period as of 19 April 2021'), 'following the re-scheduled spring break of 12-16 April 2021 during which time schools were closed.'),
                             hr()
                         ),
                         # Site Navigation -----
@@ -586,6 +594,8 @@ ui <- bootstrapPage(
                                 tags$li('Cumulative: % of schools per board affected with at least one case'),
                                 tags$li('Number and % of schools with multiple cases'),
                                 tags$li('Timeline functionality to view cases by they were reported'),
+                                tags$li('Mobile viewing and optimization'),
+                                tags$li('Encoding issues cause accented characters to display improperly on the site. A fix is in the works.'),
                             ),
                             p('We invite users to suggest further indicators for integration. Further web optimization, dynamic display features, and mobile device optimization are also planned.'),
                             hr()
@@ -594,7 +604,7 @@ ui <- bootstrapPage(
                         div(
                             h3(id = "Authorship", 'AUTHORSHIP, ATTRIBUTIONS, CITATION'),
                             h4('Cite the COVID-19 School Dashboard as:'),
-                            p('Srivastava, P., & Taylor, P.J. (2020). ', tags$em('COVID-19 school dashboard (1.0 Nov 2020). '), '[Web application]. ', a(href = 'http://covid19schooldashboard.com/', 'http://covid19schooldashboard.com/')),
+                            p('Srivastava, P., & Taylor, P.J. (2021). ', tags$em('COVID-19 school dashboard (1.1 May 2021). '), '[Web application]. ', a(href = 'http://covid19schooldashboard.com/', 'http://covid19schooldashboard.com/')),
                             br(),
                             p(a(href = 'https://www.edu.uwo.ca/faculty-profiles/prachi-srivastava.html', target = '_blank', 'Dr. Prachi Srivastava'), ', Associate Professor, Faculty of Education, University of Western Ontario, Canada.'),
                             p(a(href = 'mailto:prachi.srivastava@uwo.ca', 'Prachi.srivastava@uwo.ca')),
