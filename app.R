@@ -427,7 +427,7 @@ ui <- bootstrapPage(
                             p('The site is currently best viewed on a desktop or tablet. Mobile device optimization is planned.'),
                             br(),
                             p('We are open to feedback and continuous improvements. Please report any data discrepancies or other suggestions.'),
-                            p('Contact: ', a(href = 'mailto:info@covid19schooldashboard.com', 'info@covid19schooldashboard.com', target = '_blank')),
+                            p('Contact: ', a(href = 'mailto:covid19schooldashboard@gmail.com', 'covid19schooldashboard@gmail.com', target = '_blank')),
                             br(),
                             h4('Why is this important?'),
                             p('The effects of COVID-19 are more severe on high-risk communities, populations, and schools. There are strong equity concerns. Visualizing COVID-19 case data with data on school social background characteristics will give us a better understanding of the composition of affected schools.'),
@@ -443,7 +443,7 @@ ui <- bootstrapPage(
                             p('The main aim of the COVID-19 School Dashboard is to show which schools are affected by confirmed cases as reported in the official data, visually plot where the schools are, and show relevant school background characteristics of affected schools. This site should not be used to draw inferences on the broader COVID-19 situation in Ontario, or on case numbers generally. A number of complementary metrics are useful in that regard.'),
                             p('The numbers of cases are extracted from official data sources. A number of contextual factors will affect data changes. The following is an informational list of potential relevant factors and not exhaustive. For example, changing testing scenarios can mean that as the frequency of testing increases or decreases, threshold of symptoms is widened or restricted, and backlog of results clears or increases, the number of new cases may show spikes or dips. As the situation evolves, vaccination rates and mass and partial school closures and reopening, amongst other factors, will affect changes in data. '),
                             p('There are known lags in data reported in the Ministry of Education dataset, which may result in real-time discrepancies.'),
-                            p('There may be some discrepancies in school demographic data if they are in the official dataset. ', a(href = 'info@covid19schooldashboard.com', 'Please report them to us to fix.', target = '_blank')),
+                            p('There may be some discrepancies in school demographic data if they are in the official dataset. ', a(href = 'covid19schooldashboard@gmail.com', 'Please report them to us to fix.', target = '_blank')),
                             p('Finally, Ontario instituted a phased re-opening of schools at the beginning of the 2020-21 school year. Earlier school case data reflect a partial reopening of the system. Nearly all schools were meant to be re-opened by 21 September 2020. This was followed by periods of systems-wide school closures and partial reopening. Schools are currently closed for face-to-face instruction in Ontario. This will be reflected in the data.'),
                             hr()
                         ),
@@ -675,17 +675,17 @@ ui <- bootstrapPage(
                         h4('Connor Cozens'),
                         p(em('Developer')),
                         p('Connor is a recent graduate from Western University with an Honors BSc in Computer Science and a Minor in Software Engineering. He is currently joining the Tech & Operations team at RBC in Toronto. Connor is passionate about artificial intelligence and data science. He is always looking for projects in these areas to get involved with, to learn, and contribute to growing research fields in these areas.'),
-                        p('Contact Connor at: ', a(href = 'mailto:connor@covid19schooldashboard.com', 'connor@covid19schooldashboard.com')),
+                        p('Contact Connor at: ', a(href = 'mailto:covid19schooldashboard@gmail.com', 'covid19schooldashboard@gmail.com')),
                         p(a(href = 'https://twitter.com/ConnorCozens', target = "_blank", tags$img(src = 'twitter_logo.png', height = '24', width = '28')), ' - ', a(href = 'https://www.linkedin.com/in/connorcozens/', target = "_blank", tags$img(src = 'linkedin_logo.png', height = '24', width = '24')), ' - ', a(href = 'https://github.com/connor-cozens', target = "_blank", tags$img(src = 'github_logo.png', height = '32', width = '32'))),
                         hr(),
                         h4('Justin Marshall'),
                         p(em('Developer')),
                         p('Justin graduated from Western University with an Honors BSc in Computer Science and a Minor in Software Engineering. He is currently open to full-time roles and opportunities. In addition to data visualization, Justin is interested in fields including game development, and is currently working on creating his own games and building a portfolio.'),
-                        p('Contact Justin  at: ', a(href = 'mailto:justin@covid19schooldashboard.com', 'justin@covid19schooldashboard.com')),
+                        p('Contact Justin  at: ', a(href = 'mailto:covid19schooldashboard@gmail.com', 'covid19schooldashboard@gmail.com')),
                         p(a(href = 'https://twitter.com/JuiceMarsh', target = "_blank", tags$img(src = 'twitter_logo.png', height = '24', width = '28')), ' - ', a(href = 'https://www.linkedin.com/in/JustinMarshall1998/', target = "_blank", tags$img(src = 'linkedin_logo.png', height = '24', width = '24')), ' - ', a(href = 'https://github.com/JustinMarshall98', target = "_blank", tags$img(src = 'github_logo.png', height = '32', width = '32'))),
                         hr(),
                         p('We are open to feedback and continuous improvements. Please report any data discrepancies or other suggestions.'),
-                        p('Contact: ', a(href = 'mailto:info@covid19schooldashboard.com', 'info@covid19schooldashboard.com')),
+                        p('Contact: ', a(href = 'mailto:covid19schooldashboard@gmail.com', 'covid19schooldashboard@gmail.com')),
                )
                
     )          
