@@ -467,61 +467,7 @@ server <- function(input, output, session) {
                          # add case data markers
                          incProgress(1, 'adding markers')
                          
-                         #Add markers for schools with no cases
-                         basemap <- addCircles(basemap, 
-                                                     data = get_schools_no_cases(), 
-                                                     lng = ~longitude, 
-                                                     lat = ~latitude, 
-                                                     radius = 50,
-                                                     weight = 1, 
-                                                     color = '#dfd700',
-                                                     fillOpacity = 1,
-                                                     label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Parents have some university education: %s%%<br/><strong>Zero Confirmed Cases</strong></div>', 
-                                                                     get_schools_no_cases()$`school name`,
-                                                                     get_schools_no_cases()$city,
-                                                                     get_schools_no_cases()$`school level`,
-                                                                     get_schools_no_cases()$`board name`,
-                                                                     get_schools_no_cases()$`school language`,
-                                                                     get_schools_no_cases()$enrolment, 
-                                                                     get_schools_no_cases()$`percentage of school-aged children who live in low-income households`, 
-                                                                     get_schools_no_cases()$`percentage of students whose first language is not english`, 
-                                                                     get_schools_no_cases()$`percentage of students who are new to canada from a non-english speaking country`, 
-                                                                     get_schools_no_cases()$`percentage of students whose first language is not english`, 
-                                                                     get_schools_no_cases()$`percentage of students who are new to canada from a non-french speaking country`, 
-                                                                     get_schools_no_cases()$`percentage of students whose parents have some university education`
-                                                                     ) %>% lapply(htmltools::HTML), 
-                                                     labelOptions = labelOptions(
-                                                         style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
-                                                         textsize = '15px', direction = 'auto'))
                          
-                         basemap <- addCircleMarkers(basemap, 
-                                                     data = cases_per_school, 
-                                                     lng = ~lon, 
-                                                     lat = ~lat, 
-                                                     radius = ~(cases_per_school) * 2, # ~(cases_per_school)^(1/5), 
-                                                     weight = 1, 
-                                                     color = '#d62728',
-                                                     fillOpacity = 0.1, 
-                                                     label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Parents have some university education: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/></div>', 
-                                                                     cases_per_school$school_name, 
-                                                                     cases_per_school$city, 
-                                                                     cases_per_school$school_level, 
-                                                                     cases_per_school$school_board, 
-                                                                     cases_per_school$school_language, 
-                                                                     cases_per_school$school_enrolment, 
-                                                                     cases_per_school$low_income, 
-                                                                     cases_per_school$non_english, 
-                                                                     cases_per_school$from_non_english, 
-                                                                     cases_per_school$non_french, 
-                                                                     cases_per_school$from_non_french, 
-                                                                     cases_per_school$some_university, 
-                                                                     cases_per_school$cases_per_school,
-                                                                     cases_per_school$cases_per_school_staff,
-                                                                     cases_per_school$cases_per_school_student,
-                                                                     cases_per_school$cases_per_school_unidentified) %>% lapply(htmltools::HTML), 
-                                                     labelOptions = labelOptions(
-                                                         style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
-                                                         textsize = '15px', direction = 'auto'))
                          
                          
                          
@@ -999,6 +945,116 @@ server <- function(input, output, session) {
             class = 'display'
         )
     })
+    
+    #FixCircles--------------------------------------------------
+    observeEvent(
+        eventExpr = input$basemap_leaflet_zoom, {
+            print(input$basemap_leaflet_zoom)
+            print("hello")
+            #Determine weight, update based on zoom level
+            if (input$basemap_leaflet_zoom == 13){
+                circleMarkerWeight = 16
+                leafletProxy(
+                    mapId = "basemap_leaflet",
+                    session = session
+                ) %>% clearMarkers() %>% 
+                    #Add markers for schools with no cases
+                    addCircleMarkers(
+                        data = get_schools_no_cases(), 
+                        lng = ~longitude, 
+                        lat = ~latitude, 
+                        radius = 3,
+                        weight = circleMarkerWeight, 
+                        color = '#0000FF',
+                        fillOpacity = 1,
+                        label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Parents have some university education: %s%%<br/><strong>Zero Confirmed Cases</strong></div>', 
+                                        get_schools_no_cases()$`school name`,
+                                        get_schools_no_cases()$city,
+                                        get_schools_no_cases()$`school level`,
+                                        get_schools_no_cases()$`board name`,
+                                        get_schools_no_cases()$`school language`,
+                                        get_schools_no_cases()$enrolment, 
+                                        get_schools_no_cases()$`percentage of school-aged children who live in low-income households`, 
+                                        get_schools_no_cases()$`percentage of students whose first language is not english`, 
+                                        get_schools_no_cases()$`percentage of students who are new to canada from a non-english speaking country`, 
+                                        get_schools_no_cases()$`percentage of students whose first language is not english`, 
+                                        get_schools_no_cases()$`percentage of students who are new to canada from a non-french speaking country`, 
+                                        get_schools_no_cases()$`percentage of students whose parents have some university education`
+                        ) %>% lapply(htmltools::HTML), 
+                        labelOptions = labelOptions(
+                            style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
+                            textsize = '15px', direction = 'auto'))
+            }
+            else if(input$basemap_leaflet_zoom == 12){
+                circleMarkerWeight = 4
+                leafletProxy(
+                    mapId = "basemap_leaflet",
+                    session = session
+                ) %>% clearMarkers() %>% 
+                    #Add markers for schools with no cases
+                    addCircleMarkers(
+                        data = get_schools_no_cases(), 
+                        lng = ~longitude, 
+                        lat = ~latitude, 
+                        radius = 3,
+                        weight = circleMarkerWeight, 
+                        color = '#0000FF',
+                        fillOpacity = 1,
+                        label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Parents have some university education: %s%%<br/><strong>Zero Confirmed Cases</strong></div>', 
+                                        get_schools_no_cases()$`school name`,
+                                        get_schools_no_cases()$city,
+                                        get_schools_no_cases()$`school level`,
+                                        get_schools_no_cases()$`board name`,
+                                        get_schools_no_cases()$`school language`,
+                                        get_schools_no_cases()$enrolment, 
+                                        get_schools_no_cases()$`percentage of school-aged children who live in low-income households`, 
+                                        get_schools_no_cases()$`percentage of students whose first language is not english`, 
+                                        get_schools_no_cases()$`percentage of students who are new to canada from a non-english speaking country`, 
+                                        get_schools_no_cases()$`percentage of students whose first language is not english`, 
+                                        get_schools_no_cases()$`percentage of students who are new to canada from a non-french speaking country`, 
+                                        get_schools_no_cases()$`percentage of students whose parents have some university education`
+                        ) %>% lapply(htmltools::HTML), 
+                        labelOptions = labelOptions(
+                            style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
+                            textsize = '15px', direction = 'auto'))
+            }
+            else if(input$basemap_leaflet_zoom == 8){
+                circleMarkerWeight = 1
+                leafletProxy(
+                    mapId = "basemap_leaflet",
+                    session = session
+                ) %>% clearMarkers() %>% 
+                    #Add markers for schools with no cases
+                    addCircleMarkers(
+                        data = get_schools_no_cases(), 
+                        lng = ~longitude, 
+                        lat = ~latitude, 
+                        radius = 3,
+                        weight = circleMarkerWeight, 
+                        color = '#0000FF',
+                        fillOpacity = 1,
+                        label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Parents have some university education: %s%%<br/><strong>Zero Confirmed Cases</strong></div>', 
+                                        get_schools_no_cases()$`school name`,
+                                        get_schools_no_cases()$city,
+                                        get_schools_no_cases()$`school level`,
+                                        get_schools_no_cases()$`board name`,
+                                        get_schools_no_cases()$`school language`,
+                                        get_schools_no_cases()$enrolment, 
+                                        get_schools_no_cases()$`percentage of school-aged children who live in low-income households`, 
+                                        get_schools_no_cases()$`percentage of students whose first language is not english`, 
+                                        get_schools_no_cases()$`percentage of students who are new to canada from a non-english speaking country`, 
+                                        get_schools_no_cases()$`percentage of students whose first language is not english`, 
+                                        get_schools_no_cases()$`percentage of students who are new to canada from a non-french speaking country`, 
+                                        get_schools_no_cases()$`percentage of students whose parents have some university education`
+                        ) %>% lapply(htmltools::HTML), 
+                        labelOptions = labelOptions(
+                            style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
+                            textsize = '15px', direction = 'auto'))
+            } 
+                
+        }, ignoreInit = TRUE)
+    
+
     
     #searchBar---------------------------------------------------
     observeEvent(input$searchBar,{
