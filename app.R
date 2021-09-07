@@ -152,7 +152,7 @@ ui <- bootstrapPage(
                id = 'nav',
                
                # TAB: COVID-19 Mapper ------------------------------------------
-               tabPanel('Mapper - Affected Ontario Schools',
+               tabPanel('Mapper - 2020-21',
                         div(class='outer',
                             
                             # tag: stylesheet ----------------------------------
