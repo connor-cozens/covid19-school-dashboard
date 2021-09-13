@@ -151,8 +151,8 @@ ui <- bootstrapPage(
                'COVID-19 School Dashboard', 
                id = 'nav',
                
-               # TAB: COVID-19 Mapper ------------------------------------------
-               tabPanel('Mapper - 2020-21',
+               # TAB: COVID-19 Mapper 2021-22 ------------------------------------------
+               tabPanel('Map - 2021-22',
                         div(class='outer',
                             
                             # tag: stylesheet ----------------------------------
@@ -214,6 +214,40 @@ ui <- bootstrapPage(
                             
                         )
                         
+               ),
+               # TAB: COVID-19 Mapper 2020-21 ------------------------------------------
+               tabPanel('Map - 2020-21',
+                        div(class='outer',
+                            
+                            # tag: stylesheet ----------------------------------
+                            tags$head(includeCSS('styles.css')),
+                            
+                            # leaflet: oldmap  --------------------------------
+                            leafletOutput('oldmap_leaflet', width = '100%', height = '100%'),
+                            
+                            # panel: controls ----------------------------------
+                            absolutePanel(id = 'controls', 
+                                          class = 'panel panel-default',
+                                          top = "5%", 
+                                          left = 55, 
+                                          width = 300, 
+                                          fixed = TRUE,
+                                          draggable = TRUE, 
+                                          height = 'auto',
+                                          
+                                          tags$style(HTML(".tabbable > .nav > li[class=active] > a {color:#e95420;}")),
+                                          tags$style(HTML(".tabbable > .nav > li > a {color:#777777;}")),
+                                                       h2('Year Summary', align = 'center', style="font-size:200%;"),
+                                                       
+                                                       # cumulative_case_count_text_20_21 ---------
+                                                       h3(textOutput('cumulative_case_count_text_20_21'), align = 'right'),
+                                                       
+                                                       # clean_date_reactive_text -----------
+                                                       h6(div('Data last reported on'), textOutput('clean_date_reactive_text_20_21'), align = 'right'),
+                                                       
+                                                       h6('Drag this box to move it', align = 'right')
+                                        )
+                            )
                ),
                # TAB: Overview and Search --------------------------------------
                tabPanel('Overview and Search',
@@ -750,6 +784,61 @@ server <- function(input, output) {
         
     })
     
+    # oldmap_leaflet ----------------------------------------------------------
+    output$oldmap_leaflet <- renderLeaflet({
+        withProgress(max = 6, 
+                     value = 0, 
+                     message = 'please wait...', 
+                     expr = {
+                         incProgress(1, 'loading shapes')
+                         # regenerate the oldmap
+                         # https://geohub.lio.gov.on.ca/datasets/province/data
+                         ontario <- readOGR(dsn = 'data/shapefiles', layer = 'PROVINCE')
+                         incProgress(1, 'generating map')
+                         oldmap <- leaflet(ontario)
+                         incProgress(1, 'setting view')
+                         oldmap <- setView(oldmap, lng = -79.7, lat = 44.39, zoom = 8) 
+                         incProgress(1, 'adding polygons')
+                         oldmap <- addPolygons(oldmap, weight = 3, fillColor = '#696969', opacity = 0.5)
+                         incProgress(1, 'adding tiles')
+                         oldmap <- addProviderTiles(oldmap, providers$Esri.NatGeoWorldMap)
+                         
+                         # add case data markers
+                         incProgress(1, 'adding markers')
+                         oldmap <- addCircleMarkers(oldmap, 
+                                                    data = cases_per_school_20_21, 
+                                                    lng = ~lon, 
+                                                    lat = ~lat, 
+                                                    radius = ~(cases_per_school_20_21$cases_per_school) * 2,
+                                                    weight = 1, 
+                                                    color = '#d62728',
+                                                    fillOpacity = 0.1, 
+                                                    label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Parents have some university education: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/></div>', 
+                                                                    cases_per_school_20_21$school_name, 
+                                                                    cases_per_school_20_21$city, 
+                                                                    cases_per_school_20_21$school_level, 
+                                                                    cases_per_school_20_21$school_board, 
+                                                                    cases_per_school_20_21$school_language, 
+                                                                    cases_per_school_20_21$school_enrolment, 
+                                                                    cases_per_school_20_21$low_income, 
+                                                                    cases_per_school_20_21$non_english, 
+                                                                    cases_per_school_20_21$from_non_english, 
+                                                                    cases_per_school_20_21$non_french, 
+                                                                    cases_per_school_20_21$from_non_french, 
+                                                                    cases_per_school_20_21$some_university, 
+                                                                    cases_per_school_20_21$cases_per_school,
+                                                                    cases_per_school_20_21$cases_per_school_staff,
+                                                                    cases_per_school_20_21$cases_per_school_student,
+                                                                    cases_per_school_20_21$cases_per_school_unidentified) %>% lapply(htmltools::HTML), 
+                                                    labelOptions = labelOptions(
+                                                        style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
+                                                        textsize = '15px', direction = 'auto'))
+                         
+                         oldmap
+                     })
+        
+    })
+    
     # cumulative_plot ----------------------------------------------------------
     output$cumulative_plot <- renderPlotly({
         df <- covid19_schools_summary
@@ -881,6 +970,11 @@ server <- function(input, output) {
         format(max(covid19_schools_summary$reported_date), '%d %B %Y')
     })
     
+    # clean_date_reactive_text_20_21 -------------------------------------------------
+    output$clean_date_reactive_text_20_21 <- renderText({
+        format(max(covid19_schools_summary_20_21$reported_date), '%d %B %Y')
+    })
+    
     # clean_week_old_date_text -------------------------------------------------
     output $clean_week_old_date_text <- renderText ({
         dates <- last_week_obtain()
@@ -919,6 +1013,13 @@ server <- function(input, output) {
     output$cumulative_case_count_text <- renderText({
         idx <- max(which(covid19_schools_summary$collected_date <= as.Date(now())))
         count <- last(covid19_schools_summary[ idx, 'cumulative_school_related_cases' ])
+        paste0(prettyNum(count, big.mark = ','), ' cumulative cases')
+    })
+    
+    # cumulative_case_count_text_20_21 -----------------------------------------------
+    output$cumulative_case_count_text_20_21 <- renderText({
+        idx <- max(which(covid19_schools_summary_20_21$collected_date <= as.Date(now())))
+        count <- last(covid19_schools_summary_20_21[ idx, 'cumulative_school_related_cases' ])
         paste0(prettyNum(count, big.mark = ','), ' cumulative cases')
     })
     
