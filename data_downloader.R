@@ -849,15 +849,27 @@ if (needs_refresh | is.na(needs_refresh)) {
 	fn <- file.path(data_dir, 'cases_per_school.rdata')
 	save('cases_per_school', file = fn)
 	
-	covid19_schools_active_with_demographics_most_recent_20_21 <- covid19_schools_active_with_demographics_most_recent
+	#covid19_schools_active_with_demographics_most_recent_20_21 <- covid19_schools_active_with_demographics_most_recent
 	fn <- file.path(data_dir, 'covid19_schools_active_with_demographics_most_recent_20_21.rdata')
 	base::load(file = fn, envir = .GlobalEnv)
-	covid19_schools_summary_20_21 <- covid19_schools_summary
+	#covid19_schools_summary_20_21 <- covid19_schools_summary
 	fn <- file.path(data_dir, 'covid19_schools_summary_20_21.rdata')
 	base::load(file = fn, envir = .GlobalEnv)
-	cases_per_school_20_21 <- cases_per_school
+	#cases_per_school_20_21 <- cases_per_school
 	fn <- file.path(data_dir, 'cases_per_school_20_21.rdata')
 	base::load(file = fn, envir = .GlobalEnv)
+	
+	#covid19_schools_active_with_demographics_most_recent_20_21 <- covid19_schools_active_with_demographics_most_recent
+	#fn <- file.path(data_dir, 'covid19_schools_active_with_demographics_most_recent_20_21.rdata')
+	#save('covid19_schools_active_with_demographics_most_recent_20_21', file = fn)
+	
+	#covid19_schools_summary_20_21 <- covid19_schools_summary
+	#fn <- file.path(data_dir, 'covid19_schools_summary_20_21.rdata')
+	#save('covid19_schools_summary_20_21', file = fn)
+	
+	#cases_per_school_20_21 <- cases_per_school
+	#fn <- file.path(data_dir, 'cases_per_school_20_21.rdata')
+	#save('cases_per_school_20_21', file = fn)
 	
 	
 	# do git push
