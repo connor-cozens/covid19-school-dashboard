@@ -46,7 +46,7 @@ data_dir <- 'data'
 
 geocodes_cache_file <- file.path(data_dir, 'geocode_cache.rdata')
 
-max_file_age_hrs <- 2400000000000000000000L
+max_file_age_hrs <- 24L
 
 debug <- FALSE
 
@@ -306,7 +306,7 @@ clean_all_names <- function(dirty_names) {
 # 1. download data -------------------------------------------------------------
 
 # if we need refresh make sure newer data files are not available in git first
-url <- 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/7fbdbb48-d074-45d9-93cb-f7de58950418/download/schoolcovidsummary.csv'
+url <- 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/7e644a48-6040-4ee0-9216-1f88121b21ba/download/schoolcovidsummary2021_2022.csv'
 fname_summary <- sprintf('%s/%s', data_dir, basename(url))
 needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_summary)$mtime), units = 'hours') >= max_file_age_hrs
 if (needs_refresh | is.na(needs_refresh)) {
@@ -319,7 +319,7 @@ if (needs_refresh | is.na(needs_refresh)) {
 }
 
 # school summary data
-url <- 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/7fbdbb48-d074-45d9-93cb-f7de58950418/download/schoolcovidsummary.csv'
+url <- 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/7e644a48-6040-4ee0-9216-1f88121b21ba/download/schoolcovidsummary2021_2022.csv'
 fname_summary <- sprintf('%s/%s', data_dir, basename(url))
 needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_summary)$mtime), units = 'hours') >= max_file_age_hrs
 if (needs_refresh | is.na(needs_refresh)) { 
@@ -328,7 +328,7 @@ if (needs_refresh | is.na(needs_refresh)) {
 }
 
 # schools active cases data
-url <- 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/8b6d22e2-7065-4b0f-966f-02640be366f2/download/schoolsactivecovid.csv'
+url <- 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/dc5c8788-792f-4f91-a400-036cdf28cfe8/download/schoolrecentcovid2021_2022.csv'
 fname_active <- sprintf('%s/%s', data_dir, basename(url))
 needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_active)$mtime), units = 'hours') >= max_file_age_hrs
 if (needs_refresh | is.na(needs_refresh)) { 
