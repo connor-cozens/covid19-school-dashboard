@@ -1,0 +1,267 @@
+collected_date,reported_date,school_board,school_id,school,municipality,confirmed_student_cases,confirmed_staff_cases,confirmed_unspecified_cases,total_confirmed_cases
+2021-08-24,2021-08-26,Durham District School Board,614904,Winchester Public School,Whitby,2,0,0,2
+2021-08-23,2021-08-24,York Region District School Board,939585,Bill Crothers Secondary School,Markham,1,0,0,1
+2021-08-30,2021-08-31,York Region District School Board,939585,Bill Crothers Secondary School,Markham,1,0,0,1
+2021-08-30,2021-09-01,York Region District School Board,939585,Bill Crothers Secondary School,Markham,1,0,0,1
+2021-09-01,2021-09-02,Conseil des écoles publiques de l'Est de l'Ontario,323187,École élémentaire publique Louis-Riel,Ottawa,1,0,0,1
+2021-09-01,2021-09-02,Conseil scolaire de district catholique du Centre-Est de l'Ontario,796656,École élémentaire catholique Notre-Place,Ottawa,0,1,0,1
+2021-09-01,2021-09-03,Conseil scolaire de district catholique du Centre-Est de l'Ontario,752550,École intermédiaire catholique Franco-Cité,Ottawa,1,0,0,1
+2021-09-03,2021-09-07,Conseil scolaire de district catholique du Centre-Est de l'Ontario,793027,École élémentaire catholique Saint-François-d'Assise,Ottawa,1,0,0,1
+2021-09-03,2021-09-07,Conseil scolaire de district catholique du Centre-Est de l'Ontario,695955,École secondaire catholique Collège catholique Samuel-Genest,Ottawa,1,0,0,1
+2021-09-02,2021-09-07,Greater Essex County District School Board,909440,Essex District High School,Essex,0,1,0,1
+2021-09-07,2021-09-08,Catholic District School Board of Eastern Ontario,733067,St. Thomas Aquinas Catholic High School,Russell,0,1,0,1
+2021-09-07,2021-09-08,Conseil des écoles publiques de l'Est de l'Ontario,327445,École élémentaire publique Michaëlle-Jean,Ottawa,3,0,0,3
+2021-09-07,2021-09-08,Conseil des écoles publiques de l'Est de l'Ontario,195774,École élémentaire publique Séraphin-Marion,Ottawa,1,0,0,1
+2021-09-07,2021-09-08,Conseil des écoles publiques de l'Est de l'Ontario,912662,École secondaire publique Gisèle-Lalonde,Ottawa,1,0,0,1
+2021-09-07,2021-09-08,Conseil scolaire de district catholique du Centre-Est de l'Ontario,864730,École élémentaire catholique George-Étienne-Cartier,Ottawa,0,1,0,1
+2021-09-07,2021-09-08,Conseil scolaire de district catholique du Centre-Est de l'Ontario,793027,École élémentaire catholique Saint-François-d'Assise,Ottawa,4,0,0,4
+2021-09-07,2021-09-08,Conseil scolaire Viamonde,419354,École élémentaire L'Héritage,St. Catharines,4,0,0,4
+2021-09-07,2021-09-08,District School Board of Niagara,455202,Prince of Wales Public School,Thorold,1,0,0,1
+2021-09-07,2021-09-08,District School Board Ontario North East,361747,W Earle Miller Public School,Timmins,1,0,0,1
+2021-09-07,2021-09-08,Greater Essex County District School Board,134880,David Maxwell Public School,Windsor,2,0,0,2
+2021-09-07,2021-09-08,Greater Essex County District School Board,526703,Southwood Public School,Windsor,1,0,0,1
+2021-09-07,2021-09-08,Hamilton-Wentworth Catholic District School Board,799530,St. James the Apostle Catholic Elementary School,Hamilton,0,2,0,2
+2021-09-07,2021-09-08,Hamilton-Wentworth District School Board,303755,Lake Avenue Public School,Hamilton,0,1,0,1
+2021-09-07,2021-09-08,Kawartha Pine Ridge District School Board,587443,Waverley Public School,Clarington,2,0,0,2
+2021-09-07,2021-09-08,Lambton Kent District School Board,572853,Victor Lauriston Public School,Chatham-Kent,3,0,0,3
+2021-09-07,2021-09-08,Nipissing-Parry Sound Catholic District School Board,754625,St Theresa School,Callander,0,1,0,1
+2021-09-07,2021-09-08,Upper Grand District School Board,497193,Salem Public School,Centre Wellington,1,0,0,1
+2021-09-07,2021-09-08,Waterloo Catholic District School Board,720208,Holy Spirit Catholic Elementary School,Cambridge,0,1,0,1
+2021-09-07,2021-09-08,Waterloo Catholic District School Board,786217,St David Catholic Secondary School,Waterloo,2,0,0,2
+2021-09-07,2021-09-08,Windsor-Essex Catholic District School Board,697168,Christ the King Separate School,Windsor,1,0,0,1
+2021-09-07,2021-09-08,Windsor-Essex Catholic District School Board,757616,Sacred Heart Catholic Elementary School,Lasalle,0,1,0,1
+2021-09-07,2021-09-09,Avon Maitland District School Board,507725,Shakespeare Public School,Stratford,2,0,0,2
+2021-09-07,2021-09-09,Catholic District School Board of Eastern Ontario,691127,J L Jordan Separate School,Brockville,0,1,0,1
+2021-09-08,2021-09-09,Catholic District School Board of Eastern Ontario,769312,St Andrew's Separate School,South Stormont,2,0,0,2
+2021-09-08,2021-09-09,Conseil des écoles publiques de l'Est de l'Ontario,327445,École élémentaire publique Michaëlle-Jean,Ottawa,1,0,0,1
+2021-09-07,2021-09-09,Conseil des écoles publiques de l'Est de l'Ontario,250627,École élémentaire publique Nouvel Horizon,Hawkesbury,1,0,0,1
+2021-09-08,2021-09-09,Conseil scolaire catholique Providence,728772,École secondaire catholique l'Essor,Tecumseh,2,0,0,2
+2021-09-08,2021-09-09,Conseil scolaire de district catholique de l'Est ontarien,813257,École élémentaire catholique Saint-Joseph (Wendover),Alfred and Plantagenet,1,0,0,1
+2021-09-08,2021-09-09,Conseil scolaire de district catholique du Centre-Est de l'Ontario,725536,École élémentaire catholique La Vérendrye,Ottawa,1,0,0,1
+2021-09-08,2021-09-09,Conseil scolaire de district catholique du Centre-Est de l'Ontario,688762,École élémentaire catholique Pierre-Elliott-Trudeau,Ottawa,1,0,0,1
+2021-09-08,2021-09-09,Conseil scolaire public du Grand Nord de l'Ontario,242853,École publique Hanmer,Greater Sudbury,1,0,0,1
+2021-09-07,2021-09-09,Conseil scolaire Viamonde,925326,École secondaire Roméo Dallaire,Barrie,1,0,0,1
+2021-09-08,2021-09-09,Conseil scolaire Viamonde,925326,École secondaire Roméo Dallaire,Barrie,1,0,0,1
+2021-09-08,2021-09-09,District School Board of Niagara,455202,Prince of Wales Public School,Thorold,1,0,0,1
+2021-09-08,2021-09-09,Greater Essex County District School Board,134880,David Maxwell Public School,Windsor,2,0,0,2
+2021-09-08,2021-09-09,Greater Essex County District School Board,164690,Eastwood Public School,Windsor,1,0,0,1
+2021-09-08,2021-09-09,Greater Essex County District School Board,526703,Southwood Public School,Windsor,1,0,0,1
+2021-09-08,2021-09-09,Halton District School Board,515353,Sir Ernest Macmillan Public School,Burlington,0,1,0,1
+2021-09-08,2021-09-09,Hamilton-Wentworth Catholic District School Board,689386,Bishop Tonnos Catholic Secondary School,Hamilton,1,0,0,1
+2021-09-08,2021-09-09,Hamilton-Wentworth District School Board,548022,Tapleytown Public School,Hamilton,0,1,0,1
+2021-09-08,2021-09-09,Lambton Kent District School Board,918938,John McGregor Secondary School,Chatham-Kent,1,0,0,1
+2021-09-07,2021-09-09,London District Catholic School Board,733032,Mother Teresa Catholic Secondary School,London,0,2,0,2
+2021-09-08,2021-09-09,London District Catholic School Board,733032,Mother Teresa Catholic Secondary School,London,0,2,0,2
+2021-09-08,2021-09-09,Niagara Catholic District School Board,786349,St Denis Catholic Elementary School,St. Catharines,0,1,0,1
+2021-09-07,2021-09-09,Upper Canada District School Board,935425,Rockland District High School,Clarence-Rockland,1,0,0,1
+2021-09-08,2021-09-09,Upper Grand District School Board,909050,Erin District High School,Erin,0,0,1,1
+2021-09-07,2021-09-09,Upper Grand District School Board,909050,Erin District High School,Erin,0,0,1,1
+2021-09-07,2021-09-09,Waterloo Region District School Board,127876,Crestview Public School,Kitchener,0,1,0,1
+2021-09-07,2021-09-09,Windsor-Essex Catholic District School Board,697168,Christ the King Separate School,Windsor,1,0,0,1
+2021-09-09,2021-09-10,Bruce-Grey Catholic District School Board,732800,St Teresa of Calcutta Catholic School,Brockton,1,0,0,1
+2021-09-08,2021-09-10,Catholic District School Board of Eastern Ontario,769312,St Andrew's Separate School,South Stormont,2,0,0,2
+2021-09-09,2021-09-10,Conseil des écoles publiques de l'Est de l'Ontario,488291,École élémentaire publique Carrefour Jeunesse,Clarence-Rockland,1,0,0,1
+2021-09-09,2021-09-10,Conseil scolaire de district catholique de l'Est ontarien,798304,École élémentaire catholique Saint-Isidore,The Nation Municipality,1,0,0,1
+2021-09-09,2021-09-10,Conseil scolaire de district catholique du Centre-Est de l'Ontario,688762,École élémentaire catholique Pierre-Elliott-Trudeau,Ottawa,1,0,0,1
+2021-09-09,2021-09-10,Conseil scolaire Viamonde,925326,École secondaire Roméo Dallaire,Barrie,1,0,0,1
+2021-09-09,2021-09-10,District School Board of Niagara,505005,Applewood Public School,St. Catharines,0,1,0,1
+2021-09-09,2021-09-10,District School Board of Niagara,455202,Prince of Wales Public School,Thorold,1,0,0,1
+2021-09-09,2021-09-10,Durham Catholic District School Board,762733,St Josephine Bakhita Catholic Elementary School,Ajax,1,0,0,1
+2021-09-08,2021-09-10,Durham Catholic District School Board,818844,St Leo Catholic School,Whitby,2,0,0,2
+2021-09-09,2021-09-10,Durham District School Board,170662,David Bouchard Public School,Oshawa,0,1,0,1
+2021-09-09,2021-09-10,Durham District School Board,092886,Vimy Ridge Public School,Ajax,0,1,0,1
+2021-09-09,2021-09-10,Greater Essex County District School Board,134880,David Maxwell Public School,Windsor,2,0,0,2
+2021-09-09,2021-09-10,Greater Essex County District School Board,574155,Queen Victoria Public School,Windsor,1,0,0,1
+2021-09-09,2021-09-10,Greater Essex County District School Board,526703,Southwood Public School,Windsor,1,0,0,1
+2021-09-09,2021-09-10,Limestone District School Board,514721,John Graves Simcoe Public School,Kingston,1,0,0,1
+2021-09-08,2021-09-10,Ottawa Catholic School Board,749168,Our Lady of Victory Elementary School,Ottawa,1,0,0,1
+2021-09-09,2021-09-10,Peel District School Board,005797,James Bolton Public School,Caledon,2,0,0,2
+2021-09-09,2021-09-10,Peel District School Board,297682,Kingswood Drive Public School,Brampton,0,1,0,1
+2021-09-09,2021-09-10,Simcoe County District School Board,902636,Nottawasaga Pines Secondary School,Essa,1,0,0,1
+2021-09-09,2021-09-10,Upper Grand District School Board,057380,Brant Avenue Public School,Guelph,0,0,1,1
+2021-09-08,2021-09-10,Upper Grand District School Board,909050,Erin District High School,Erin,0,0,1,1
+2021-09-09,2021-09-10,Upper Grand District School Board,909050,Erin District High School,Erin,0,0,1,1
+2021-09-09,2021-09-10,Upper Grand District School Board,282324,J Douglas Hogarth Public School,Centre Wellington,0,0,1,1
+2021-09-09,2021-09-10,Upper Grand District School Board,477416,John Galt Public School,Guelph,0,0,1,1
+2021-09-09,2021-09-10,Upper Grand District School Board,590665,Waverley Drive Public School,Guelph,0,0,3,3
+2021-09-10,2021-09-13,Conseil des écoles publiques de l'Est de l'Ontario,898582,École secondaire publique L'Académie de la Seigneurie,Casselman,1,0,0,1
+2021-09-10,2021-09-13,Conseil des écoles publiques de l'Est de l'Ontario,907464,École secondaire publique L'Héritage,Cornwall,1,0,0,1
+2021-09-10,2021-09-13,Conseil scolaire de district catholique du Centre-Est de l'Ontario,688762,École élémentaire catholique Pierre-Elliott-Trudeau,Ottawa,1,0,0,1
+2021-09-10,2021-09-13,Conseil scolaire de district catholique du Centre-Est de l'Ontario,709387,École élémentaire catholique Sainte-Bernadette,Ottawa,1,0,0,1
+2021-09-10,2021-09-13,Conseil scolaire de district catholique du Centre-Est de l'Ontario,751120,École intermédiaire catholique Samuel-Genest,Ottawa,1,0,0,1
+2021-09-10,2021-09-13,Conseil scolaire de district catholique du Centre-Est de l'Ontario,695955,École secondaire catholique Collège catholique Samuel-Genest,Ottawa,1,0,0,1
+2021-09-10,2021-09-13,Dufferin-Peel Catholic District School Board,864570,St. Michael Catholic Secondary School,Caledon,0,1,0,1
+2021-09-09,2021-09-13,Dufferin-Peel Catholic District School Board,864570,St. Michael Catholic Secondary School,Caledon,0,1,0,1
+2021-09-10,2021-09-13,Greater Essex County District School Board,041947,Bellewood Public School,Windsor,1,0,0,1
+2021-09-10,2021-09-13,Greater Essex County District School Board,134880,David Maxwell Public School,Windsor,2,0,0,2
+2021-09-10,2021-09-13,Greater Essex County District School Board,526703,Southwood Public School,Windsor,1,0,0,1
+2021-09-10,2021-09-13,Greater Essex County District School Board,949612,Vincent Massey Secondary School,Windsor,2,0,0,2
+2021-09-10,2021-09-13,Halton Catholic District School Board,798010,St. Ignatius of Loyola Catholic Secondary School,Oakville,0,1,0,1
+2021-09-10,2021-09-13,Halton Catholic District School Board,848484,St. Raphael Catholic Elementary School,Burlington,1,0,0,1
+2021-09-10,2021-09-13,Halton Catholic District School Board,794978,St. Scholastica Catholic Elementary School,Milton,1,0,0,1
+2021-09-10,2021-09-13,Halton District School Board,070777,Burlington Central Elementary School,Burlington,1,0,0,1
+2021-09-10,2021-09-13,Halton District School Board,369253,Viola Desmond Public School,Milton,1,0,0,1
+2021-09-10,2021-09-13,Hamilton-Wentworth Catholic District School Board,773786,St. Thérèse of Lisieux Catholic Elementary School,Hamilton,0,1,0,1
+2021-09-09,2021-09-13,Hamilton-Wentworth Catholic District School Board,855685,St. Thomas More Catholic Secondary School,Hamilton,1,0,0,1
+2021-09-10,2021-09-13,Hamilton-Wentworth District School Board,488921,Dr. J. Edgar Davey (New) Elementary Public School,Hamilton,0,1,0,1
+2021-09-10,2021-09-13,Huron Perth Catholic District School Board,832545,St Michael Catholic Secondary School,Stratford,1,0,0,1
+2021-09-10,2021-09-13,Lambton Kent District School Board,918938,John McGregor Secondary School,Chatham-Kent,1,0,0,1
+2021-09-09,2021-09-13,Lambton Kent District School Board,572853,Victor Lauriston Public School,Chatham-Kent,2,0,0,2
+2021-09-10,2021-09-13,Near North District School Board,420428,Parry Sound Public School School,Parry Sound,1,0,0,1
+2021-09-10,2021-09-13,Niagara Catholic District School Board,715166,St John Bosco Catholic Elementary School,Port Colborne,1,0,0,1
+2021-09-10,2021-09-13,Northwest Catholic District School Board,742309,Our Lady of the Way,Morley,1,0,0,1
+2021-09-09,2021-09-13,Ottawa-Carleton District School Board,345903,Mary Honeywell Elementary School,Ottawa,1,0,0,1
+2021-09-10,2021-09-13,Peel District School Board,380164,Munden Park Public School,Mississauga,3,0,0,3
+2021-09-10,2021-09-13,Simcoe County District School Board,003131,Admiral Collingwood Elementary School,Collingwood,1,0,0,1
+2021-09-10,2021-09-13,Simcoe County District School Board,186666,Alliston Union Public School,New Tecumseth,1,0,0,1
+2021-09-10,2021-09-13,Thames Valley District School Board,257737,Hillcrest Public School,London,1,0,0,1
+2021-09-09,2021-09-13,Toronto District School Board,922315,Leaside High School,Toronto,1,0,0,1
+2021-09-09,2021-09-13,Toronto District School Board,941972,Sir Oliver Mowat Collegiate Institute,Toronto,1,0,0,1
+2021-09-09,2021-09-13,Upper Canada District School Board,540056,St Lawrence Intermediate School,Cornwall,1,0,0,1
+2021-09-09,2021-09-13,Upper Grand District School Board,057380,Brant Avenue Public School,Guelph,0,0,1,1
+2021-09-10,2021-09-13,Upper Grand District School Board,166472,Edward Johnson Public School,Guelph,0,0,1,1
+2021-09-09,2021-09-13,Upper Grand District School Board,909050,Erin District High School,Erin,0,0,1,1
+2021-09-10,2021-09-13,Upper Grand District School Board,909050,Erin District High School,Erin,0,0,1,1
+2021-09-09,2021-09-13,Waterloo Region District School Board,910350,Forest Heights Collegiate Institute,Kitchener,1,0,0,1
+2021-09-10,2021-09-13,Waterloo Region District School Board,095230,Hespeler Public School,Cambridge,0,1,0,1
+2021-09-09,2021-09-13,York Region District School Board,924849,Markville Secondary School,Markham,1,0,0,1
+2021-09-10,2021-09-14,Catholic District School Board of Eastern Ontario,758787,Sacred Heart of Jesus Separate School,Lanark Highlands,0,1,0,1
+2021-09-13,2021-09-14,Catholic District School Board of Eastern Ontario,814555,St. Mark Catholic School,Prescott,1,0,0,1
+2021-09-13,2021-09-14,Conseil des écoles publiques de l'Est de l'Ontario,412597,École élémentaire publique Charlotte Lemieux,Ottawa,2,0,0,2
+2021-09-13,2021-09-14,Conseil des écoles publiques de l'Est de l'Ontario,417726,École élémentaire publique Des Sentiers,Ottawa,1,0,0,1
+2021-09-13,2021-09-14,Conseil des écoles publiques de l'Est de l'Ontario,302864,École élémentaire publique L'Héritage,Cornwall,1,0,0,1
+2021-09-13,2021-09-14,Conseil des écoles publiques de l'Est de l'Ontario,327445,École élémentaire publique Michaëlle-Jean,Ottawa,2,0,0,2
+2021-09-13,2021-09-14,Conseil des écoles publiques de l'Est de l'Ontario,530457,École élémentaire publique Michel-Dupuis,Ottawa,1,0,0,1
+2021-09-13,2021-09-14,Conseil des écoles publiques de l'Est de l'Ontario,907464,École secondaire publique L'Héritage,Cornwall,1,0,0,1
+2021-09-13,2021-09-14,Conseil scolaire catholique MonAvenir,841308,ÉÉC Saint-Michel,Toronto,0,1,0,1
+2021-09-13,2021-09-14,Conseil scolaire catholique Providence,728772,École secondaire catholique l'Essor,Tecumseh,1,0,0,1
+2021-09-13,2021-09-14,Conseil scolaire de district catholique des Grandes Rivières,835358,École catholique Saint-Michel,Temiskaming Shores,3,0,0,3
+2021-09-13,2021-09-14,Conseil scolaire de district catholique du Centre-Est de l'Ontario,705390,École élémentaire catholique De la Découverte,Ottawa,3,0,0,3
+2021-09-13,2021-09-14,Conseil scolaire de district catholique du Centre-Est de l'Ontario,703168,École élémentaire catholique Des Pionniers,Ottawa,2,0,0,2
+2021-09-13,2021-09-14,Conseil scolaire de district catholique du Centre-Est de l'Ontario,753157,École élémentaire catholique Marius-Barbeau,Ottawa,1,1,0,2
+2021-09-10,2021-09-14,Conseil scolaire de district catholique du Centre-Est de l'Ontario,796656,École élémentaire catholique Notre-Place,Ottawa,1,0,0,1
+2021-09-13,2021-09-14,Conseil scolaire de district catholique du Centre-Est de l'Ontario,796656,École élémentaire catholique Notre-Place,Ottawa,1,0,0,1
+2021-09-10,2021-09-14,Conseil scolaire de district catholique du Centre-Est de l'Ontario,688762,École élémentaire catholique Pierre-Elliott-Trudeau,Ottawa,1,0,0,1
+2021-09-13,2021-09-14,Conseil scolaire de district catholique du Centre-Est de l'Ontario,688762,École élémentaire catholique Pierre-Elliott-Trudeau,Ottawa,2,0,0,2
+2021-09-13,2021-09-14,Conseil scolaire de district catholique du Centre-Est de l'Ontario,709387,École élémentaire catholique Sainte-Bernadette,Ottawa,1,0,0,1
+2021-09-13,2021-09-14,Conseil scolaire de district catholique du Centre-Est de l'Ontario,752625,École élémentaire catholique Saint-Rémi,Ottawa,1,0,0,1
+2021-09-13,2021-09-14,Conseil scolaire de district catholique du Centre-Est de l'Ontario,695955,École secondaire catholique Collège catholique Samuel-Genest,Ottawa,1,0,0,1
+2021-09-13,2021-09-14,Conseil scolaire Viamonde,447621,École élémentaire Charles-Sauriol,Toronto,1,0,0,1
+2021-09-13,2021-09-14,Conseil scolaire Viamonde,165417,École élémentaire Horizon Jeunesse,Mississauga,0,2,0,2
+2021-09-13,2021-09-14,Conseil scolaire Viamonde,019735,École élémentaire La Mosaïque,Toronto,2,0,0,2
+2021-09-13,2021-09-14,Conseil scolaire Viamonde,191313,École élémentaire La Pommeraie,London,2,1,0,3
+2021-09-13,2021-09-14,District School Board of Niagara,281000,Jacob Beam Public School,Lincoln,1,0,0,1
+2021-09-13,2021-09-14,District School Board of Niagara,414514,Oakridge Public School,St. Catharines,0,1,0,1
+2021-09-13,2021-09-14,District School Board of Niagara,455202,Prince of Wales Public School,Thorold,1,0,0,1
+2021-09-13,2021-09-14,Dufferin-Peel Catholic District School Board,706337,Father Clair Tipping School,Brampton,2,0,0,2
+2021-09-10,2021-09-14,Dufferin-Peel Catholic District School Board,716405,Holy Family School,Caledon,1,0,0,1
+2021-09-13,2021-09-14,Dufferin-Peel Catholic District School Board,716405,Holy Family School,Caledon,1,0,0,1
+2021-09-13,2021-09-14,Dufferin-Peel Catholic District School Board,776092,St Basil School,Mississauga,1,0,0,1
+2021-09-13,2021-09-14,Dufferin-Peel Catholic District School Board,776742,St Benedict Elementary School,Orangeville,0,1,0,1
+2021-09-13,2021-09-14,Dufferin-Peel Catholic District School Board,783870,St Christopher School,Mississauga,1,0,0,1
+2021-09-13,2021-09-14,Dufferin-Peel Catholic District School Board,807712,St. Daniel Comboni Catholic Elementary School,Brampton,1,0,0,1
+2021-09-13,2021-09-14,Dufferin-Peel Catholic District School Board,797316,St Herbert School,Mississauga,1,0,0,1
+2021-09-13,2021-09-14,Durham Catholic District School Board,803057,St John Bosco Catholic School,Oshawa,1,0,0,1
+2021-09-13,2021-09-14,Greater Essex County District School Board,922188,Leamington District Secondary School,Leamington,1,0,0,1
+2021-09-13,2021-09-14,Greater Essex County District School Board,462098,Queen Elizabeth Public School,Leamington,4,0,0,4
+2021-09-13,2021-09-14,Greater Essex County District School Board,939765,Sandwich Secondary School,Lasalle,1,0,0,1
+2021-09-13,2021-09-14,Greater Essex County District School Board,498513,Sandwich West Public School,Lasalle,1,0,0,1
+2021-09-13,2021-09-14,Greater Essex County District School Board,243524,Talbot Trail Public School,Windsor,1,0,0,1
+2021-09-13,2021-09-14,Greater Essex County District School Board,147362,West Gate Public School,Windsor,0,1,0,1
+2021-09-13,2021-09-14,Greater Essex County District School Board,918806,Westview Freedom Academy Secondary School,Windsor,1,0,0,1
+2021-09-13,2021-09-14,Greater Essex County District School Board,950009,W. F. Herman Academy Secondary School,Windsor,1,0,0,1
+2021-09-10,2021-09-14,Halton Catholic District School Board,696392,St. Francis of Xavier Catholic Secondary School,Milton,1,0,0,1
+2021-09-13,2021-09-14,Halton Catholic District School Board,794978,St. Scholastica Catholic Elementary School,Milton,1,0,0,1
+2021-09-13,2021-09-14,Halton District School Board,890332,Acton District High School,Halton Hills,1,0,0,1
+2021-09-13,2021-09-14,Halton District School Board,070777,Burlington Central Elementary School,Burlington,1,0,0,1
+2021-09-13,2021-09-14,Halton District School Board,967740,Craig Kielburger Secondary School,Milton,0,1,0,1
+2021-09-13,2021-09-14,Halton District School Board,111600,Hawthorne Village Public School,Milton,2,0,0,2
+2021-09-13,2021-09-14,Halton District School Board,445193,Pineland Public School,Burlington,1,0,0,1
+2021-09-13,2021-09-14,Halton District School Board,310777,P. L. Robertson Public School,Milton,1,0,0,1
+2021-09-10,2021-09-14,Hamilton-Wentworth Catholic District School Board,690279,Blessed Sacrament Catholic Elementary School,Hamilton,1,0,0,1
+2021-09-13,2021-09-14,Hamilton-Wentworth Catholic District School Board,825892,St. Gabriel Catholic Elementary School,Hamilton,1,0,0,1
+2021-09-13,2021-09-14,Hamilton-Wentworth Catholic District School Board,694134,St. John Henry Newman Catholic Secondary School,Hamilton,1,0,0,1
+2021-09-10,2021-09-14,Hamilton-Wentworth Catholic District School Board,855685,St. Thomas More Catholic Secondary School,Hamilton,2,0,0,2
+2021-09-13,2021-09-14,Hamilton-Wentworth District School Board,484199,Ridgemount Junior Public School,Hamilton,1,0,0,1
+2021-09-13,2021-09-14,Hamilton-Wentworth District School Board,516244,Sir Wilfrid Laurier Public School,Hamilton,1,0,0,1
+2021-09-13,2021-09-14,Hastings & Prince Edward District School Board,244600,Harmony Public School,Belleville,1,0,0,1
+2021-09-13,2021-09-14,Huron-Superior Catholic District School Board,826901,St Mary's French Immersion Catholic School,Sault Ste. Marie,1,0,0,1
+2021-09-13,2021-09-14,Kawartha Pine Ridge District School Board,449510,Kaawaate East City Public School Elementary Public School,Peterborough,0,1,0,1
+2021-09-13,2021-09-14,Kawartha Pine Ridge District School Board,403350,North Shore Public School,Otonabee-South Monaghan,1,0,0,1
+2021-09-13,2021-09-14,Kawartha Pine Ridge District School Board,947563,Thomas A Stewart Secondary School,Peterborough,1,0,0,1
+2021-09-13,2021-09-14,Lakehead District School Board,952087,Westgate Collegiate and Vocational Institute,Thunder Bay,1,0,0,1
+2021-09-13,2021-09-14,Lambton Kent District School Board,919322,Chatham-Kent Secondary School,Chatham-Kent,1,0,0,1
+2021-09-13,2021-09-14,Lambton Kent District School Board,118583,Colonel Cameron Public School,St. Clair,0,1,0,1
+2021-09-13,2021-09-14,Lambton Kent District School Board,356026,McNaughton Ave Public School,Chatham-Kent,2,0,0,2
+2021-09-13,2021-09-14,Lambton Kent District School Board,462870,Queen Elizabeth II P Public School,Petrolia,1,0,0,1
+2021-09-13,2021-09-14,Lambton Kent District School Board,548707,Tecumseh Public School,Chatham-Kent,1,0,0,1
+2021-09-10,2021-09-14,Lambton Kent District School Board,572853,Victor Lauriston Public School,Chatham-Kent,2,0,0,2
+2021-09-13,2021-09-14,Near North District School Board,420428,Parry Sound Public School School,Parry Sound,1,0,0,1
+2021-09-13,2021-09-14,Niagara Catholic District School Board,803766,St John Catholic Elementary School,Lincoln,1,0,0,1
+2021-09-13,2021-09-14,Niagara Catholic District School Board,852910,St Theresa Catholic Elementary School,St. Catharines,1,0,0,1
+2021-09-13,2021-09-14,Nipissing-Parry Sound Catholic District School Board,733172,Mother St Bride School,North Bay,1,0,0,1
+2021-09-13,2021-09-14,Nipissing-Parry Sound Catholic District School Board,763659,St Joseph-Scollard Hall Secondary School,North Bay,1,0,0,1
+2021-09-13,2021-09-14,Ottawa-Carleton District School Board,037699,Le Phare Elementary School,Ottawa,1,0,0,1
+2021-09-13,2021-09-14,Ottawa-Carleton District School Board,922960,Lisgar Collegiate Institute,Ottawa,1,0,0,1
+2021-09-13,2021-09-14,Ottawa-Carleton District School Board,129690,Maple Ridge Elementary School,Ottawa,0,1,0,1
+2021-09-13,2021-09-14,Ottawa Catholic School Board,809020,Notre Dame High School,Ottawa,1,0,0,1
+2021-09-13,2021-09-14,Ottawa Catholic School Board,843296,St Peter High School,Ottawa,2,0,0,2
+2021-09-13,2021-09-14,Ottawa Catholic School Board,847313,St Pius X High School,Ottawa,0,1,0,1
+2021-09-13,2021-09-14,Ottawa Catholic School Board,689130,St. Rose of Lima Elementary School,Ottawa,1,0,0,1
+2021-09-13,2021-09-14,Peel District School Board,071188,Burnhamthorpe Public School,Mississauga,2,0,0,2
+2021-09-10,2021-09-14,Peel District School Board,071188,Burnhamthorpe Public School,Mississauga,2,0,0,2
+2021-09-13,2021-09-14,Peel District School Board,917559,Humberview Secondary School,Caledon,1,0,0,1
+2021-09-13,2021-09-14,Peel District School Board,948187,T. L. Kennedy Secondary School,Mississauga,0,1,0,1
+2021-09-13,2021-09-14,Peel District School Board,578835,Vista Heights Public School,Mississauga,1,0,0,1
+2021-09-10,2021-09-14,Peel District School Board,600091,Westervelts Corners Public School,Brampton,1,0,0,1
+2021-09-13,2021-09-14,Peel District School Board,604780,Whitehorn Public School,Mississauga,1,0,0,1
+2021-09-13,2021-09-14,Peterborough Victoria Northum Clarington Catholic District School Board,731358,Monsignor Leo Cleary Catholic Elementary School,Clarington,0,1,0,1
+2021-09-10,2021-09-14,Rainy River District School Board,141518,Donald Young Public School,Emo,1,0,0,1
+2021-09-13,2021-09-14,Simcoe County District School Board,902551,Collingwood Collegiate Institute,Collingwood,1,0,0,1
+2021-09-13,2021-09-14,Simcoe County District School Board,160172,East Oro Public School,Oro-Medonte,1,0,0,1
+2021-09-13,2021-09-14,Simcoe Muskoka Catholic District School Board,808007,Saint Gabriel the Archangel Catholic School,Barrie,3,0,0,3
+2021-09-13,2021-09-14,Simcoe Muskoka Catholic District School Board,824690,St. Marie of the Incarnation Separate School,Bradford West Gwillimbury,1,0,0,1
+2021-09-13,2021-09-14,St Clair Catholic District School Board,771295,St Anne Catholic School,Chatham-Kent,1,0,0,1
+2021-09-10,2021-09-14,St Clair Catholic District School Board,773757,St Matthew Catholic School,Sarnia,1,0,0,1
+2021-09-13,2021-09-14,St Clair Catholic District School Board,846015,St Philip Catholic School,Petrolia,1,0,0,1
+2021-09-10,2021-09-14,Thames Valley District School Board,902420,College Avenue Secondary School,Woodstock,0,1,0,1
+2021-09-13,2021-09-14,Thames Valley District School Board,000469,Lambeth Public School,London,0,1,0,1
+2021-09-13,2021-09-14,Thames Valley District School Board,941743,Sir Frederick Banting Secondary School,London,1,0,0,1
+2021-09-13,2021-09-14,Toronto Catholic District School Board,719528,Holy Rosary Catholic School,Toronto,0,1,0,1
+2021-09-13,2021-09-14,Toronto Catholic District School Board,723428,Jean Vanier Catholic Secondary School,Toronto,1,0,0,1
+2021-09-13,2021-09-14,Toronto Catholic District School Board,780880,St Brigid Catholic School,Toronto,1,0,0,1
+2021-09-10,2021-09-14,Toronto Catholic District School Board,859036,St Wilfrid Catholic School,Toronto,0,1,0,1
+2021-09-13,2021-09-14,Toronto District School Board,287801,Alvin Curling Public School,Toronto,1,0,0,1
+2021-09-13,2021-09-14,Toronto District School Board,050679,Blake Street Junior Public School,Toronto,1,0,0,1
+2021-09-13,2021-09-14,Toronto District School Board,495506,Ryerson Community School Junior Senior,Toronto,1,0,0,1
+2021-09-13,2021-09-14,Toronto District School Board,531022,St Margaret's Public School,Toronto,1,0,0,1
+2021-09-13,2021-09-14,Trillium Lakelands District School Board,278211,Irwin Memorial Public School,Lake of Bays,2,0,0,2
+2021-09-10,2021-09-14,Upper Canada District School Board,167126,South Edwardsburg Public School,Edwardsburgh/Cardinal,1,0,0,1
+2021-09-13,2021-09-14,Upper Canada District School Board,944670,St Lawrence Secondary School,Cornwall,1,0,0,1
+2021-09-13,2021-09-14,Upper Canada District School Board,949094,Vankleek Hill Collegiate Institute,Champlain,1,0,0,1
+2021-09-13,2021-09-14,Upper Canada District School Board,578444,Viscount Alexander Public School,Cornwall,0,1,0,1
+2021-09-13,2021-09-14,Upper Grand District School Board,166472,Edward Johnson Public School,Guelph,0,0,1,1
+2021-09-13,2021-09-14,Upper Grand District School Board,178969,Elora Public School,Centre Wellington,0,0,3,3
+2021-09-10,2021-09-14,Upper Grand District School Board,909050,Erin District High School,Erin,0,0,1,1
+2021-09-13,2021-09-14,Upper Grand District School Board,586866,Ken Danby Public School,Guelph,0,0,1,1
+2021-09-13,2021-09-14,Upper Grand District School Board,452491,Primrose Elementary School,Mulmur,0,0,1,1
+2021-09-13,2021-09-14,Upper Grand District School Board,590665,Waverley Drive Public School,Guelph,0,0,1,1
+2021-09-13,2021-09-14,Waterloo Catholic District School Board,718920,Holy Rosary Catholic Elementary School,Waterloo,1,0,0,1
+2021-09-13,2021-09-14,Waterloo Catholic District School Board,776726,St Benedict Catholic Secondary School,Cambridge,1,0,0,1
+2021-09-13,2021-09-14,Waterloo Catholic District School Board,832103,St Mary's High School,Kitchener,0,1,0,1
+2021-09-13,2021-09-14,Waterloo Region District School Board,201448,Forest Hill Public School,Kitchener,1,0,0,1
+2021-09-13,2021-09-14,Waterloo Region District School Board,913340,Glenview Park Secondary School,Cambridge,1,0,0,1
+2021-09-13,2021-09-14,Waterloo Region District School Board,509159,Sheppard Public School,Kitchener,1,0,0,1
+2021-09-13,2021-09-14,Waterloo Region District School Board,951048,Waterloo-Oxford District Secondary School,Wilmot,1,0,0,1
+2021-09-13,2021-09-14,Wellington Catholic District School Board,798690,St James Catholic School,Guelph,1,0,0,1
+2021-09-13,2021-09-14,Windsor-Essex Catholic District School Board,694452,Cardinal Carter Catholic Secondary School,Leamington,1,0,0,1
+2021-09-13,2021-09-14,Windsor-Essex Catholic District School Board,706523,F J Brennan Catholic High School,Windsor,1,0,0,1
+2021-09-10,2021-09-14,Windsor-Essex Catholic District School Board,803243,St John de Brebeuf Catholic School,Kingsville,1,0,0,1
+2021-09-13,2021-09-14,Windsor-Essex Catholic District School Board,781533,St John Vianney Catholic School,Windsor,1,0,0,1
+2021-09-13,2021-09-14,Windsor-Essex Catholic District School Board,847704,St Pius X Catholic School,Tecumseh,1,0,0,1
+2021-09-13,2021-09-14,York Catholic District School Board,725161,St Kateri Tekakwitha Catholic Elementary School,Markham,1,0,0,1
+2021-09-13,2021-09-14,York Region District School Board,904040,Alexander MacKenzie High School,Richmond Hill,1,0,0,1
+2021-09-13,2021-09-14,York Region District School Board,028282,Aurora Heights Public School,Aurora,1,0,0,1
+2021-09-13,2021-09-14,York Region District School Board,939585,Bill Crothers Secondary School,Markham,1,0,0,1
+2021-09-10,2021-09-14,York Region District School Board,904970,Dr John M Denison Secondary School,Newmarket,0,1,0,1
+2021-09-13,2021-09-14,York Region District School Board,257447,Rick Hansen Public School,Aurora,1,0,0,1
