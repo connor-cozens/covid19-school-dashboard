@@ -46,7 +46,7 @@ data_dir <- 'data'
 
 geocodes_cache_file <- file.path(data_dir, 'geocode_cache.rdata')
 
-max_file_age_hrs <- 24L
+max_file_age_hrs <- 0L
 
 debug <- FALSE
 
@@ -772,7 +772,8 @@ if (needs_refresh | is.na(needs_refresh)) {
 	# $ percentage.of.school.aged.children.who.live.in.low.income.households                    : chr  "10" "30" "50" "20" ...
 	covid19_schools_active_with_demographics$percentage.of.school.aged.children.who.live.in.low.income.households <- as.integer(covid19_schools_active_with_demographics$percentage.of.school.aged.children.who.live.in.low.income.households)
 	# $ percentage.of.students.whose.parents.have.some.university.education                     : chr  "55" "55" "35" "60" ...
-	covid19_schools_active_with_demographics$percentage.of.students.whose.parents.have.some.university.education <- as.integer(covid19_schools_active_with_demographics$percentage.of.students.whose.parents.have.some.university.education)
+	covid19_schools_active_with_demographics$percentage.of.students.whose.parents.have.no.degree..diploma.or.certificate <- as.integer(covid19_schools_active_with_demographics$percentage.of.students.whose.parents.have.no.degree..diploma.or.certificate)
+	covid19_schools_active_with_demographics$percentage.of.students.whose.parents.have.no.degree..diploma.or.certificate
 	# $ extract.date                                                                            : POSIXct, format: "2020-09-04" "2020-09-04" "2020-09-04" "2020-09-04" ...
 	covid19_schools_active_with_demographics$extract.date <- NULL
 	# $ school_clean.1                                                                          : chr  "catholique roger saint denis" "catholique saint fran<c3><a7>ois d assise" "catholique sainte anne" "catholique laurier carri<c3><a8>re" ...
@@ -820,7 +821,7 @@ if (needs_refresh | is.na(needs_refresh)) {
 	names(from_non_english) <- geo_query_str
 	from_non_french <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.who.are.new.to.canada.from.a.non.french.speaking.country
 	names(from_non_french) <- geo_query_str
-	some_university <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.whose.parents.have.some.university.education
+	some_university <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.whose.parents.have.no.degree..diploma.or.certificate
 	names(some_university) <- geo_query_str
 	cases_per_school_staff <- tapply(covid19_schools_active_with_demographics_most_recent$confirmed_staff_cases, geo_query_str, sum)
 	cases_per_school_student <- tapply(covid19_schools_active_with_demographics_most_recent$confirmed_student_cases, geo_query_str, sum)
