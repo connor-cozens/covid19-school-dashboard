@@ -562,7 +562,8 @@ if (needs_refresh | is.na(needs_refresh)) {
 		# print(x)
 		# browser()
 		# match on cleaned school name
-		idx <- which(school_demographics$school_clean == x[ 'school_clean' ])
+		idx <- which(school_demographics$`school number` == x[ 'school_id' ])
+		print(length(idx))
 		if (length(idx) > 1) {
 			disambiguation_df <- data.frame(x[ 'school' ] %>% as.character,
 											school_demographics[ idx, c('school name', 'board name') ],
@@ -599,6 +600,7 @@ if (needs_refresh | is.na(needs_refresh)) {
 			}
 		} else if (length(idx) == 1) {
 			# we have a perfect match
+		  print("123123123 Perfect Match 123123123123")
 			result <- data.frame(t(x), school_demographics[ idx, ])
 		} else if (length(idx) == 0) {
 			# this is one of the cleaned school names that is mismatched
