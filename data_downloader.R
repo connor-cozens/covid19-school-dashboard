@@ -559,95 +559,11 @@ if (needs_refresh | is.na(needs_refresh)) {
 	ambiguous_school_names <- character(0)
 	
 	covid19_schools_active_with_demographics <- apply(covid19_schools_active, 1, function(x) {
-		# print(x)
-		# browser()
-		# match on cleaned school name
-		idx <- which(school_demographics$`school number` == x[ 'school_id' ])
-		print(length(idx))
-		if (length(idx) > 1) {
-			disambiguation_df <- data.frame(x[ 'school' ] %>% as.character,
-											school_demographics[ idx, c('school name', 'board name') ],
-											x[ 'school_board' ] %>% as.character,
-											stringsAsFactors = FALSE)
-			# print(disambiguation_df)
-			# if all school boards are the same it is a question of whether this is an elementary or a high school
-			if (length(unique(disambiguation_df[ , 3 ])) == 1) {
-				# are we looking at the high school or the elementary school?
-				# message('disambiguated by school type')
-				# browser()
-				idx <- stringdistmatrix(disambiguation_df[ 1, 1 ], disambiguation_df[ , 2 ])
-				idx <- which.min(idx)
-				# message(sprintf('chose entry %s', idx))
-				idx2 <- which(school_demographics$`school name` == disambiguation_df[ idx, 'school.name' ] & 
-							  	school_demographics$`board name` == disambiguation_df[ idx, 'board.name' ])
-				result <- data.frame(t(x), school_demographics[ idx2, ])
-			} else {
-				# fuzzy match the board names
-				# message('disambiguated by school board name')
-				bn <- disambiguation_df[ 1, 4 ]
-				bn <- str_replace(bn, 'Conseil des écoles catholiques', 'CSDC')
-				bn <- str_replace(bn, '\\(.*\\)', '')
-				bn <- str_trim(bn)
-				idx <- stringdistmatrix(bn, disambiguation_df[ , 3 ])
-				idx <- which.min(idx)
-				idx2 <- which(school_demographics$`school name` == disambiguation_df[ idx, 'school.name' ] & 
-							  	school_demographics$`board name` == disambiguation_df[ idx, 'board.name' ])
-				# message(sprintf('chose entry %s', idx))
-				result <- data.frame(t(x), school_demographics[ idx2, ])
-				# print(x)
-				# print(result)
-				# browser()
-			}
-		} else if (length(idx) == 1) {
-			# we have a perfect match
-		  print("123123123 Perfect Match 123123123123")
-			result <- data.frame(t(x), school_demographics[ idx, ])
-		} else if (length(idx) == 0) {
-			# this is one of the cleaned school names that is mismatched
-			# browser()
-			# before we give up let's see if we have any fuzzy matches...
-			sdm <- stringdistmatrix(x[ 'school_clean'], school_demographics$school_clean)
-			sdm <- as.integer(sdm)
-			idx1 <- which(sdm < 3)
-			if (length(idx1) > 0) {
-				if (length(idx1) > 1) {
-					# break ties 
-					# disambiguate by school board
-					sdm2 <- stringdistmatrix(x[ 'school_board' ], school_demographics[ idx1, 'board name'])
-					sdm2 <- as.integer(sdm2)
-					idx2 <- which.min(sdm2)
-					idx1 <- idx1[ idx2 ]
-					result <- data.frame(t(x), school_demographics[ idx1, ])	
-					# browser()
-				} else {
-					# message(sprintf('found fuzzy match for school name "%s"', x[ 'school_clean' ]))
-					result <- data.frame(t(x), school_demographics[ idx1, ])	
-				}
-			} else {
-				# if (debug) message(sprintf('no corresponding school name found for "%s" using dummy data', x[ 'school_clean' ]))
-				ambiguous_school_names <- get('ambiguous_school_names', envir = .GlobalEnv)
-				ambiguous_school_names <- c(ambiguous_school_names, x[ 'school_clean' ])
-				ambiguous_school_names <- unique(ambiguous_school_names)
-				ambiguous_school_names <- sort(ambiguous_school_names)
-				assign('ambiguous_school_names', ambiguous_school_names, envir = .GlobalEnv)
-				dummy_df <- data.frame(t(rep('', 52)))
-				colnames(dummy_df) <- colnames(school_demographics)
-				result <- data.frame(t(x))	
-			}
-		}
-		if (nrow(result) > 1) { 
-			# use municipality to disambiguate
-			idx <- which(tolower(str_trim(result$municipality)) == tolower(str_trim(result$municipality.1)))
-			if (length(idx) == 1) {
-				# if (debug) message(sprintf('disambiguated by municipality for %s!', x[ 'school_clean' ]))
-				result <- result[ idx, ]
-			} else {
-				# if (debug) message(sprintf('sloppy disambiguation for %s!', x[ 'school_clean' ]))
-				result <- result[ 1, ]
-			}
-		}
-		return(result)
+	  idx <- which(school_demographics$`school number` == x[ 'school_id' ])
+	  result <- data.frame(t(x), school_demographics[ idx, ])
+	  return(result)
 	})
+	
 	
 	# use this to update the clean_all_names function so that it can properly match
 	# entries in active cases dataset with corresponding entries in school demographics 
