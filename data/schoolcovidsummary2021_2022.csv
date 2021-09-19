@@ -1,2 +1,17 @@
 collected_date,reported_date,current_schools_w_cases,current_schools_closed,current_total_number_schools,new_total_school_related_cases,new_school_related_student_cases,new_school_related_staff_cases,new_school_related_unspecified_cases,recent_total_school_related_cases,recent_school_related_student_cases,recent_school_related_staff_cases,recent_school_related_unspecified_cases,past_total_school_related_cases,past_school_related_student_cases,past_school_related_staff_cases,past_school_related_unspecified_cases,cumulative_school_related_cases,cumulative_school_related_student_cases,cumulative_school_related_staff_cases,cumulative_school_related_unspecified_cases
+2021-08-25,2021-08-26,2,0,4844,3,3,0,0,3,3,0,0,0,0,0,0,3,3,0,0
+2021-08-26,2021-08-27,2,0,4844,0,0,0,0,3,3,0,0,0,0,0,0,3,3,0,0
+2021-08-27,2021-08-30,2,0,4844,0,0,0,0,3,3,0,0,0,0,0,0,3,3,0,0
+2021-08-30,2021-08-31,2,0,4844,1,1,0,0,3,3,0,0,1,1,0,0,4,4,0,0
+2021-08-31,2021-09-01,1,0,4844,1,1,0,0,1,1,0,0,1,1,0,0,2,2,0,0
+2021-09-01,2021-09-02,3,0,4844,2,1,1,0,3,2,1,0,1,1,0,0,4,3,1,0
+2021-09-02,2021-09-03,4,0,4844,1,1,0,0,4,3,1,0,1,1,0,0,5,4,1,0
+2021-09-03,2021-09-07,7,0,4844,3,2,1,0,7,5,2,0,1,1,0,0,8,6,2,0
+2021-09-07,2021-09-08,28,0,4844,35,27,8,0,43,33,10,0,1,1,0,0,44,34,10,0
+2021-09-08,2021-09-09,46,0,4844,34,23,9,2,69,47,19,3,1,1,0,0,70,48,19,3
+2021-09-09,2021-09-10,65,0,4844,32,20,4,8,99,66,23,10,1,1,0,0,100,67,23,10
+2021-09-10,2021-09-13,98,0,4844,46,36,6,4,158,118,29,11,4,1,0,3,162,119,29,14
 2021-09-13,2021-09-14,218,0,4844,169,138,23,8,324,256,51,17,4,1,0,3,328,257,51,20
+2021-09-14,2021-09-15,299,0,4844,168,145,15,8,476,390,66,20,10,4,0,6,486,394,66,26
+2021-09-15,2021-09-16,348,1,4844,109,98,8,3,558,474,67,17,12,5,1,6,570,479,68,23
+2021-09-16,2021-09-17,396,1,4844,121,105,15,1,619,520,81,18,13,6,1,6,632,526,82,24
