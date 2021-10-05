@@ -40,7 +40,7 @@ library(stringdist)
 
 # SETTINGS ---------------------------------------------------------------------
 
-google_api_key <- 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX' # you need a google api key with maps javascript api and geocoding api enabled
+google_api_key <- 'X' # you need a google api key with maps javascript api and geocoding api enabled
 
 data_dir <- 'data'
 
@@ -346,7 +346,7 @@ if (needs_refresh | is.na(needs_refresh)) {
 }
 
 # schools demographic data
-url <- 'https://data.ontario.ca/dataset/d85f68c5-fcb0-4b4d-aec5-3047db47dcd5/resource/602a5186-67f5-4faf-94f3-7c61ffc4719a/download/new_sif_data_table_2018_2019prelim_en_august.xlsx'
+url <- 'https://data.ontario.ca/dataset/d85f68c5-fcb0-4b4d-aec5-3047db47dcd5/resource/602a5186-67f5-4faf-94f3-7c61ffc4719a/download/new_sif_data_table_2019_20prelim_en_september2021.xlsx'
 fname_demographics <- sprintf('%s/%s', data_dir, basename(url))
 needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_demographics)$mtime), units = 'hours') >= max_file_age_hrs
 if (needs_refresh | is.na(needs_refresh)) { 
