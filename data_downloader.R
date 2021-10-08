@@ -337,13 +337,13 @@ if (needs_refresh | is.na(needs_refresh)) {
 }
 
 # ontario all covid cases data
-url <- 'https://data.ontario.ca/dataset/f4112442-bdc8-45d2-be3c-12efae72fb27/resource/455fd63b-603d-4608-8216-7d8647f43350/download/conposcovidloc.csv'
-fname_all_cases <- sprintf('%s/%s', data_dir, basename(url))
-needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_all_cases)$mtime), units = 'hours') >= max_file_age_hrs
-if (needs_refresh | is.na(needs_refresh)) { 
-  message('updating all cases data file')
-  GET(url, write_disk(fname_all_cases, overwrite = TRUE))
-}
+#url <- 'https://data.ontario.ca/dataset/f4112442-bdc8-45d2-be3c-12efae72fb27/resource/455fd63b-603d-4608-8216-7d8647f43350/download/conposcovidloc.csv'
+#fname_all_cases <- sprintf('%s/%s', data_dir, basename(url))
+#needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_all_cases)$mtime), units = 'hours') >= max_file_age_hrs
+#if (needs_refresh | is.na(needs_refresh)) { 
+#  message('updating all cases data file')
+#  GET(url, write_disk(fname_all_cases, overwrite = TRUE))
+#}
 
 # schools demographic data
 url <- 'https://data.ontario.ca/dataset/d85f68c5-fcb0-4b4d-aec5-3047db47dcd5/resource/602a5186-67f5-4faf-94f3-7c61ffc4719a/download/new_sif_data_table_2019_20prelim_en_september2021.xlsx'
@@ -368,7 +368,7 @@ if (needs_refresh | is.na(needs_refresh)) {
   
   # 3. load all cases data into memory ---------------------------------------
   
-  covid19_all_cases <- read.csv(fname_all_cases, fileEncoding = 'Windows-1252', stringsAsFactors = FALSE)
+  #covid19_all_cases <- read.csv(fname_all_cases, fileEncoding = 'Windows-1252', stringsAsFactors = FALSE)
   
   # 4. load school demographic data into memory ------------------------------
   
@@ -449,13 +449,13 @@ if (needs_refresh | is.na(needs_refresh)) {
   
   # 7. clean all cases data --------------------------------------------------
   
-  message('cleaning all cases data')
-  colnames(covid19_all_cases) <- tolower(colnames(covid19_all_cases))
-  covid19_all_cases$accurate_episode_date <- as.Date(covid19_all_cases$accurate_episode_date)
-  covid19_all_cases$case_reported_date <- as.Date(covid19_all_cases$case_reported_date)
-  covid19_all_cases$test_reported_date <- as.Date(covid19_all_cases$test_reported_date)
-  fn <- file.path(data_dir, 'covid19_all_cases.rdata')
-  save('covid19_all_cases', file = fn)
+  #message('cleaning all cases data')
+  #colnames(covid19_all_cases) <- tolower(colnames(covid19_all_cases))
+  #covid19_all_cases$accurate_episode_date <- as.Date(covid19_all_cases$accurate_episode_date)
+  #covid19_all_cases$case_reported_date <- as.Date(covid19_all_cases$case_reported_date)
+  #covid19_all_cases$test_reported_date <- as.Date(covid19_all_cases$test_reported_date)
+  #fn <- file.path(data_dir, 'covid19_all_cases.rdata')
+  #save('covid19_all_cases', file = fn)
   
   # 8. clean school demographics data ----------------------------------------
   
@@ -907,8 +907,8 @@ if (needs_refresh | is.na(needs_refresh)) {
   base::load(file = fn, envir = .GlobalEnv)
   fn <- file.path(data_dir, 'covid19_schools_summary.rdata')
   base::load(file = fn, envir = .GlobalEnv)
-  fn <- file.path(data_dir, 'covid19_all_cases.rdata')
-  base::load(file = fn, envir = .GlobalEnv)
+  #fn <- file.path(data_dir, 'covid19_all_cases.rdata')
+  #base::load(file = fn, envir = .GlobalEnv)
   fn <- file.path(data_dir, 'school_demographics.rdata')
   base::load(file = fn, envir = .GlobalEnv)
   fn <- file.path(data_dir, 'covid19_schools_active_with_demographics.rdata')
