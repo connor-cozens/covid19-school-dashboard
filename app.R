@@ -177,7 +177,7 @@ ui <- bootstrapPage(
                                           tabsetPanel(
                                               tabPanel(id = "daily",
                                                        
-                                                       h2('Daily Summary', align = 'right', style="font-size:200%;"),
+                                                       h2('Daily Summary', align = 'right', style="font-size:150%;"),
                                                        
                                                        # cumulative_case_count_text ---------
                                                        h3(textOutput('cumulative_case_count_text'), align = 'right'),
@@ -192,7 +192,7 @@ ui <- bootstrapPage(
                                               ),
                                               tabPanel(id = "weekly",
                                                        
-                                                       h2('Weekly Summary', align = 'right', style="font-size:200%;"),
+                                                       h2('Weekly Summary', align = 'right', style="font-size:150%;"),
                                                        
                                                        # weeklyRadio -----------
                                                        div(
