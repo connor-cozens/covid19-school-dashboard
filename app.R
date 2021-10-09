@@ -493,7 +493,7 @@ ui <- bootstrapPage(
                             p('The following provides a brief policy context of provincial policy responses on school closures and reopening. It does not outline decisions of individual school boards or regional public health units (PHUs), unless they were named in provincial announcements.'),
                             p('The figure below shows the main Ontario-level school closure and re-opening periods from September 2020 – April 2021. Schools did not reopen for face-to-face instruction for the remainder of the school year (30 June 2021). There were exceptions for schools and programs serving children with special needs.'),
                             img(src='timeline.png', width='100%'),
-                            tags$style("#subnote {font-size: 8px;}"),
+                            tags$style("#subnote"),
                             p(id = "subnote", tags$b('Figure 1 Ontario-level school closures and reopening policy tracing (March 2020 – April 2021)')),
                             p(id = "subnote", 'Cite as: Srivastava, P., Taylor, P.J. (2021). COVID-19 school dashboard (1.1 May 2021). [Web application]. http://covid19schooldashboard.com/'),
                             p(id = "subnote", 'Notes. *: School closures: defined here as the suspension of in-school, face-to-face instruction. Public schools only. Special provisions for face-to-face instruction were made for special education needs services. These are not presented here. Only provincial-level decisions are presented. Individual school boards and PHUs may have additionally instituted localised school closures. These are not presented here.'),
