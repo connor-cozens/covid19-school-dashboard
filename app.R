@@ -251,32 +251,49 @@ ui <- bootstrapPage(
                ),
                # TAB: Overview and Search --------------------------------------
                tabPanel('Overview and Search',
-                        # cumulative_plot --------------------------------------
-                        h3('Cumulative Case Chart'),
-                        plotlyOutput('cumulative_plot', width = '100%'),
-                        hr(),
-                        # daily_summary_2_dt -----------------------------------
-                        h3('Daily Summary', align = 'left'),
-                        div(tableOutput('daily_summary_2_dt'), style = 'font-size: small; width: 100%'),
-                        hr(),
-                        # weeklyRadio2 -----------------------------------
-                        h3('Weekly Summary', align = 'left'),
-                        div(
-                            radioButtons(
-                                inputId = "weeklyRadio2",
-                                label = strong("Select a timeframe:"),
-                                choices = list("7-day view", "14-day view"),
-                                inline = TRUE
-                            ), align = "right"),
+                        tabsetPanel(
+                            tabPanel('2021-2022',
+                                     # cumulative_plot --------------------------------------
+                                     h3('Cumulative Case Chart'),
+                                     plotlyOutput('cumulative_plot', width = '100%'),
+                                     hr(),
+                                     # daily_summary_2_dt -----------------------------------
+                                     h3('Daily Summary', align = 'left'),
+                                     div(tableOutput('daily_summary_2_dt'), style = 'font-size: small; width: 100%'),
+                                     hr(),
+                                     # weeklyRadio2 -----------------------------------
+                                     h3('Weekly Summary', align = 'left'),
+                                     div(
+                                         radioButtons(
+                                             inputId = "weeklyRadio2",
+                                             label = strong("Select a timeframe:"),
+                                             choices = list("7-day view", "14-day view"),
+                                             inline = TRUE
+                                         ), align = "right"),
+                                     
+                                     #whichWeekView2 ----------
+                                     uiOutput("whichWeekView2"),
+                                     hr(),
+                                     # school_details_dt ------------------------------------
+                                     h3('Search Function and Table', align = 'left'),
+                                     div('Search schools, boards, municipalities for confirmed cases of COVID-19.', width = '100%', align = 'left'),
+                                     br(),
+                                     div(DTOutput('school_details_dt'), style = 'font-size: small; width: 100%')
+                            ),
+                            tabPanel('2020-2021',
+                                     # cumulative_plot_20_21 --------------------------------------
+                                     h3('Cumulative Case Chart'),
+                                     plotlyOutput('cumulative_plot_20_21', width = '100%'),
+                                     hr(),
+                                     # school_details_dt_20_21 ------------------------------------
+                                     h3('Search Function and Table', align = 'left'),
+                                     div('Search schools, boards, municipalities for confirmed cases of COVID-19.', width = '100%', align = 'left'),
+                                     br(),
+                                     div(DTOutput('school_details_dt_20_21'), style = 'font-size: small; width: 100%')
+                                     )
+                            
+                        )
                         
-                        #whichWeekView2 ----------
-                        uiOutput("whichWeekView2"),
-                        hr(),
-                        # school_details_dt ------------------------------------
-                        h3('Search Function and Table', align = 'left'),
-                        div('Search schools, boards, municipalities for confirmed cases of COVID-19.', width = '100%', align = 'left'),
-                        br(),
-                        div(DTOutput('school_details_dt'), style = 'font-size: small; width: 100%')
                ),
                
                # TAB: Data Tables & Data Dictionary ----------------------------
@@ -865,6 +882,21 @@ server <- function(input, output) {
         fig
     })
     
+    # cumulative_plot_20_21 ----------------------------------------------------------
+    output$cumulative_plot_20_21 <- renderPlotly({
+        df <- covid19_schools_summary_20_21
+        fig <- plot_ly(df, x = ~collected_date, y = ~cumulative_school_related_cases, name = 'Cumulative school-related cases', type = 'scatter', mode = 'lines+markers')
+        fig <- fig %>% add_trace(y = ~cumulative_school_related_student_cases, name = 'Cumulative school-related student cases', mode = 'lines+markers') 
+        fig <- fig %>% add_trace(y = ~cumulative_school_related_staff_cases, name = 'Cumulative school-related staff cases', mode = 'lines+markers') 
+        fig <- fig %>% add_trace(y = ~cumulative_school_related_unidentified_cases, name = 'Cumulative school-related unidentified cases', mode = 'lines+markers')
+        fig <- fig %>% layout(title = 'Cumulative school-related cases', 
+                              legend = list(x = 0.1, y = 0.9),
+                              xaxis = list(title = 'Collected date'),
+                              yaxis = list (title = 'Cumulative cases'))
+        # fig <- config(fig, displayModeBar = FALSE)
+        fig
+    })
+    
     # whichWeekView ------------------------------------------------------------
     observeEvent(input$weeklyRadio,{
         if (input$weeklyRadio == "7-day view"){
@@ -957,6 +989,27 @@ server <- function(input, output) {
     # school_details_dt --------------------------------------------------------
     output$school_details_dt <- renderDT({
         df <- covid19_schools_active_with_demographics_most_recent[ , 2:8 ]
+        colnames(df) <- str_replace_all(colnames(df), '_', ' ')
+        colnames(df) <- str_to_title(colnames(df))
+        datatable(
+            df,
+            options = list(
+                pageLength = 10,
+                paging = TRUE,
+                searching = TRUE,
+                fixedColumns = TRUE,
+                autoWidth = TRUE,
+                ordering = TRUE,
+                dom = 'Bfrtip'
+            ),
+            rownames = FALSE,
+            class = 'display'
+        )
+    })
+    
+    # school_details_dt_20_21 --------------------------------------------------------
+    output$school_details_dt_20_21 <- renderDT({
+        df <- covid19_schools_active_with_demographics_most_recent_20_21[ , 2:8 ]
         colnames(df) <- str_replace_all(colnames(df), '_', ' ')
         colnames(df) <- str_to_title(colnames(df))
         datatable(
