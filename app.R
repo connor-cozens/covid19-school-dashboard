@@ -299,42 +299,86 @@ ui <- bootstrapPage(
                # TAB: Data Tables & Data Dictionary ----------------------------
                tabPanel('Data Tables & Data Dictionary',
                         tabsetPanel(
-                            tabPanel('Summary of cases in schools', 
-                                     h3('Summary of cases in schools'),
-                                     br(), 
-                                     downloadButton('download_csv_button_1', 'Download as CSV'),
+                            tabPanel('2021-2022',
                                      br(),
-                                     br(),
-                                     p('Scroll down to see data dictionary of terms for this table.'),
-                                     DTOutput('school_summary_data_dt'),
-                                     br(),
-                                     'Adapted from data published by Government of Ontario: ', 
-                                     a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools', target = '_blank', 'Summary of cases in schools'),
-                                     br(), 
-                                     hr(),
-                                     h3('Data dictionary'),
-                                     DTOutput('school_summary_data_dictionary_dt')
-                            ),
-                            tabPanel('Schools with active cases and school demographic data', 
-                                     h3('Schools with active cases and school demographic data'),
-                                     br(), 
-                                     downloadButton('download_csv_button_2', 'Download as CSV'),
-                                     br(),
-                                     br(),
-                                     p('Scroll down to see data dictionary of terms for this table.'),
-                                     DTOutput('school_cases_demo_data_dt'),
-                                     br(),
-                                     'Adapted from data published by Government of Ontario: ', 
-                                     a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools', target = '_blank', 'Schools with active COVID-19 cases'),
-                                     ', ',
-                                     a(href = 'https://data.ontario.ca/dataset/school-information-and-student-demographics', target = '_blank', 'School information and student demographics'),
-                                     br(), 
-                                     hr(),
-                                     h3('Data dictionary'),
-                                     DTOutput('school_cases_demo_data_dictionary_dt')
-                                     
-                            )
+                                     tabsetPanel(
+                                         tabPanel('Summary of cases in schools', 
+                                                  h3('Summary of cases in schools'),
+                                                  br(), 
+                                                  downloadButton('download_csv_button_1', 'Download as CSV'),
+                                                  br(),
+                                                  br(),
+                                                  p('Scroll down to see data dictionary of terms for this table.'),
+                                                  DTOutput('school_summary_data_dt'),
+                                                  br(),
+                                                  'Adapted from data published by Government of Ontario: ', 
+                                                  a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools', target = '_blank', 'Summary of cases in schools'),
+                                                  br(), 
+                                                  hr(),
+                                                  h3('Data dictionary'),
+                                                  DTOutput('school_summary_data_dictionary_dt')
+                                         ),
+                                         tabPanel('Schools with active cases and school demographic data', 
+                                                  h3('Schools with active cases and school demographic data'),
+                                                  br(), 
+                                                  downloadButton('download_csv_button_2', 'Download as CSV'),
+                                                  br(),
+                                                  br(),
+                                                  p('Scroll down to see data dictionary of terms for this table.'),
+                                                  DTOutput('school_cases_demo_data_dt'),
+                                                  br(),
+                                                  'Adapted from data published by Government of Ontario: ', 
+                                                  a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools', target = '_blank', 'Schools with active COVID-19 cases'),
+                                                  ', ',
+                                                  a(href = 'https://data.ontario.ca/dataset/school-information-and-student-demographics', target = '_blank', 'School information and student demographics'),
+                                                  br(), 
+                                                  hr(),
+                                                  h3('Data dictionary'),
+                                                  DTOutput('school_cases_demo_data_dictionary_dt')
+                                                )
+                                            )
+                                     ),
+                                    tabPanel('2020-2021',
+                                             br(),
+                                             tabsetPanel(
+                                                 tabPanel('Summary of cases in schools', 
+                                                          h3('Summary of cases in schools'),
+                                                          br(), 
+                                                          downloadButton('download_csv_button_1_20_21', 'Download as CSV'),
+                                                          br(),
+                                                          br(),
+                                                          p('Scroll down to see data dictionary of terms for this table.'),
+                                                          DTOutput('school_summary_data_dt_20_21'),
+                                                          br(),
+                                                          'Adapted from data published by Government of Ontario during the 2020-2021 academic year: ', 
+                                                          a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools', target = '_blank', 'Summary of cases in schools'),
+                                                          br(), 
+                                                          hr(),
+                                                          h3('Data dictionary'),
+                                                          DTOutput('school_summary_data_dictionary_dt_20_21')
+                                                 ),
+                                                 tabPanel('Schools with active cases and school demographic data', 
+                                                          h3('Schools with active cases and school demographic data'),
+                                                          br(), 
+                                                          downloadButton('download_csv_button_2_20_21', 'Download as CSV'),
+                                                          br(),
+                                                          br(),
+                                                          p('Scroll down to see data dictionary of terms for this table.'),
+                                                          DTOutput('school_cases_demo_data_dt_20_21'),
+                                                          br(),
+                                                          'Adapted from data published by Government of Ontario during the 2020-2021 academic year: ', 
+                                                          a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools', target = '_blank', 'Schools with active COVID-19 cases'),
+                                                          ', ',
+                                                          a(href = 'https://data.ontario.ca/dataset/school-information-and-student-demographics', target = '_blank', 'School information and student demographics'),
+                                                          br(), 
+                                                          hr(),
+                                                          h3('Data dictionary'),
+                                                          DTOutput('school_cases_demo_data_dictionary_dt_20_21')
+                                                 )
+                                             )
+                                             )
                         )
+                        
                ),
                
                # TAB: Data Sources and Source Code -----------------------------
@@ -1245,8 +1289,90 @@ server <- function(input, output) {
         )
     })
     
+    # school_summary_data_dt_20_21 ---------------------------------------------------
+    output$school_summary_data_dt_20_21 <- renderDT({
+        df <- covid19_schools_summary_20_21
+        idx <- order(df$reported_date, decreasing = TRUE)
+        df <- df[ idx, ]
+        colnames(df) <- str_replace_all(colnames(df), '_', ' ')
+        colnames(df) <- str_to_title(colnames(df))
+        datatable(
+            df,
+            options = list(
+                paging = TRUE,
+                searching = TRUE,
+                fixedColumns = TRUE,
+                autoWidth = TRUE,
+                ordering = TRUE,
+                dom = 'Bfrtip'
+            ),
+            rownames = FALSE,
+            class = 'display'
+        )
+    })
+    
     # school_summary_data_dictionary_dt ----------------------------------------
     output$school_summary_data_dictionary_dt <- renderDT({
+        field <- c('Collected Date',
+                   'Reported Date',
+                   'Current Schools W Cases',
+                   'Current Schools Closed',
+                   'Current Total Number Schools', 
+                   'New Total School Related Cases',
+                   'New School Related Student Cases',
+                   'New School Related Staff Cases', 
+                   'New School Related Unidentified Cases', 
+                   'Recent Total School Related Cases', 
+                   'Recent School Related Student Cases',
+                   'Recent School Related Staff Cases',
+                   'Recent School Related Unidentified Cases', 
+                   'Past Total School Related Cases', 
+                   'Past School Related Student Cases',
+                   'Past School Related Staff Cases', 
+                   'Past School Related Unidentified Cases', 
+                   'Cumulative School Related Cases',
+                   'Cumulative School Related Student Cases',
+                   'Cumulative School Related Staff Cases',
+                   'Cumulative School Related Unidentified Cases')
+        description <- c('Date results collected',
+                         'Date results reported',
+                         'Count of schools with active cases currently',
+                         'Count of schools closed',
+                         'Total number of schools in province',
+                         'Total new school-related cases of all types since last reporting date',
+                         'New school-related student cases since last reporting date',
+                         'New school-related staff cases since last reporting date',
+                         'New school-related unidentified cases since last reporting date. Unidentified cases: Where the type of case was not identified in the dataset as either student/child or staff/provider/partner due to privacy considerations. These only include unidentified students/children or staff/providers/partners and not visitors or parents. These cases are tracked in the dataset as "individuals" but not included in the "student/child" or "staff/provider" columns.',
+                         'Total recent school-related cases reported in the past 14 days',
+                         'Recent school-related student cases reported in the past 14 days',
+                         'Recent school-related staff cases reported in the past 14 days',
+                         'Recent school-related unidentified cases reported in the past 14 days. Unidentified cases: Where the type of case was not identified in the dataset as either student/child or staff/provider/partner due to privacy considerations. These only include unidentified students/children or staff/providers/partners and not visitors or parents. These cases are tracked in the dataset as "individuals" but not included in the "student/child" or "staff/provider" columns.',
+                         'Total past school-related cases',
+                         'Past school-related student cases',
+                         'Past school-related staff cases',
+                         'Past school-related unidentified cases. Unidentified cases: Where the type of case was not identified in the dataset as either student/child or staff/provider/partner due to privacy considerations. These only include unidentified students/children or staff/providers/partners and not visitors or parents. These cases are tracked in the dataset as "individuals" but not included in the "student/child" or "staff/provider" columns.',
+                         'Cumulative total school-related cases',
+                         'Cumulative school-related student cases',
+                         'Cumulative school-related staff cases',
+                         'Cumulative school-related unidentified cases. Unidentified cases: Where the type of case was not identified in the dataset as either student/child or staff/provider/partner due to privacy considerations. These only include unidentified students/children or staff/providers/partners and not visitors or parents. These cases are tracked in the dataset as "individuals" but not included in the "student/child" or "staff/provider" columns.')
+        df <- data.frame(field, description)
+        datatable(
+            df,
+            options = list(
+                paging = TRUE,
+                searching = TRUE,
+                fixedColumns = TRUE,
+                autoWidth = TRUE,
+                ordering = TRUE,
+                dom = 'Bfrtip'
+            ),
+            rownames = FALSE,
+            class = 'display'
+        )
+    })
+    
+    # school_summary_data_dictionary_dt_20_21 ----------------------------------------
+    output$school_summary_data_dictionary_dt_20_21 <- renderDT({
         field <- c('Collected Date',
                    'Reported Date',
                    'Current Schools W Cases',
@@ -1314,9 +1440,44 @@ server <- function(input, output) {
             write.csv(covid19_schools_summary, file)
         }
     )
+    
+    # download_csv_button_1_20_21 ----------------------------------------------------
+    output$download_csv_button_1_20_21 <- downloadHandler(
+        filename = function() {
+            paste('schoolcovidsummary_20_21_', format(now(), '%Y%m%d'), '.csv', sep='')
+        },
+        content = function(file) {
+            write.csv(covid19_schools_summary_20_21, file)
+        }
+    )
+    
     # school_cases_demo_data_dt ------------------------------------------------
     output$school_cases_demo_data_dt <- renderDT({
         df <- covid19_schools_active_with_demographics
+        idx <- order(df$reported_date, decreasing = TRUE)
+        df <- df[ idx, ]
+        df$board.name <- NULL
+        df$school.name <- NULL
+        colnames(df) <- str_replace_all(colnames(df), '_|\\.', ' ')
+        colnames(df) <- str_to_title(colnames(df))
+        datatable(
+            df,
+            options = list(
+                paging = TRUE,
+                searching = TRUE,
+                fixedColumns = TRUE,
+                autoWidth = TRUE,
+                ordering = TRUE,
+                dom = 'Bfrtip'
+            ),
+            rownames = FALSE,
+            class = 'display'
+        )
+    })
+    
+    # school_cases_demo_data_dt_20_21 ------------------------------------------------
+    output$school_cases_demo_data_dt_20_21 <- renderDT({
+        df <- covid19_schools_active_with_demographics_20_21
         idx <- order(df$reported_date, decreasing = TRUE)
         df <- df[ idx, ]
         df$board.name <- NULL
@@ -1383,6 +1544,51 @@ server <- function(input, output) {
         )
     })
     
+    # school_cases_demo_data_dictionary_dt_20_21 -------------------------------------
+    output$school_cases_demo_data_dictionary_dt_20_21 <- renderDT({
+        field <- c('Collected Date', 'Reported Date', 'School Board', 'School', 
+                   'Municipality', 'Confirmed Student Cases', 'Confirmed Staff Cases',
+                   'Confirmed Unidentified Cases', 'Total Confirmed Cases',
+                   'Board Number', 'Board Name', 'Board Type', 'School Number', 
+                   'School Name', 'School Type', 'School Special Condition Code', 
+                   'School Level', 'School Language', 'Grade Range', 'Street', 'City',
+                   'Province', 'Postal Code', 'Enrolment', 'Latitude', 'Longitude', 
+                   'Percentage Of Students Whose First Language Is Not English', 
+                   'Percentage Of Students Whose First Language Is Not French', 
+                   'Percentage Of Students Who Are New To Canada From A Non English Speaking Country',
+                   'Percentage Of Students Who Are New To Canada From A Non French Speaking Country', 
+                   'Percentage Of Students Identified As Gifted', 
+                   'Percentage Of School Aged Children Who Live In Low Income Households', 
+                   'Percentage Of Students Whose Parents Have Some University Education')
+        description <- c('Collected Date', 'Reported Date', 'School Board', 'School', 
+                         'Municipality', NA, NA, NA, NA,
+                         'Board Number', 'Board Name', 'Board Type', 'School Number', 
+                         'School Name', 'School Type', 'School Special Condition Code', 
+                         'School Level', 'School Language', 'Grade Range', 'Street', 'City',
+                         'Province', 'Postal Code', 'Enrolment', 'Latitude', 'Longitude', 
+                         'Percentage Of Students Whose First Language Is Not English', 
+                         'Percentage Of Students Whose First Language Is Not French', 
+                         'Percentage Of Students Who Are New To Canada From A Non English Speaking Country',
+                         'Percentage Of Students Who Are New To Canada From A Non French Speaking Country', 
+                         'Percentage Of Students Identified As Gifted', 
+                         'Percentage Of School Aged Children Who Live In Low Income Households', 
+                         'Percentage Of Students Whose Parents Have Some University Education')
+        df <- data.frame(field, description)
+        datatable(
+            df,
+            options = list(
+                paging = TRUE,
+                searching = TRUE,
+                fixedColumns = TRUE,
+                autoWidth = TRUE,
+                ordering = TRUE,
+                dom = 'Bfrtip'
+            ),
+            rownames = FALSE,
+            class = 'display'
+        )
+    })
+    
     # download_csv_button_2 ----------------------------------------------------
     output$download_csv_button_2 <- downloadHandler(
         filename = function() {
@@ -1390,6 +1596,16 @@ server <- function(input, output) {
         },
         content = function(file) {
             write.csv(covid19_schools_active_with_demographics, file)
+        }
+    )
+    
+    # download_csv_button_2_20_21 ----------------------------------------------------
+    output$download_csv_button_2_20_21 <- downloadHandler(
+        filename = function() {
+            paste('schoolsactivecovidwithdemographics_20_21_', format(now(), '%Y%m%d'), '.csv', sep='')
+        },
+        content = function(file) {
+            write.csv(covid19_schools_active_with_demographics_20_21, file)
         }
     )
     
