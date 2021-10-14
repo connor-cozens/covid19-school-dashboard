@@ -865,6 +865,9 @@ if (needs_refresh | is.na(needs_refresh)) {
   #covid19_schools_active_with_demographics_most_recent_20_21 <- covid19_schools_active_with_demographics_most_recent
   fn <- file.path(data_dir, 'covid19_schools_active_with_demographics_most_recent_20_21.rdata')
   base::load(file = fn, envir = .GlobalEnv)
+  #covid19_schools_active_with_demographics_20_21 <- covid19_schools_active_with_demographics
+  fn <- file.path(data_dir, 'covid19_schools_active_with_demographics_20_21.rdata')
+  base::load(file = fn, envir = .GlobalEnv)
   #covid19_schools_summary_20_21 <- covid19_schools_summary
   fn <- file.path(data_dir, 'covid19_schools_summary_20_21.rdata')
   base::load(file = fn, envir = .GlobalEnv)
@@ -875,6 +878,10 @@ if (needs_refresh | is.na(needs_refresh)) {
   #covid19_schools_active_with_demographics_most_recent_20_21 <- covid19_schools_active_with_demographics_most_recent
   #fn <- file.path(data_dir, 'covid19_schools_active_with_demographics_most_recent_20_21.rdata')
   #save('covid19_schools_active_with_demographics_most_recent_20_21', file = fn)
+  
+  #covid19_schools_active_with_demographics_20_21 <- covid19_schools_active_with_demographics
+  #fn <- file.path(data_dir, 'covid19_schools_active_with_demographics_20_21.rdata')
+  #save('covid19_schools_active_with_demographics_20_21', file = fn)
   
   #covid19_schools_summary_20_21 <- covid19_schools_summary
   #fn <- file.path(data_dir, 'covid19_schools_summary_20_21.rdata')
