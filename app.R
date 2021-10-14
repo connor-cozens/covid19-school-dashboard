@@ -161,6 +161,23 @@ ui <- bootstrapPage(
                             # leaflet: basemap  --------------------------------
                             leafletOutput('basemap_leaflet', width = '100%', height = '100%'),
                             
+                            # panel: button: viewOptions
+                            absolutePanel(id = 'viewOptions',
+                                          class = 'panel panel-default',
+                                          top = "10%", 
+                                          right = "10%", 
+                                          width = 'auto', 
+                                          fixed = TRUE,
+                                          draggable = FALSE, 
+                                          height = 'auto',
+                                          actionButton("getOptions", "Viewing Options", icon("cog"))
+                            ),
+                            
+                            uiOutput('mapperViewOptions'),
+                            
+                            
+                            
+                            
                             # panel: controls ----------------------------------
                             absolutePanel(id = 'controls', 
                                           class = 'panel panel-default',
@@ -800,6 +817,44 @@ ui <- bootstrapPage(
 # SHINY SERVER -----------------------------------------------------------------
 
 server <- function(input, output) {
+    
+    # panel: button: viewOptions
+    
+    viewOptionsOpen <- FALSE
+    
+    observeEvent(input$getOptions, {
+        viewOptionsOpen <<- !viewOptionsOpen #flip when button is pressed
+        print(viewOptionsOpen)
+        if (!viewOptionsOpen){
+            #viewOptionsOpen <<-  TRUE #flip when button is pressed
+            #print(viewOptionsOpen)
+            output$mapperViewOptions <- renderUI({
+                #Render nothing in this spot
+            })
+        }
+        else{
+            #viewOptionsOpen <<-  FALSE #flip when button is pressed
+            output$mapperViewOptions <- renderUI({
+                absolutePanel(id = 'options',
+                              class = 'panel panel-default',
+                              top = "20%", 
+                              right = "10%", 
+                              width = 'auto', 
+                              fixed = TRUE,
+                              draggable = FALSE, 
+                              height = 'auto',
+                              style = "padding-left: 1%",
+                              
+                
+                                radioButtons("radio",
+                                             h3("Visualization Options"),
+                                             choices = list("Only Schools with Cases" = 1,
+                                                            "Only Schools Without Cases" = 2,
+                                                            "All Schools" = 3))
+                            )
+            })
+        }
+    })
     
     # basemap_leaflet ----------------------------------------------------------
     output$basemap_leaflet <- renderLeaflet({
