@@ -149,6 +149,22 @@ get_schools_no_cases <- function() {
     return (df2)
 }
 
+#get_schools_no_cases_20_21
+# return dataframe from school_geocodes with schools that have cases removed from it. Data from 2020/2021
+# Thinking about putting this into data_downloader. Does it have an effect on load time?
+get_schools_no_cases_20_21 <- function() {
+    df <- cases_per_school_20_21
+    cn <- c(
+        'school_name',
+        'city'
+    )
+    df <- df[ , cn]
+    df2 <- school_demographics_20_21
+    
+    df2 <- df2[!(df2$'school name' %in% df$school_name), , drop = FALSE]
+    return (df2)
+}
+
 # INITIALIZATION ---------------------------------------------------------------
 
 # SHINY UI ---------------------------------------------------------------------
@@ -921,7 +937,7 @@ server <- function(input, output, session) {
                     lat = ~latitude, 
                     radius = 3, 
                     weight = 1, 
-                    color = '#000028',
+                    color = '#0000B0',
                     fillOpacity = 1, 
                     label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/><strong>Zero Confirmed Cases</strong></div>', 
                                     get_schools_no_cases()$`school name`, 
@@ -951,7 +967,7 @@ server <- function(input, output, session) {
                     lat = ~latitude, 
                     radius = 3, 
                     weight = 1, 
-                    color = '#000028',
+                    color = '#0000B0',
                     fillOpacity = 1, 
                     label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/><strong>Zero Confirmed Cases</strong></div>', 
                                     get_schools_no_cases()$`school name`, 
@@ -977,7 +993,7 @@ server <- function(input, output, session) {
                     radius = ~(cases_per_school) * 2, # ~(cases_per_school)^(1/5), 
                     weight = 1, 
                     color = '#d62728',
-                    fillOpacity = 0.1, 
+                    fillOpacity = 0.4, 
                     label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/></div>', 
                                     cases_per_school$school_name, 
                                     cases_per_school$city, 
