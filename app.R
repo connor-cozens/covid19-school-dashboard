@@ -58,9 +58,13 @@ get_summary_table <- function() {
     df <- df[ c(1, 4, 3, 2), ]
     
     #Add in schools with >5 cases
-    df2 <- data.frame("Current schools with >5 cases", sum(cases_per_school$cases_per_school > 5), "NA", round(sum(cases_per_school$cases_per_school > 5) / schools_count, 4) * 1e2)
+    df2 <- data.frame("Current schools with >5 cases", sum(cases_per_school$cases_per_school >5), "NA", round(sum(cases_per_school$cases_per_school > 5) / schools_count, 4) * 1e2)
     names(df2) <- c("Variable", "Count", "Change", "Percentage")
     df <- rbind(df,df2)
+    #Add in schools with >1 cases
+    df3 <- data.frame("Current schools with >1 cases", sum(cases_per_school$cases_per_school > 1), "NA", round(sum(cases_per_school$cases_per_school > 1) / schools_count, 4) * 1e2)
+    names(df3) <- c("Variable", "Count", "Change", "Percentage")
+    df <- rbind(df,df3)
     
     df
 }
