@@ -65,6 +65,7 @@ get_summary_table <- function() {
     df3 <- data.frame("Current schools with >1 cases", sum(cases_per_school$cases_per_school > 1), "NA", round(sum(cases_per_school$cases_per_school > 1) / schools_count, 4) * 1e2)
     names(df3) <- c("Variable", "Count", "Change", "Percentage")
     df <- rbind(df,df3)
+    df <- df[ c(1, 2, 3, 5, 6, 4), ]
     
     df
 }
@@ -840,7 +841,8 @@ server <- function(input, output) {
                                                      weight = 1, 
                                                      color = '#d62728',
                                                      fillOpacity = 0.1, 
-                                                     label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Students receiving Special Education Services: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/></div>', 
+                                                     #Students receiving Special Education Services: %s%%<br/>
+                                                     label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/></div>', 
                                                                      cases_per_school$school_name, 
                                                                      cases_per_school$city, 
                                                                      cases_per_school$school_level, 
@@ -852,7 +854,7 @@ server <- function(input, output) {
                                                                      cases_per_school$from_non_english, 
                                                                      cases_per_school$non_french, 
                                                                      cases_per_school$from_non_french,
-                                                                     cases_per_school$special_education,
+                                                                     #cases_per_school$special_education,
                                                                      #cases_per_school$some_university, 
                                                                      cases_per_school$cases_per_school,
                                                                      cases_per_school$cases_per_school_staff,
