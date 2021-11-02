@@ -940,6 +940,15 @@ server <- function(input, output, session) {
         }
         if (schoolsWithCases){
             leafletProxy('basemap_leaflet') %>%
+                addCircleMarkers(
+                                 data = cases_per_school, 
+                                 lng = ~lon, 
+                                 lat = ~lat, 
+                                 radius = 2,
+                                 weight = 1, 
+                                 color = '#b00000',
+                                 fillOpacity = 1)
+            leafletProxy('basemap_leaflet') %>%
                 addCircleMarkers( 
                     data = cases_per_school, 
                     lng = ~lon, 
@@ -1065,6 +1074,15 @@ server <- function(input, output, session) {
         if (schoolsWithCasesOld){
             leafletProxy('oldmap_leaflet') %>%
                 addCircleMarkers(
+                                        data = cases_per_school_20_21, 
+                                        lng = ~lon, 
+                                        lat = ~lat, 
+                                        radius = 2,
+                                        weight = 1, 
+                                        color = '#b00000',
+                                        fillOpacity = 1)
+            leafletProxy('oldmap_leaflet') %>%
+                addCircleMarkers(
                    data = cases_per_school_20_21, 
                    lng = ~lon, 
                    lat = ~lat, 
@@ -1152,6 +1170,14 @@ server <- function(input, output, session) {
                                                      data = cases_per_school, 
                                                      lng = ~lon, 
                                                      lat = ~lat, 
+                                                     radius = 2,
+                                                     weight = 1, 
+                                                     color = '#b00000',
+                                                     fillOpacity = 1)
+                         basemap <- addCircleMarkers(basemap, 
+                                                     data = cases_per_school, 
+                                                     lng = ~lon, 
+                                                     lat = ~lat, 
                                                      radius = ~(cases_per_school) * 2, # ~(cases_per_school)^(1/5), 
                                                      weight = 1, 
                                                      color = '#d62728',
@@ -1203,6 +1229,14 @@ server <- function(input, output, session) {
                          
                          # add case data markers
                          incProgress(1, 'adding markers')
+                         oldmap <- addCircleMarkers(oldmap,
+                                 data = cases_per_school_20_21, 
+                                 lng = ~lon, 
+                                 lat = ~lat, 
+                                 radius = 2,
+                                 weight = 1, 
+                                 color = '#b00000',
+                                 fillOpacity = 1)
                          oldmap <- addCircleMarkers(oldmap, 
                                                     data = cases_per_school_20_21, 
                                                     lng = ~lon, 
