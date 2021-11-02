@@ -274,6 +274,20 @@ ui <- bootstrapPage(
                             # leaflet: oldmap  --------------------------------
                             leafletOutput('oldmap_leaflet', width = '100%', height = '100%'),
                             
+                            # panel: button: viewOptionsOld
+                            absolutePanel(id = 'viewOptionsOld',
+                                          class = 'panel panel-default',
+                                          top = "0%", 
+                                          right = "0%", 
+                                          width = 'auto', 
+                                          #fixed = TRUE,
+                                          draggable = FALSE, 
+                                          height = 'auto',
+                                          actionButton("getOptionsOld", "Viewing Options", icon("cog"))
+                            ),
+                            
+                            uiOutput('mapperViewOptionsOld'),
+                            
                             # panel: controls ----------------------------------
                             absolutePanel(id = 'controls', 
                                           class = 'panel panel-default',
@@ -853,12 +867,21 @@ server <- function(input, output, session) {
     # panel: button: viewOptions
     
     viewOptionsOpen <- FALSE
+    schoolsWithCases <- TRUE
+    schoolsWithoutCases <- FALSE
+    suppressFirstResponse1 <- TRUE
+    suppressFirstResponse2 <- TRUE
     
+    viewOptionsOpenOld <- FALSE
+    schoolsWithCasesOld <- TRUE
+    schoolsWithoutCasesOld <- FALSE
+    suppressFirstResponse1Old <- TRUE
+    suppressFirstResponse2Old <- TRUE
+    
+    # observe: getOptions
     observeEvent(input$getOptions, {
         viewOptionsOpen <<- !viewOptionsOpen #flip when button is pressed
         if (!viewOptionsOpen){
-            #viewOptionsOpen <<-  TRUE #flip when button is pressed
-            #print(viewOptionsOpen)
             output$mapperViewOptions <- renderUI({
                 #Render nothing in this spot
             })
@@ -876,91 +899,20 @@ server <- function(input, output, session) {
                               height = 'auto',
                               style = "padding-left: 1%;
                               border-radius: 25px;",
-                              
-                
-                                radioButtons("viewOptionsRadio",
-                                             h3("Visualization Options"),
-                                             choices = list("No Change" = 0,
-                                                            "Only Schools with Cases" = 1,
-                                                            "Only Schools Without Cases" = 2,
-                                                            "All Schools" = 3))
+
+                                checkboxInput("visOp1", "Schools with Cases", value = schoolsWithCases),
+                                checkboxInput("visOp2", "Schools without Cases", value = schoolsWithoutCases)
                             )
             })
         }
     })
     
-    # observe: viewOptionsRadio
-    observeEvent(input$viewOptionsRadio,{
-        if (input$viewOptionsRadio == 0){
-            print("0")
-        }
-        else if (input$viewOptionsRadio == 1){
-            leafletProxy('basemap_leaflet') %>%
-                clearMarkers() %>%
-                #clearShapes() %>%
-                addCircleMarkers( 
-                                 data = cases_per_school, 
-                                 lng = ~lon, 
-                                 lat = ~lat, 
-                                 radius = ~(cases_per_school) * 2, # ~(cases_per_school)^(1/5), 
-                                 weight = 1, 
-                                 color = '#d62728',
-                                 fillOpacity = 0.1, 
-                                 label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/></div>', 
-                                                 cases_per_school$school_name, 
-                                                 cases_per_school$city, 
-                                                 cases_per_school$school_level, 
-                                                 cases_per_school$school_board, 
-                                                 cases_per_school$school_language, 
-                                                 cases_per_school$school_enrolment, 
-                                                 cases_per_school$low_income, 
-                                                 cases_per_school$non_english, 
-                                                 cases_per_school$from_non_english, 
-                                                 cases_per_school$non_french, 
-                                                 cases_per_school$from_non_french, 
-                                                 #cases_per_school$some_university, 
-                                                 cases_per_school$cases_per_school,
-                                                 cases_per_school$cases_per_school_staff,
-                                                 cases_per_school$cases_per_school_student,
-                                                 cases_per_school$cases_per_school_unidentified) %>% lapply(htmltools::HTML), 
-                                 labelOptions = labelOptions(
-                                     style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
-                                     textsize = '15px', direction = 'auto'))
-        }
-        else if (input$viewOptionsRadio == 2){
+    updateMarkers <- function () {
+        leafletProxy('basemap_leaflet') %>%
+        clearMarkers()
+        
+        if (schoolsWithoutCases){
             leafletProxy(mapId = 'basemap_leaflet', session = session) %>%
-                clearMarkers() %>%
-                #clearShapes() %>%
-                addCircleMarkers( 
-                    data = get_schools_no_cases(), 
-                    lng = ~longitude, 
-                    lat = ~latitude, 
-                    radius = 3, 
-                    weight = 1, 
-                    color = '#0000B0',
-                    fillOpacity = 1, 
-                    label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/><strong>Zero Confirmed Cases</strong></div>', 
-                                    get_schools_no_cases()$`school name`, 
-                                    get_schools_no_cases()$city, 
-                                    get_schools_no_cases()$`school level`, 
-                                    get_schools_no_cases()$`board name`, 
-                                    get_schools_no_cases()$`school language`, 
-                                    get_schools_no_cases()$enrolment, 
-                                    get_schools_no_cases()$`percentage of school-aged children who live in low-income households`, 
-                                    get_schools_no_cases()$`percentage of students whose first language is not english`, 
-                                    get_schools_no_cases()$`percentage of students who are new to canada from a non-english speaking country`, 
-                                    get_schools_no_cases()$`percentage of students whose first language is not french`, 
-                                    get_schools_no_cases()$`percentage of students who are new to canada from a non-french speaking country`) %>% 
-                                    lapply(htmltools::HTML), 
-                    labelOptions = labelOptions(
-                        style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
-                        textsize = '15px', direction = 'auto'))
-        }
-        else{
-            leafletProxy('basemap_leaflet') %>%
-                clearMarkers() %>%
-                #clearShapes() %>%
-                # Schools without cases on map
                 addCircleMarkers( 
                     data = get_schools_no_cases(), 
                     lng = ~longitude, 
@@ -984,8 +936,10 @@ server <- function(input, output, session) {
                         lapply(htmltools::HTML), 
                     labelOptions = labelOptions(
                         style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
-                        textsize = '15px', direction = 'auto')) %>%
-                #schools with cases on map
+                        textsize = '15px', direction = 'auto'))
+        }
+        if (schoolsWithCases){
+            leafletProxy('basemap_leaflet') %>%
                 addCircleMarkers( 
                     data = cases_per_school, 
                     lng = ~lon, 
@@ -993,7 +947,7 @@ server <- function(input, output, session) {
                     radius = ~(cases_per_school) * 2, # ~(cases_per_school)^(1/5), 
                     weight = 1, 
                     color = '#d62728',
-                    fillOpacity = 0.4, 
+                    fillOpacity = 0.3, 
                     label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/></div>', 
                                     cases_per_school$school_name, 
                                     cases_per_school$city, 
@@ -1015,7 +969,163 @@ server <- function(input, output, session) {
                         style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
                         textsize = '15px', direction = 'auto'))
         }
+    }
+    
+    observeEvent(input$visOp1,{
+        if (!suppressFirstResponse1){
+            if (schoolsWithCases){
+                schoolsWithCases <<- FALSE
+                updateMarkers()
+            }
+            else {
+                schoolsWithCases <<- TRUE
+                updateMarkers()
+            }
+        }
+        else {
+            suppressFirstResponse1 <<- FALSE
+        }
+    }, ignoreInit = TRUE)
+    
+    observeEvent(input$visOp2,{
+        if (!suppressFirstResponse2){
+            if (schoolsWithoutCases){
+                schoolsWithoutCases <<- FALSE
+                updateMarkers()
+            }
+            else {
+                schoolsWithoutCases <<- TRUE
+                updateMarkers()
+            }
+        }
+        else {
+            suppressFirstResponse2 <<- FALSE
+        }
+    }, ignoreInit = TRUE)
+    
+    
+    # observe: getOptionsOld
+    observeEvent(input$getOptionsOld, {
+        viewOptionsOpenOld <<- !viewOptionsOpenOld #flip when button is pressed
+        if (!viewOptionsOpenOld){
+            output$mapperViewOptionsOld <- renderUI({
+                #Render nothing in this spot
+            })
+        }
+        else{
+            output$mapperViewOptionsOld <- renderUI({
+                absolutePanel(id = 'optionsOld',
+                              class = 'panel panel-default',
+                              top = "5%", 
+                              right = "0%", 
+                              width = 'auto', 
+                              draggable = FALSE, 
+                              height = 'auto',
+                              style = "padding-left: 1%;
+                              border-radius: 25px;",
+                              
+                              checkboxInput("visOp1Old", "Schools with Cases", value = schoolsWithCasesOld),
+                              checkboxInput("visOp2Old", "Schools without Cases", value = schoolsWithoutCasesOld)
+                )
+            })
+        }
     })
+    
+    updateMarkersOld <- function () {
+        leafletProxy('oldmap_leaflet') %>%
+            clearMarkers()
+        
+        if (schoolsWithoutCasesOld){
+            leafletProxy(mapId = 'oldmap_leaflet') %>%
+                addCircleMarkers( 
+                    data = get_schools_no_cases_20_21(), 
+                    lng = ~longitude, 
+                    lat = ~latitude, 
+                    radius = 3, 
+                    weight = 1, 
+                    color = '#0000B0',
+                    fillOpacity = 1, 
+                    label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/><strong>Zero Confirmed Cases</strong></div>', 
+                                    get_schools_no_cases_20_21()$`school name`, 
+                                    get_schools_no_cases_20_21()$city, 
+                                    get_schools_no_cases_20_21()$`school level`, 
+                                    get_schools_no_cases_20_21()$`board name`, 
+                                    get_schools_no_cases_20_21()$`school language`, 
+                                    get_schools_no_cases_20_21()$enrolment, 
+                                    get_schools_no_cases_20_21()$`percentage of school-aged children who live in low-income households`, 
+                                    get_schools_no_cases_20_21()$`percentage of students whose first language is not english`, 
+                                    get_schools_no_cases_20_21()$`percentage of students who are new to canada from a non-english speaking country`, 
+                                    get_schools_no_cases_20_21()$`percentage of students whose first language is not french`, 
+                                    get_schools_no_cases_20_21()$`percentage of students who are new to canada from a non-french speaking country`) %>% 
+                        lapply(htmltools::HTML), 
+                    labelOptions = labelOptions(
+                        style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
+                        textsize = '15px', direction = 'auto'))
+        }
+        if (schoolsWithCasesOld){
+            leafletProxy('oldmap_leaflet') %>%
+                addCircleMarkers(
+                   data = cases_per_school_20_21, 
+                   lng = ~lon, 
+                   lat = ~lat, 
+                   radius = ~(cases_per_school_20_21$cases_per_school) * 2,
+                   weight = 1, 
+                   color = '#d62728',
+                   fillOpacity = 0.3, 
+                   label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Parents have no university education: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/></div>', 
+                                   cases_per_school_20_21$school_name, 
+                                   cases_per_school_20_21$city, 
+                                   cases_per_school_20_21$school_level, 
+                                   cases_per_school_20_21$school_board, 
+                                   cases_per_school_20_21$school_language, 
+                                   cases_per_school_20_21$school_enrolment, 
+                                   cases_per_school_20_21$low_income, 
+                                   cases_per_school_20_21$non_english, 
+                                   cases_per_school_20_21$from_non_english, 
+                                   cases_per_school_20_21$non_french, 
+                                   cases_per_school_20_21$from_non_french, 
+                                   cases_per_school_20_21$some_university, 
+                                   cases_per_school_20_21$cases_per_school,
+                                   cases_per_school_20_21$cases_per_school_staff,
+                                   cases_per_school_20_21$cases_per_school_student,
+                                   cases_per_school_20_21$cases_per_school_unidentified) %>% lapply(htmltools::HTML), 
+                   labelOptions = labelOptions(
+                       style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
+                       textsize = '15px', direction = 'auto'))
+        }
+    }
+    
+    observeEvent(input$visOp1Old,{
+        if (!suppressFirstResponse1Old){
+            if (schoolsWithCasesOld){
+                schoolsWithCasesOld <<- FALSE
+                updateMarkersOld()
+            }
+            else {
+                schoolsWithCasesOld <<- TRUE
+                updateMarkersOld()
+            }
+        }
+        else {
+            suppressFirstResponse1Old <<- FALSE
+        }
+    }, ignoreInit = TRUE)
+    
+    observeEvent(input$visOp2Old,{
+        if (!suppressFirstResponse2Old){
+            if (schoolsWithoutCasesOld){
+                schoolsWithoutCasesOld <<- FALSE
+                updateMarkersOld()
+            }
+            else {
+                schoolsWithoutCasesOld <<- TRUE
+                updateMarkersOld()
+            }
+        }
+        else {
+            suppressFirstResponse2Old <<- FALSE
+        }
+    }, ignoreInit = TRUE)
     
     # basemap_leaflet ----------------------------------------------------------
     output$basemap_leaflet <- renderLeaflet({
@@ -1045,7 +1155,7 @@ server <- function(input, output, session) {
                                                      radius = ~(cases_per_school) * 2, # ~(cases_per_school)^(1/5), 
                                                      weight = 1, 
                                                      color = '#d62728',
-                                                     fillOpacity = 0.1, 
+                                                     fillOpacity = 0.3, 
                                                      label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/></div>', 
                                                                      cases_per_school$school_name, 
                                                                      cases_per_school$city, 
@@ -1100,7 +1210,7 @@ server <- function(input, output, session) {
                                                     radius = ~(cases_per_school_20_21$cases_per_school) * 2,
                                                     weight = 1, 
                                                     color = '#d62728',
-                                                    fillOpacity = 0.1, 
+                                                    fillOpacity = 0.3, 
                                                     label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Parents have no university education: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/></div>', 
                                                                     cases_per_school_20_21$school_name, 
                                                                     cases_per_school_20_21$city, 
