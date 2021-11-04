@@ -56,6 +56,17 @@ get_summary_table <- function() {
     df[ 2, 'Percentage' ] <- round(df[ 2, 'Count' ] / schools_count, 4) * 1e2
     df[ 3, 'Percentage' ] <- round(df[ 3, 'Count' ] / schools_count, 4) * 1e2
     df <- df[ c(1, 4, 3, 2), ]
+    
+    #Add in schools with >5 cases
+    df2 <- data.frame("Current schools with >5 cases", sum(cases_per_school$cases_per_school >5), "NA", round(sum(cases_per_school$cases_per_school > 5) / schools_count, 4) * 1e2)
+    names(df2) <- c("Variable", "Count", "Change", "Percentage")
+    df <- rbind(df,df2)
+    #Add in schools with >1 cases
+    df3 <- data.frame("Current schools with >1 cases", sum(cases_per_school$cases_per_school > 1), "NA", round(sum(cases_per_school$cases_per_school > 1) / schools_count, 4) * 1e2)
+    names(df3) <- c("Variable", "Count", "Change", "Percentage")
+    df <- rbind(df,df3)
+    df <- df[ c(1, 2, 3, 5, 6, 4), ]
+    
     df
 }
 
@@ -84,7 +95,7 @@ last_two_weeks_obtain <- function() {
     return(df)
 }
 
-#' get_summary_table
+#' get_weekly_summary_table
 #' 
 #' generate Weekly summary table
 #' if timeFrame == TRUE, 7 days view, otherwise 14 days view
@@ -1234,7 +1245,8 @@ server <- function(input, output, session) {
                                                                      cases_per_school$non_english, 
                                                                      cases_per_school$from_non_english, 
                                                                      cases_per_school$non_french, 
-                                                                     cases_per_school$from_non_french, 
+                                                                     cases_per_school$from_non_french,
+                                                                     #cases_per_school$special_education,
                                                                      #cases_per_school$some_university, 
                                                                      cases_per_school$cases_per_school,
                                                                      cases_per_school$cases_per_school_staff,

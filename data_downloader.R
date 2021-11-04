@@ -46,7 +46,7 @@ data_dir <- 'data'
 
 geocodes_cache_file <- file.path(data_dir, 'geocode_cache.rdata')
 
-max_file_age_hrs <- 24L
+max_file_age_hrs <- 8L
 
 debug <- FALSE
 
@@ -744,7 +744,7 @@ if (needs_refresh | is.na(needs_refresh)) {
   # $ percentage.of.students.identified.as.gifted                                             : chr  "25" "10" "20" "15" ...
   covid19_schools_active_with_demographics$percentage.of.students.identified.as.gifted <- as.integer(covid19_schools_active_with_demographics$percentage.of.students.identified.as.gifted)
   # $ percentage.of.students.receiving.special.education.services                             : chr  "0" "0" "0" "0" ...
-  covid19_schools_active_with_demographics$percentage.of.students.receiving.special.education.services <- NULL # as.integer(covid19_schools_active_with_demographics$percentage.of.students.receiving.special.education.services)
+  covid19_schools_active_with_demographics$percentage.of.students.receiving.special.education.services <- as.integer(covid19_schools_active_with_demographics$percentage.of.students.receiving.special.education.services)
   # $ percentage.of.grade.3.students.achieving.the.provincial.standard.in.reading             : chr  "67%" "83%" "65%" "92%" ...
   covid19_schools_active_with_demographics$percentage.of.grade.3.students.achieving.the.provincial.standard.in.reading <- NULL
   # $ change.in.grade.3.reading.achievement.over.three.years                                  : chr  "0" "-12" "-23" "5" ...
@@ -823,8 +823,8 @@ if (needs_refresh | is.na(needs_refresh)) {
   names(school_enrolment) <- geo_query_str
   low_income <- covid19_schools_active_with_demographics_most_recent$percentage.of.school.aged.children.who.live.in.low.income.households
   names(low_income) <- geo_query_str
-  # special_education <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.receiving.special.education.services
-  # names(special_education) <- geo_query_str
+  special_education <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.receiving.special.education.services
+  names(special_education) <- geo_query_str
   non_english <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.whose.first.language.is.not.english
   names(non_english) <- geo_query_str
   non_french <- covid19_schools_active_with_demographics_most_recent$percentage.of.students.whose.first.language.is.not.french
@@ -853,7 +853,7 @@ if (needs_refresh | is.na(needs_refresh)) {
   cases_per_school$school_language <- sapply(cases_per_school$geo_query_str, function(x) school_language[[match(x, geo_query_str)]][ 1 ]) %>% as.character
   cases_per_school$school_enrolment <- sapply(cases_per_school$geo_query_str, function(x) school_enrolment[[match(x, geo_query_str)]][ 1 ]) %>% as.integer
   cases_per_school$low_income <- sapply(cases_per_school$geo_query_str, function(x) low_income[[match(x, geo_query_str)]][ 1 ]) %>% as.integer
-  # cases_per_school$special_education <- sapply(cases_per_school$geo_query_str, function(x) special_education[[ x ]][ 1 ]) %>% as.integer
+  cases_per_school$special_education <- sapply(cases_per_school$geo_query_str, function(x) special_education[[ x ]][ 1 ]) %>% as.integer
   cases_per_school$non_english <- sapply(cases_per_school$geo_query_str, function(x) non_english[[match(x, geo_query_str)]][ 1 ]) %>% as.integer
   cases_per_school$non_french <- sapply(cases_per_school$geo_query_str, function(x) non_french[[match(x, geo_query_str)]][ 1 ]) %>% as.integer
   cases_per_school$from_non_english <- sapply(cases_per_school$geo_query_str, function(x) from_non_english[[match(x, geo_query_str)]][ 1 ]) %>% as.integer
