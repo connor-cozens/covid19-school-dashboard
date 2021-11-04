@@ -165,6 +165,44 @@ get_schools_no_cases_20_21 <- function() {
     return (df2)
 }
 
+# OVERRIDES --------------------------------------------------------------------
+navbar_js <- "@media (max-width: 1325px) {
+    .navbar-header {
+        float: none;
+    }
+    .navbar-left,.navbar-right {
+        float: none !important;
+    }
+    .navbar-toggle {
+        display: block;
+    }
+    .navbar-collapse {
+        border-top: 1px solid transparent;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+    .navbar-fixed-top {
+        top: 0;
+        border-width: 0 0 1px;
+    }
+    .navbar-collapse.collapse {
+        display: none!important;
+    }
+    .navbar-nav {
+        float: none!important;
+        margin-top: 7.5px;
+    }
+    .navbar-nav>li {
+        float: none;
+    }
+    .navbar-nav>li>a {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+    .collapse.in{
+        display:block !important;
+    }
+}"
+
 # INITIALIZATION ---------------------------------------------------------------
 
 # SHINY UI ---------------------------------------------------------------------
@@ -663,9 +701,9 @@ ui <- bootstrapPage(
                         div(
                             h3(id = "Site Navigation", 'HOW TO NAVIGATE THE SITE'),
                             h4('Map 2021-22 - Affected Ontario Schools Tab'),
-                            p('Shows daily updates to cumulative school-related cases. Affected schools are plotted by geocode on the map. Hovering on a school bubble shows school-specific data on case numbers and breakdown per school, administrative school-level data on school characteristics, and demographic data of the affected school population.'),
+                            p('Shows daily updates to cumulative school-related cases. All schools are plotted by geocode on the map. The default view shows all affected schools. Click on \'View Options\' to customize which schools (with cases, without cases, or both) you see. Hovering on a school bubble shows school-specific data on case numbers and breakdown per school, administrative school-level data on school characteristics, and demographic data of the affected school population.'),
                             h4('Map 2020-21 - Affected Ontario Schools Tab'),
-                            p('Shows the final cumulative school-related cases as last reported on the update of 27 April 2021. The first school-related cases appeared in the dataset on 10 September 2020. Affected schools are plotted by geocode on the map.'), 
+                            p('Shows the final cumulative school-related cases as last reported on the update of 27 April 2021. The first school-related cases appeared in the dataset on 10 September 2020. All schools are plotted by geocode on the map. The default view shows all affected schools. Click on \'View Options\' to customize which schools (with cases, without cases, or both) you see.'), 
                             br(),
                             h5(tags$b('Bubbles')),
                             p('The size of the bubbles indicates the magnitude of cumulative cases (student, staff, unidentified) at specific schools relative to others. ', tags$b('The bigger the bubble, the more cumulative cases at that school – that is, the more it has been affected relative to other schools.')),
@@ -857,7 +895,10 @@ ui <- bootstrapPage(
                         p('Contact: ', a(href = 'mailto:covid19schooldashboard@gmail.com', 'covid19schooldashboard@gmail.com')),
                )
                
-    )          
+    ),
+    tags$head(
+        tags$style(HTML(navbar_js))
+    )        
 )
 
 # SHINY SERVER -----------------------------------------------------------------
