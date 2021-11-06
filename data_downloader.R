@@ -40,7 +40,7 @@ library(stringdist)
 
 # SETTINGS ---------------------------------------------------------------------
 
-google_api_key <- '' # you need a google api key with maps javascript api and geocoding api enabled
+google_api_key <- 'AIzaSyAoIvUXeagJj5p7o3Tx2wLSjc60gjy1Kqc' # you need a google api key with maps javascript api and geocoding api enabled
 
 data_dir <- 'data'
 
@@ -853,7 +853,7 @@ if (needs_refresh | is.na(needs_refresh)) {
   cases_per_school$school_language <- sapply(cases_per_school$geo_query_str, function(x) school_language[[match(x, geo_query_str)]][ 1 ]) %>% as.character
   cases_per_school$school_enrolment <- sapply(cases_per_school$geo_query_str, function(x) school_enrolment[[match(x, geo_query_str)]][ 1 ]) %>% as.integer
   cases_per_school$low_income <- sapply(cases_per_school$geo_query_str, function(x) low_income[[match(x, geo_query_str)]][ 1 ]) %>% as.integer
-  cases_per_school$special_education <- sapply(cases_per_school$geo_query_str, function(x) special_education[[ x ]][ 1 ]) %>% as.integer
+  cases_per_school$special_education <- sapply(cases_per_school$geo_query_str, function(x) special_education[[match(x, geo_query_str)]][1]) %>% as.integer
   cases_per_school$non_english <- sapply(cases_per_school$geo_query_str, function(x) non_english[[match(x, geo_query_str)]][ 1 ]) %>% as.integer
   cases_per_school$non_french <- sapply(cases_per_school$geo_query_str, function(x) non_french[[match(x, geo_query_str)]][ 1 ]) %>% as.integer
   cases_per_school$from_non_english <- sapply(cases_per_school$geo_query_str, function(x) from_non_english[[match(x, geo_query_str)]][ 1 ]) %>% as.integer
