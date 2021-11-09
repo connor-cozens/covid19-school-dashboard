@@ -8,6 +8,7 @@ library(shinythemes)
 library(sp)
 library(plotly)
 library(xts)
+library(writexl)
 # library(renv)
 
 # renv::init()
@@ -505,6 +506,8 @@ ui <- bootstrapPage(
                             tags$li(a(href = 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/8b6d22e2-7065-4b0f-966f-02640be366f2/download/schoolsactivecovid.csv', 'Schools with active COVID-19 cases dataset (.csv)', target = '_blank')),
                             tags$li(a(href = 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/7fbdbb48-d074-45d9-93cb-f7de58950418/download/schoolcovidsummary.csv', 'Summary of cases in schools dataset (.csv)', target = '_blank'))
                         ),
+                        h3('2020-2021 Data Download'),
+                        downloadButton("dl", "Download"),
                         h3('Source Code'),
                         p('Source code for this site can be found ', a(href = 'https://github.com/connor-cozens/covid19-school-dashboard', 'here', target = '_blank'))
                ),
@@ -973,6 +976,11 @@ ui <- bootstrapPage(
 # SHINY SERVER -----------------------------------------------------------------
 
 server <- function(input, output, session) {
+    
+    output$dl <- downloadHandler(
+        filename = function() { "covidstoof.xlsx" },
+        content = function(file) {write_xlsx(covid19_schools_active_with_demographics_20_21, path = file)}
+    )
     
     # panel: button: viewOptions
     
