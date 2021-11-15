@@ -40,7 +40,7 @@ library(stringdist)
 
 # SETTINGS ---------------------------------------------------------------------
 
-google_api_key <- 'AIzaSyAoIvUXeagJj5p7o3Tx2wLSjc60gjy1Kqc' # you need a google api key with maps javascript api and geocoding api enabled
+google_api_key <- '' # you need a google api key with maps javascript api and geocoding api enabled
 
 data_dir <- 'data'
 
@@ -811,7 +811,7 @@ if (needs_refresh | is.na(needs_refresh)) {
   
   # 13. create cases_per_school to plot cases by school on map ---------------
   geo_query_str <- sprintf('%s,%s,Ontario,Canada', 
-                           str_trim(covid19_schools_active_with_demographics_most_recent$school), 
+                           str_trim(covid19_schools_active_with_demographics_most_recent$school.name), 
                            covid19_schools_active_with_demographics_most_recent$municipality)
   school_board <- covid19_schools_active_with_demographics_most_recent$board.name
   names(school_board) <- geo_query_str
