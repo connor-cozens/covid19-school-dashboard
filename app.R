@@ -349,17 +349,17 @@ ui <- bootstrapPage(
                                           
                                           tags$style(HTML(".tabbable > .nav > li[class=active] > a {color:#e95420;}")),
                                           tags$style(HTML(".tabbable > .nav > li > a {color:#777777;}")),
-                                                       h2('Year Summary', align = 'center', style="font-size:200%;"),
-                                                       
-                                                       # cumulative_case_count_text_20_21 ---------
-                                                       h3(textOutput('cumulative_case_count_text_20_21'), align = 'right'),
-                                                       
-                                                       # clean_date_reactive_text -----------
-                                                       h6(div('Data last reported on'), textOutput('clean_date_reactive_text_20_21'), align = 'right'),
-                                                       
-                                                       h6('Drag this box to move it', align = 'right')
-                                        )
+                                          h2('Year Summary', align = 'center', style="font-size:200%;"),
+                                          
+                                          # cumulative_case_count_text_20_21 ---------
+                                          h3(textOutput('cumulative_case_count_text_20_21'), align = 'right'),
+                                          
+                                          # clean_date_reactive_text -----------
+                                          h6(div('Data last reported on'), textOutput('clean_date_reactive_text_20_21'), align = 'right'),
+                                          
+                                          h6('Drag this box to move it', align = 'right')
                             )
+                        )
                ),
                # TAB: Overview and Search --------------------------------------
                tabPanel('Overview and Search',
@@ -402,7 +402,7 @@ ui <- bootstrapPage(
                                      div('Search schools, boards, municipalities for confirmed cases of COVID-19.', width = '100%', align = 'left'),
                                      br(),
                                      div(DTOutput('school_details_dt_20_21'), style = 'font-size: small; width: 100%')
-                                     )
+                            )
                             
                         )
                         
@@ -447,48 +447,48 @@ ui <- bootstrapPage(
                                                   hr(),
                                                   h3('Data dictionary'),
                                                   DTOutput('school_cases_demo_data_dictionary_dt')
-                                                )
-                                            )
-                                     ),
-                                    tabPanel('2020-2021',
-                                             br(),
-                                             tabsetPanel(
-                                                 tabPanel('Summary of cases in schools', 
-                                                          h3('Summary of cases in schools'),
-                                                          br(), 
-                                                          downloadButton('download_csv_button_1_20_21', 'Download as CSV'),
-                                                          br(),
-                                                          br(),
-                                                          p('Scroll down to see data dictionary of terms for this table.'),
-                                                          DTOutput('school_summary_data_dt_20_21'),
-                                                          br(),
-                                                          'Adapted from data published by Government of Ontario during the 2020-2021 academic year: ', 
-                                                          a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools', target = '_blank', 'Summary of cases in schools'),
-                                                          br(), 
-                                                          hr(),
-                                                          h3('Data dictionary'),
-                                                          DTOutput('school_summary_data_dictionary_dt_20_21')
-                                                 ),
-                                                 tabPanel('Schools with active cases and school demographic data', 
-                                                          h3('Schools with active cases and school demographic data'),
-                                                          br(), 
-                                                          downloadButton('download_csv_button_2_20_21', 'Download as CSV'),
-                                                          br(),
-                                                          br(),
-                                                          p('Scroll down to see data dictionary of terms for this table.'),
-                                                          DTOutput('school_cases_demo_data_dt_20_21'),
-                                                          br(),
-                                                          'Adapted from data published by Government of Ontario during the 2020-2021 academic year: ', 
-                                                          a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools', target = '_blank', 'Schools with active COVID-19 cases'),
-                                                          ', ',
-                                                          a(href = 'https://data.ontario.ca/dataset/school-information-and-student-demographics', target = '_blank', 'School information and student demographics'),
-                                                          br(), 
-                                                          hr(),
-                                                          h3('Data dictionary'),
-                                                          DTOutput('school_cases_demo_data_dictionary_dt_20_21')
-                                                 )
-                                             )
-                                             )
+                                         )
+                                     )
+                            ),
+                            tabPanel('2020-2021',
+                                     br(),
+                                     tabsetPanel(
+                                         tabPanel('Summary of cases in schools', 
+                                                  h3('Summary of cases in schools'),
+                                                  br(), 
+                                                  downloadButton('download_csv_button_1_20_21', 'Download as CSV'),
+                                                  br(),
+                                                  br(),
+                                                  p('Scroll down to see data dictionary of terms for this table.'),
+                                                  DTOutput('school_summary_data_dt_20_21'),
+                                                  br(),
+                                                  'Adapted from data published by Government of Ontario during the 2020-2021 academic year: ', 
+                                                  a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools', target = '_blank', 'Summary of cases in schools'),
+                                                  br(), 
+                                                  hr(),
+                                                  h3('Data dictionary'),
+                                                  DTOutput('school_summary_data_dictionary_dt_20_21')
+                                         ),
+                                         tabPanel('Schools with active cases and school demographic data', 
+                                                  h3('Schools with active cases and school demographic data'),
+                                                  br(), 
+                                                  downloadButton('download_csv_button_2_20_21', 'Download as CSV'),
+                                                  br(),
+                                                  br(),
+                                                  p('Scroll down to see data dictionary of terms for this table.'),
+                                                  DTOutput('school_cases_demo_data_dt_20_21'),
+                                                  br(),
+                                                  'Adapted from data published by Government of Ontario during the 2020-2021 academic year: ', 
+                                                  a(href = 'https://data.ontario.ca/dataset/summary-of-cases-in-schools', target = '_blank', 'Schools with active COVID-19 cases'),
+                                                  ', ',
+                                                  a(href = 'https://data.ontario.ca/dataset/school-information-and-student-demographics', target = '_blank', 'School information and student demographics'),
+                                                  br(), 
+                                                  hr(),
+                                                  h3('Data dictionary'),
+                                                  DTOutput('school_cases_demo_data_dictionary_dt_20_21')
+                                         )
+                                     )
+                            )
                         )
                         
                ),
@@ -1009,17 +1009,17 @@ server <- function(input, output, session) {
                               height = 'auto',
                               style = "padding-left: 1%;
                               border-radius: 25px;",
-
-                                checkboxInput("visOp1", "Schools with Cases", value = schoolsWithCases),
-                                checkboxInput("visOp2", "Schools without Cases", value = schoolsWithoutCases)
-                            )
+                              
+                              checkboxInput("visOp1", "Schools with Cases", value = schoolsWithCases),
+                              checkboxInput("visOp2", "Schools without Cases", value = schoolsWithoutCases)
+                )
             })
         }
     })
     
     updateMarkers <- function () {
         leafletProxy('basemap_leaflet') %>%
-        clearMarkers()
+            clearMarkers()
         
         if (schoolsWithoutCases){
             leafletProxy(mapId = 'basemap_leaflet', session = session) %>%
@@ -1052,13 +1052,13 @@ server <- function(input, output, session) {
         if (schoolsWithCases){
             leafletProxy('basemap_leaflet') %>%
                 addCircleMarkers(
-                                 data = cases_per_school, 
-                                 lng = ~lon, 
-                                 lat = ~lat, 
-                                 radius = 2,
-                                 weight = 1, 
-                                 color = '#b00000',
-                                 fillOpacity = 1)
+                    data = cases_per_school, 
+                    lng = ~lon, 
+                    lat = ~lat, 
+                    radius = 2,
+                    weight = 1, 
+                    color = '#b00000',
+                    fillOpacity = 1)
             leafletProxy('basemap_leaflet') %>%
                 addCircleMarkers( 
                     data = cases_per_school, 
@@ -1186,42 +1186,42 @@ server <- function(input, output, session) {
         if (schoolsWithCasesOld){
             leafletProxy('oldmap_leaflet') %>%
                 addCircleMarkers(
-                                        data = cases_per_school_20_21, 
-                                        lng = ~lon, 
-                                        lat = ~lat, 
-                                        radius = 2,
-                                        weight = 1, 
-                                        color = '#b00000',
-                                        fillOpacity = 1)
+                    data = cases_per_school_20_21, 
+                    lng = ~lon, 
+                    lat = ~lat, 
+                    radius = 2,
+                    weight = 1, 
+                    color = '#b00000',
+                    fillOpacity = 1)
             leafletProxy('oldmap_leaflet') %>%
                 addCircleMarkers(
-                   data = cases_per_school_20_21, 
-                   lng = ~lon, 
-                   lat = ~lat, 
-                   radius = ~(cases_per_school_20_21$cases_per_school) * 2,
-                   weight = 1, 
-                   color = '#d62728',
-                   fillOpacity = 0.3, 
-                   label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Parents have no university education: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/></div>', 
-                                   cases_per_school_20_21$school_name, 
-                                   cases_per_school_20_21$city, 
-                                   cases_per_school_20_21$school_level, 
-                                   cases_per_school_20_21$school_board, 
-                                   cases_per_school_20_21$school_language, 
-                                   cases_per_school_20_21$school_enrolment, 
-                                   cases_per_school_20_21$low_income, 
-                                   cases_per_school_20_21$non_english, 
-                                   cases_per_school_20_21$from_non_english, 
-                                   cases_per_school_20_21$non_french, 
-                                   cases_per_school_20_21$from_non_french, 
-                                   cases_per_school_20_21$some_university, 
-                                   cases_per_school_20_21$cases_per_school,
-                                   cases_per_school_20_21$cases_per_school_staff,
-                                   cases_per_school_20_21$cases_per_school_student,
-                                   cases_per_school_20_21$cases_per_school_unidentified) %>% lapply(htmltools::HTML), 
-                   labelOptions = labelOptions(
-                       style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
-                       textsize = '15px', direction = 'auto'))
+                    data = cases_per_school_20_21, 
+                    lng = ~lon, 
+                    lat = ~lat, 
+                    radius = ~(cases_per_school_20_21$cases_per_school) * 2,
+                    weight = 1, 
+                    color = '#d62728',
+                    fillOpacity = 0.3, 
+                    label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Parents have no university education: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/></div>', 
+                                    cases_per_school_20_21$school_name, 
+                                    cases_per_school_20_21$city, 
+                                    cases_per_school_20_21$school_level, 
+                                    cases_per_school_20_21$school_board, 
+                                    cases_per_school_20_21$school_language, 
+                                    cases_per_school_20_21$school_enrolment, 
+                                    cases_per_school_20_21$low_income, 
+                                    cases_per_school_20_21$non_english, 
+                                    cases_per_school_20_21$from_non_english, 
+                                    cases_per_school_20_21$non_french, 
+                                    cases_per_school_20_21$from_non_french, 
+                                    cases_per_school_20_21$some_university, 
+                                    cases_per_school_20_21$cases_per_school,
+                                    cases_per_school_20_21$cases_per_school_staff,
+                                    cases_per_school_20_21$cases_per_school_student,
+                                    cases_per_school_20_21$cases_per_school_unidentified) %>% lapply(htmltools::HTML), 
+                    labelOptions = labelOptions(
+                        style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
+                        textsize = '15px', direction = 'auto'))
         }
     }
     
@@ -1343,13 +1343,13 @@ server <- function(input, output, session) {
                          # add case data markers
                          incProgress(1, 'adding markers')
                          oldmap <- addCircleMarkers(oldmap,
-                                 data = cases_per_school_20_21, 
-                                 lng = ~lon, 
-                                 lat = ~lat, 
-                                 radius = 2,
-                                 weight = 1, 
-                                 color = '#b00000',
-                                 fillOpacity = 1)
+                                                    data = cases_per_school_20_21, 
+                                                    lng = ~lon, 
+                                                    lat = ~lat, 
+                                                    radius = 2,
+                                                    weight = 1, 
+                                                    color = '#b00000',
+                                                    fillOpacity = 1)
                          oldmap <- addCircleMarkers(oldmap, 
                                                     data = cases_per_school_20_21, 
                                                     lng = ~lon, 
@@ -1419,24 +1419,24 @@ server <- function(input, output, session) {
         if (input$weeklyRadio == "7-day view"){
             output$whichWeekView <- renderUI({
                 div(
-                h6(div('Data reported from'), textOutput('clean_week_old_date_text'), align = 'right'),
-                
-                # weekly_summary_1_dt -----------------
-                div(tableOutput('weekly_summary_1_dt'), style = 'font-size: small; width: 100%'),
-                
-                h6('Drag this box to move it', align = 'right')
+                    h6(div('Data reported from'), textOutput('clean_week_old_date_text'), align = 'right'),
+                    
+                    # weekly_summary_1_dt -----------------
+                    div(tableOutput('weekly_summary_1_dt'), style = 'font-size: small; width: 100%'),
+                    
+                    h6('Drag this box to move it', align = 'right')
                 )
             })
         }
         else {
             output$whichWeekView <- renderUI({
                 div(
-                h6(div('Data reported from'), textOutput('clean_two_weeks_old_date_text'), align = 'right'),
-                
-                # weekly_summary_3_dt -----------------
-                div(tableOutput('weekly_summary_3_dt'), style = 'font-size: small; width: 100%'),
-                
-                h6('Drag this box to move it', align = 'right')
+                    h6(div('Data reported from'), textOutput('clean_two_weeks_old_date_text'), align = 'right'),
+                    
+                    # weekly_summary_3_dt -----------------
+                    div(tableOutput('weekly_summary_3_dt'), style = 'font-size: small; width: 100%'),
+                    
+                    h6('Drag this box to move it', align = 'right')
                 )
             })
         }
@@ -1505,8 +1505,10 @@ server <- function(input, output, session) {
     
     # school_details_dt --------------------------------------------------------
     output$school_details_dt <- renderDT({
-        df <- covid19_schools_active_with_demographics_most_recent[ , 2:8 ]
+        #df1 <- covid19_schools_active_with_demographics_most_recent
+        df <- covid19_schools_active_with_demographics_most_recent[ , c(2, 12, 4, 15, 6:8) ]
         colnames(df) <- str_replace_all(colnames(df), '_', ' ')
+        colnames(df) <- str_replace_all(colnames(df), '\\.', ' ')
         colnames(df) <- str_to_title(colnames(df))
         datatable(
             df,
@@ -1526,6 +1528,8 @@ server <- function(input, output, session) {
     
     # school_details_dt_20_21 --------------------------------------------------------
     output$school_details_dt_20_21 <- renderDT({
+        #df <- covid19_schools_active_with_demographics_most_recent[ , c(2, 12, 4, 15, 6:8) ]
+        # Need to fix 2020/2021 data to have the school and board names that fixed filled out
         df <- covid19_schools_active_with_demographics_most_recent_20_21[ , 2:8 ]
         colnames(df) <- str_replace_all(colnames(df), '_', ' ')
         colnames(df) <- str_to_title(colnames(df))
@@ -1926,11 +1930,12 @@ server <- function(input, output, session) {
     
     # school_cases_demo_data_dt ------------------------------------------------
     output$school_cases_demo_data_dt <- renderDT({
-        df <- covid19_schools_active_with_demographics
+        #df <- covid19_schools_active_with_demographics_most_recent[ , c(2, 12, 4, 15, 6:8) ]
+        df <- covid19_schools_active_with_demographics[ , c(1, 2, 12, 4, 15, 6:11, 13, 14, 16:36)]
         idx <- order(df$reported_date, decreasing = TRUE)
         df <- df[ idx, ]
-        df$board.name <- NULL
-        df$school.name <- NULL
+        #df$board.name <- NULL
+        #df$school.name <- NULL
         colnames(df) <- str_replace_all(colnames(df), '_|\\.', ' ')
         colnames(df) <- str_to_title(colnames(df))
         datatable(
