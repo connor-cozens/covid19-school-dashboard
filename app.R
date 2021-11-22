@@ -978,6 +978,7 @@ ui <- bootstrapPage(
                         h4('Kelly Bairos'),
                         p(em('Project Coordinator')),
                         p('Kelly has a Master’s in Education with a focus on Education Policy, and has been a project manager on several education research projects since 2010. Her professional work not only includes oversight of administrative, organizational, and financial project matters, but also planning and executing knowledge mobilization strategies.'),
+                        p('Contact Kelly at: ', a(href = 'mailto:kbairos@uwo.ca', 'kbairos@uwo.ca')),
                         hr(),
                         p('We are open to feedback and continuous improvements. Please report any data discrepancies or other suggestions.'),
                         p('Contact: ', a(href = 'mailto:covid19schooldashboard@gmail.com', 'covid19schooldashboard@gmail.com')),
