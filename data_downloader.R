@@ -899,6 +899,20 @@ if (needs_refresh | is.na(needs_refresh)) {
   #save('school_demographics_20_21', file = fn)
   
   
+  #matchCheckForNA <- function(x) {
+  #  tempVal <- covid19_schools_active_with_demographics$school.name[match(x, covid19_schools_active_with_demographics$school)][ 1 ]
+  #  if (is.na(tempVal)){
+  #    return(x)
+  #  }
+  #  else{
+  #    return(tempVal)
+  #  }
+  #}
+  
+  #cases_per_school_20_21$school_name <- sapply(cases_per_school_20_21$school_name, matchCheckForNA) #%>% as.integer
+  
+  
+  
   # do git push
   #try(expr = {
   #		message('committing updated data files to git')
@@ -941,4 +955,16 @@ if (needs_refresh | is.na(needs_refresh)) {
   base::load(file = fn, envir = .GlobalEnv)
   fn <- file.path(data_dir, 'risk_rank_neighborhood.rdata')
   base::load(file = fn, envir = .GlobalEnv)
+  
+  #covid19_schools_active_with_demographics_most_recent_20_21$school.name <- sapply(covid19_schools_active_with_demographics_most_recent_20_21$school_id, function(x) covid19_schools_active_with_demographics_most_recent$school.name[match(x, covid19_schools_active_with_demographics_most_recent$school_id)][ 1 ]) #%>% as.integer
+  #covid19_schools_active_with_demographics_most_recent_20_21$board.name <- sapply(covid19_schools_active_with_demographics_most_recent_20_21$school_id, function(x) covid19_schools_active_with_demographics_most_recent$board.name[match(x, covid19_schools_active_with_demographics_most_recent$school_id)][ 1 ]) #%>% as.integer
+  #covid19_schools_active_with_demographics_most_recent_20_21$board.number <- sapply(covid19_schools_active_with_demographics_most_recent_20_21$school_id, function(x) covid19_schools_active_with_demographics_most_recent$board.number[match(x, covid19_schools_active_with_demographics_most_recent$school_id)][ 1 ]) #%>% as.integer
+  #covid19_schools_active_with_demographics_most_recent_20_21$board.type <- sapply(covid19_schools_active_with_demographics_most_recent_20_21$school_id, function(x) covid19_schools_active_with_demographics_most_recent$board.type[match(x, covid19_schools_active_with_demographics_most_recent$school_id)][ 1 ]) #%>% as.integer
+  #covid19_schools_active_with_demographics_most_recent_20_21$school.type <- sapply(covid19_schools_active_with_demographics_most_recent_20_21$school_id, function(x) covid19_schools_active_with_demographics_most_recent$school.type[match(x, covid19_schools_active_with_demographics_most_recent$school_id)][ 1 ]) #%>% as.integer
+  
+  #covid19_schools_active_with_demographics_20_21$school.name <- sapply(covid19_schools_active_with_demographics_20_21$school_id, function(x) covid19_schools_active_with_demographics$school.name[match(x, covid19_schools_active_with_demographics$school_id)][ 1 ]) #%>% as.integer
+  #covid19_schools_active_with_demographics_20_21$board.name <- sapply(covid19_schools_active_with_demographics_20_21$school_id, function(x) covid19_schools_active_with_demographics$board.name[match(x, covid19_schools_active_with_demographics$school_id)][ 1 ]) #%>% as.integer
+  #covid19_schools_active_with_demographics_20_21$board.number <- sapply(covid19_schools_active_with_demographics_20_21$school_id, function(x) covid19_schools_active_with_demographics$board.number[match(x, covid19_schools_active_with_demographics$school_id)][ 1 ]) #%>% as.integer
+  #covid19_schools_active_with_demographics_20_21$board.type <- sapply(covid19_schools_active_with_demographics_20_21$school_id, function(x) covid19_schools_active_with_demographics$board.type[match(x, covid19_schools_active_with_demographics$school_id)][ 1 ]) #%>% as.integer
+  #covid19_schools_active_with_demographics_20_21$school.type <- sapply(covid19_schools_active_with_demographics_20_21$school_id, function(x) covid19_schools_active_with_demographics$school.type[match(x, covid19_schools_active_with_demographics$school_id)][ 1 ]) #%>% as.integer
 }
