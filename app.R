@@ -495,7 +495,7 @@ ui <- bootstrapPage(
                
                # TAB: Data Sources and Source Code -----------------------------
                tabPanel('Data Sources and Source Code',
-                        h3('Data Sources'),
+                        h3('Data Sources 2021-22'),
                         tags$ul(
                             tags$li(a(href = 'https://data.ontario.ca/dataset?keywords_en=COVID-19', 'All COVID-19 datasets', target = '_blank')),
                             tags$li(a(href = 'https://www.ontario.ca/page/covid-19-cases-schools-and-child-care-centres', 'COVID-19 cases in schools and child care centres', target = '_blank')),
@@ -505,6 +505,8 @@ ui <- bootstrapPage(
                             tags$li(a(href = 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/8b6d22e2-7065-4b0f-966f-02640be366f2/download/schoolsactivecovid.csv', 'Schools with active COVID-19 cases dataset (.csv)', target = '_blank')),
                             tags$li(a(href = 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/7fbdbb48-d074-45d9-93cb-f7de58950418/download/schoolcovidsummary.csv', 'Summary of cases in schools dataset (.csv)', target = '_blank'))
                         ),
+                        h3('Data 2020-21'),
+                        downloadButton('download_csv_button_3_20_21', 'schoolcovidsummary20_21.csv'),
                         h3('Source Code'),
                         p('Source code for this site can be found ', a(href = 'https://github.com/connor-cozens/covid19-school-dashboard', 'here', target = '_blank'))
                ),
@@ -2103,6 +2105,16 @@ server <- function(input, output, session) {
     output$download_csv_button_2_20_21 <- downloadHandler(
         filename = function() {
             paste('schoolsactivecovidwithdemographics_20_21_', format(now(), '%Y%m%d'), '.csv', sep='')
+        },
+        content = function(file) {
+            write.csv(covid19_schools_active_with_demographics_20_21, file)
+        }
+    )
+    
+    # download_csv_button_3_20_21 ----------------------------------------------------
+    output$download_csv_button_3_20_21 <- downloadHandler(
+        filename = function() {
+            paste('schoolcovidsummary20_21.csv', format(now(), '%Y%m%d'), '.csv', sep='')
         },
         content = function(file) {
             write.csv(covid19_schools_active_with_demographics_20_21, file)
