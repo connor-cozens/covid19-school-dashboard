@@ -883,9 +883,9 @@ if (needs_refresh | is.na(needs_refresh)) {
   #save('covid19_schools_active_with_demographics_most_recent_20_21', file = fn)
   
   #covid19_schools_active_with_demographics_20_21 <- covid19_schools_active_with_demographics
-  #fn <- file.path(data_dir, 'covid19_schools_active_with_demographics_20_21.rdata')
-  #save('covid19_schools_active_with_demographics_20_21', file = fn)
-  
+  # fn <- file.path(data_dir, 'covid19_schools_active_with_demographics_20_21.rdata')
+  # save('covid19_schools_active_with_demographics_20_21', file = fn)
+   
   #covid19_schools_summary_20_21 <- covid19_schools_summary
   #fn <- file.path(data_dir, 'covid19_schools_summary_20_21.rdata')
   #save('covid19_schools_summary_20_21', file = fn)
@@ -956,15 +956,39 @@ if (needs_refresh | is.na(needs_refresh)) {
   fn <- file.path(data_dir, 'risk_rank_neighborhood.rdata')
   base::load(file = fn, envir = .GlobalEnv)
   
-  #covid19_schools_active_with_demographics_most_recent_20_21$school.name <- sapply(covid19_schools_active_with_demographics_most_recent_20_21$school_id, function(x) covid19_schools_active_with_demographics_most_recent$school.name[match(x, covid19_schools_active_with_demographics_most_recent$school_id)][ 1 ]) #%>% as.integer
-  #covid19_schools_active_with_demographics_most_recent_20_21$board.name <- sapply(covid19_schools_active_with_demographics_most_recent_20_21$school_id, function(x) covid19_schools_active_with_demographics_most_recent$board.name[match(x, covid19_schools_active_with_demographics_most_recent$school_id)][ 1 ]) #%>% as.integer
-  #covid19_schools_active_with_demographics_most_recent_20_21$board.number <- sapply(covid19_schools_active_with_demographics_most_recent_20_21$school_id, function(x) covid19_schools_active_with_demographics_most_recent$board.number[match(x, covid19_schools_active_with_demographics_most_recent$school_id)][ 1 ]) #%>% as.integer
-  #covid19_schools_active_with_demographics_most_recent_20_21$board.type <- sapply(covid19_schools_active_with_demographics_most_recent_20_21$school_id, function(x) covid19_schools_active_with_demographics_most_recent$board.type[match(x, covid19_schools_active_with_demographics_most_recent$school_id)][ 1 ]) #%>% as.integer
-  #covid19_schools_active_with_demographics_most_recent_20_21$school.type <- sapply(covid19_schools_active_with_demographics_most_recent_20_21$school_id, function(x) covid19_schools_active_with_demographics_most_recent$school.type[match(x, covid19_schools_active_with_demographics_most_recent$school_id)][ 1 ]) #%>% as.integer
+  #Fixes the missing data rows for covid19_schools_active_with_demographics_20_21
   
-  #covid19_schools_active_with_demographics_20_21$school.name <- sapply(covid19_schools_active_with_demographics_20_21$school_id, function(x) covid19_schools_active_with_demographics$school.name[match(x, covid19_schools_active_with_demographics$school_id)][ 1 ]) #%>% as.integer
-  #covid19_schools_active_with_demographics_20_21$board.name <- sapply(covid19_schools_active_with_demographics_20_21$school_id, function(x) covid19_schools_active_with_demographics$board.name[match(x, covid19_schools_active_with_demographics$school_id)][ 1 ]) #%>% as.integer
-  #covid19_schools_active_with_demographics_20_21$board.number <- sapply(covid19_schools_active_with_demographics_20_21$school_id, function(x) covid19_schools_active_with_demographics$board.number[match(x, covid19_schools_active_with_demographics$school_id)][ 1 ]) #%>% as.integer
-  #covid19_schools_active_with_demographics_20_21$board.type <- sapply(covid19_schools_active_with_demographics_20_21$school_id, function(x) covid19_schools_active_with_demographics$board.type[match(x, covid19_schools_active_with_demographics$school_id)][ 1 ]) #%>% as.integer
-  #covid19_schools_active_with_demographics_20_21$school.type <- sapply(covid19_schools_active_with_demographics_20_21$school_id, function(x) covid19_schools_active_with_demographics$school.type[match(x, covid19_schools_active_with_demographics$school_id)][ 1 ]) #%>% as.integer
+  # for(i in 1:nrow(covid19_schools_active_with_demographics_20_21)) {
+  #   if (is.na(covid19_schools_active_with_demographics_20_21$board.number[i])){
+  #     index <- match(covid19_schools_active_with_demographics_20_21$school_id[i], school_demographics_20_21$`school number`)
+  #     if (!is.na(index)){
+  #       covid19_schools_active_with_demographics_20_21$school.name[i] = school_demographics_20_21$`school name`[index]
+  #       covid19_schools_active_with_demographics_20_21$school[i] = school_demographics_20_21$`school name`[index]
+  #       covid19_schools_active_with_demographics_20_21$board.name[i] = school_demographics_20_21$`board name`[index]
+  #       covid19_schools_active_with_demographics_20_21$school_board[i] = school_demographics_20_21$`board name`[index]
+  #       covid19_schools_active_with_demographics_20_21$board.number[i] = school_demographics_20_21$`board number`[index]
+  #       covid19_schools_active_with_demographics_20_21$board.type[i] = school_demographics_20_21$`board type`[index]
+  #       covid19_schools_active_with_demographics_20_21$school.number[i] = school_demographics_20_21$`school number`[index]
+  #       covid19_schools_active_with_demographics_20_21$school.type[i] = school_demographics_20_21$`school type`[index]
+  #       covid19_schools_active_with_demographics_20_21$school.special.condition.code[i] = school_demographics_20_21$`school special condition code`[index]
+  #       covid19_schools_active_with_demographics_20_21$school.level[i] = school_demographics_20_21$`school level`[index]
+  #       covid19_schools_active_with_demographics_20_21$school.language[i] = school_demographics_20_21$`school language`[index]
+  #       covid19_schools_active_with_demographics_20_21$grade.range[i] = school_demographics_20_21$`grade range`[index]
+  #       covid19_schools_active_with_demographics_20_21$street[i] = school_demographics_20_21$`street`[index]
+  #       covid19_schools_active_with_demographics_20_21$city[i] = school_demographics_20_21$`city`[index]
+  #       covid19_schools_active_with_demographics_20_21$province[i] = school_demographics_20_21$`province`[index]
+  #       covid19_schools_active_with_demographics_20_21$postal.code[i] = school_demographics_20_21$`postal code`[index]
+  #       covid19_schools_active_with_demographics_20_21$enrolment[i] = school_demographics_20_21$`enrolment`[index]
+  #       covid19_schools_active_with_demographics_20_21$latitude[i] = school_demographics_20_21$`latitude`[index]
+  #       covid19_schools_active_with_demographics_20_21$longitude[i] = school_demographics_20_21$`longitude`[index]
+  #       covid19_schools_active_with_demographics_20_21$percentage.of.students.whose.first.language.is.not.english[i] = school_demographics_20_21$`percentage of students whose first language is not english`[index]
+  #       covid19_schools_active_with_demographics_20_21$percentage.of.students.whose.first.language.is.not.french[i] = school_demographics_20_21$`percentage of students whose first language is not french`[index]
+  #       covid19_schools_active_with_demographics_20_21$percentage.of.students.who.are.new.to.canada.from.a.non.english.speaking.country[i] = school_demographics_20_21$`percentage of students who are new to canada from a non-english speaking country`[index]
+  #       covid19_schools_active_with_demographics_20_21$percentage.of.students.who.are.new.to.canada.from.a.non.french.speaking.country[i] = school_demographics_20_21$`percentage of students who are new to canada from a non-french speaking country`[index]
+  #       covid19_schools_active_with_demographics_20_21$percentage.of.students.identified.as.gifted[i] = school_demographics_20_21$`percentage of students identified as gifted`[index]
+  #       covid19_schools_active_with_demographics_20_21$percentage.of.school.aged.children.who.live.in.low.income.households[i] = school_demographics_20_21$`percentage of school-aged children who live in low-income households`[index]
+  #       covid19_schools_active_with_demographics_20_21$percentage.of.students.whose.parents.have.some.university.education[i] = school_demographics_20_21$`percentage of students whose parents have some university education`[index]
+  #     }
+  #   }
+  # }
 }
