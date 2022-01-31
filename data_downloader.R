@@ -346,13 +346,14 @@ if (needs_refresh | is.na(needs_refresh)) {
 #}
 
 # schools demographic data
-url <- 'https://data.ontario.ca/dataset/d85f68c5-fcb0-4b4d-aec5-3047db47dcd5/resource/602a5186-67f5-4faf-94f3-7c61ffc4719a/download/new_sif_data_table_2019_20prelim_en_september2021.xlsx'
-fname_demographics <- sprintf('%s/%s', data_dir, basename(url))
-needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_demographics)$mtime), units = 'hours') >= max_file_age_hrs
-if (needs_refresh | is.na(needs_refresh)) { 
-  message('updating student demographics data file')
-  GET(url, write_disk(fname_demographics, overwrite = TRUE))
-}
+#url <- 'https://data.ontario.ca/dataset/d85f68c5-fcb0-4b4d-aec5-3047db47dcd5/resource/602a5186-67f5-4faf-94f3-7c61ffc4719a/download/new_sif_data_table_2019_20prelim_en_september2021.xlsx'
+#fname_demographics <- sprintf('%s/%s', data_dir, basename(url))
+fname_demographics <- "data/new_sif_data_table_2019_20prelim_en_september2021.xlsx"
+#needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_demographics)$mtime), units = 'hours') >= max_file_age_hrs
+#if (needs_refresh | is.na(needs_refresh)) { 
+#  message('updating student demographics data file')
+#  GET(url, write_disk(fname_demographics, overwrite = TRUE))
+#}
 
 if (needs_refresh | is.na(needs_refresh)) {
   
