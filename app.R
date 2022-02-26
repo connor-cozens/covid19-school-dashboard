@@ -1270,7 +1270,7 @@ server <- function(input, output, session) {
     }
     
     observeEvent(input$visOp1Old,{
-        if (!suppressFirstResponse1Old){
+        if (!suppressFirstResponse1Old && !input$visTSOld){
             if (!input$visOp1Old){
                 schoolsWithCasesOld <<- FALSE
                 updateMarkersOld()
@@ -1286,7 +1286,7 @@ server <- function(input, output, session) {
     }, ignoreInit = TRUE)
     
     observeEvent(input$visOp2Old,{
-        if (!suppressFirstResponse2Old){
+        if (!suppressFirstResponse2Old && !input$visTSOld){
             if (!input$visOp2Old){
                 schoolsWithoutCasesOld <<- FALSE
                 updateMarkersOld()
@@ -1457,8 +1457,6 @@ server <- function(input, output, session) {
         leafletProxy('oldmap_leaflet') %>%
             clearMarkers()
         
-        print("check")
-        
         leafletProxy(mapId = 'oldmap_leaflet', session = session) %>%
             addCircleMarkers( 
                 data = cases_pst_old, 
@@ -1489,7 +1487,6 @@ server <- function(input, output, session) {
                 labelOptions = labelOptions(
                     style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
                     textsize = '15px', direction = 'auto'))
-        print("check2")
         
         
     })
