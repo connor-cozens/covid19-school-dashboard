@@ -31,12 +31,14 @@ RUN R -e 'install.packages(c(\
               "rvest", \
               "stringr", \
               "stringdist", \
-              "git2r" \
+              "git2r", \
+              "Rcpp" \
             ), \
             repos="https://packagemanager.rstudio.com/all/__linux__/focal/latest"\
           )'
 
 COPY ./shiny-app/data /srv/shiny-server/data
+COPY ./shiny-app/data/shapefiles /srv/shiny-server/data/shapefiles
 COPY ./shiny-app/* /srv/shiny-server/
 COPY ./shiny-app/www /srv/shiny-server/www
 
