@@ -24,8 +24,8 @@ apt-get clean
 
 # Clone private repository
 # RUN --mount=type=ssh git clone git@gitlab.com:br00t/ontario-covid19-dashboard.git
-RUN git config --global user.name "Peter Taylor"
-RUN git config --global user.email "peter.taylor@taypeinternational.com"
+# RUN git config --global user.name "Peter Taylor"
+# RUN git config --global user.email "peter.taylor@taypeinternational.com"
 
 # copy necessary files
 ## app folder
