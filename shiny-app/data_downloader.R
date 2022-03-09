@@ -46,7 +46,7 @@ data_dir <- 'data'
 
 geocodes_cache_file <- file.path(data_dir, 'geocode_cache.rdata')
 
-max_file_age_hrs <- 9999L
+max_file_age_hrs <- 800000000L
 
 debug <- FALSE
 

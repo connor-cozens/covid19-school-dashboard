@@ -308,9 +308,15 @@ ui <- bootstrapPage(
                                           )
                                           
                                           
-                            )
+                            ),
                             
-                        )
+                            
+                            
+                        ),
+                        
+                        tags$style(HTML(".js-irs-0 .irs-single, .js-irs-0 .irs-bar-edge, .js-irs-0 .irs-bar {background: teal}")),
+                        # TIMESLIDER
+                        uiOutput('timesliderViewer')
                         
                ),
                # TAB: COVID-19 Mapper 2020-21 ------------------------------------------
@@ -359,7 +365,10 @@ ui <- bootstrapPage(
                                           
                                           h6('Drag this box to move it', align = 'right')
                             )
-                        )
+                        ),
+                        tags$style(HTML(".js-irs-0 .irs-single, .js-irs-0 .irs-bar-edge, .js-irs-0 .irs-bar {background: teal}")),
+                        # TIMESLIDER
+                        uiOutput('timesliderViewerOld')
                ),
                # TAB: Overview and Search --------------------------------------
                tabPanel('Overview and Search',
@@ -988,10 +997,14 @@ ui <- bootstrapPage(
                         p('Contact: ', a(href = 'mailto:covid19schooldashboard@gmail.com', 'covid19schooldashboard@gmail.com')),
                )
                
+               
     ),
     tags$head(
         tags$style(HTML(navbar_js))
-    )        
+    )
+    
+    
+    
 )
 
 # SHINY SERVER -----------------------------------------------------------------
@@ -1003,14 +1016,18 @@ server <- function(input, output, session) {
     viewOptionsOpen <- FALSE
     schoolsWithCases <- TRUE
     schoolsWithoutCases <- FALSE
+    vTimeSlider <- FALSE
     suppressFirstResponse1 <- TRUE
     suppressFirstResponse2 <- TRUE
+    suppressFirstResponse3 <- TRUE
     
     viewOptionsOpenOld <- FALSE
     schoolsWithCasesOld <- TRUE
     schoolsWithoutCasesOld <- FALSE
+    vTimeSliderOld <- FALSE
     suppressFirstResponse1Old <- TRUE
     suppressFirstResponse2Old <- TRUE
+    suppressFirstResponse3Old <- TRUE
     
     # observe: getOptions
     observeEvent(input$getOptions, {
@@ -1035,7 +1052,8 @@ server <- function(input, output, session) {
                               border-radius: 25px;",
                               
                               checkboxInput("visOp1", "Schools with Cases", value = schoolsWithCases),
-                              checkboxInput("visOp2", "Schools without Cases", value = schoolsWithoutCases)
+                              checkboxInput("visOp2", "Schools without Cases", value = schoolsWithoutCases),
+                              checkboxInput("visTS", "View Timeslider, Case over time", value = vTimeSlider)
                 )
             })
         }
@@ -1045,7 +1063,7 @@ server <- function(input, output, session) {
         leafletProxy('basemap_leaflet') %>%
             clearMarkers()
         
-        if (schoolsWithoutCases){
+        if (input$visOp2){
             leafletProxy(mapId = 'basemap_leaflet', session = session) %>%
                 addCircleMarkers( 
                     data = get_schools_no_cases(), 
@@ -1073,7 +1091,7 @@ server <- function(input, output, session) {
                         style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
                         textsize = '15px', direction = 'auto'))
         }
-        if (schoolsWithCases){
+        if (input$visOp1){
             leafletProxy('basemap_leaflet') %>%
                 addCircleMarkers(
                     data = cases_per_school, 
@@ -1117,8 +1135,8 @@ server <- function(input, output, session) {
     }
     
     observeEvent(input$visOp1,{
-        if (!suppressFirstResponse1){
-            if (schoolsWithCases){
+        if (!suppressFirstResponse1 && !input$visTS){
+            if (!input$visOp1){
                 schoolsWithCases <<- FALSE
                 updateMarkers()
             }
@@ -1133,8 +1151,8 @@ server <- function(input, output, session) {
     }, ignoreInit = TRUE)
     
     observeEvent(input$visOp2,{
-        if (!suppressFirstResponse2){
-            if (schoolsWithoutCases){
+        if (!suppressFirstResponse2 && !input$visTS){
+            if (!input$visOp2){
                 schoolsWithoutCases <<- FALSE
                 updateMarkers()
             }
@@ -1170,12 +1188,14 @@ server <- function(input, output, session) {
                               border-radius: 25px;",
                               
                               checkboxInput("visOp1Old", "Schools with Cases", value = schoolsWithCasesOld),
-                              checkboxInput("visOp2Old", "Schools without Cases", value = schoolsWithoutCasesOld)
+                              checkboxInput("visOp2Old", "Schools without Cases", value = schoolsWithoutCasesOld),
+                              checkboxInput("visTSOld", "View Timeslider, Case over time", value = vTimeSliderOld)
                 )
             })
         }
     })
     
+
     updateMarkersOld <- function () {
         leafletProxy('oldmap_leaflet') %>%
             clearMarkers()
@@ -1250,8 +1270,8 @@ server <- function(input, output, session) {
     }
     
     observeEvent(input$visOp1Old,{
-        if (!suppressFirstResponse1Old){
-            if (schoolsWithCasesOld){
+        if (!suppressFirstResponse1Old && !input$visTSOld){
+            if (!input$visOp1Old){
                 schoolsWithCasesOld <<- FALSE
                 updateMarkersOld()
             }
@@ -1266,8 +1286,8 @@ server <- function(input, output, session) {
     }, ignoreInit = TRUE)
     
     observeEvent(input$visOp2Old,{
-        if (!suppressFirstResponse2Old){
-            if (schoolsWithoutCasesOld){
+        if (!suppressFirstResponse2Old && !input$visTSOld){
+            if (!input$visOp2Old){
                 schoolsWithoutCasesOld <<- FALSE
                 updateMarkersOld()
             }
@@ -1280,6 +1300,196 @@ server <- function(input, output, session) {
             suppressFirstResponse2Old <<- FALSE
         }
     }, ignoreInit = TRUE)
+    
+    observeEvent(input$visTS,{
+        if (!suppressFirstResponse3){
+            if (!input$visTS){
+                vTimeSlider <<- FALSE
+                #make timeslider go away
+                output$timesliderViewer <- renderUI({
+                    
+                })
+                updateMarkers()
+            }
+            else{
+                vTimeSlider <<- TRUE
+                updateCheckboxInput(session, "visOp1", value = FALSE)
+                updateCheckboxInput(session, "visOp2", value = FALSE)
+                #Make timeslider appear
+                output$timesliderViewer <- renderUI({
+                    div(
+                        p("Select a date to view data reported at that time:", style = "color:white;font:Helvetica;padding-left:10px;padding-top:15px;"),
+                        sliderInput("obs", label = NULL,
+                                    min = as.Date("2021-09-13","%Y-%m-%d"), max = as.Date("2021-12-22","%Y-%m-%d"), value = as.Date("2021-09-13"), timeFormat="%Y-%m-%d", width = '95%'
+                        ), style = "position:absolute;bottom:0;left:0;right:0;background-color:#d34615;padding-left:3%")
+                })
+            }
+        }
+        else{
+            suppressFirstResponse3 <<- FALSE
+        }
+        
+    })
+    
+    observeEvent(input$visTSOld,{
+        if (!suppressFirstResponse3Old){
+            if (!input$visTSOld){
+                vTimeSliderOld <<- FALSE
+                #make timeslider go away
+                output$timesliderViewerOld <- renderUI({
+                    
+                })
+                updateMarkersOld()
+            }
+            else{
+                vTimeSliderOld <<- TRUE
+                updateCheckboxInput(session, "visOp1Old", value = FALSE)
+                updateCheckboxInput(session, "visOp2Old", value = FALSE)
+                #Make timeslider appear
+                output$timesliderViewerOld <- renderUI({
+                    div(
+                        p("Select a date to view data reported at that time:", style = "color:white;font:Helvetica;padding-left:10px;padding-top:15px;"),
+                        sliderInput("obsOld", label = NULL,
+                                    min = as.Date("2020-09-10","%Y-%m-%d"), max = as.Date("2021-04-14","%Y-%m-%d"), value = as.Date("2020-09-10"), timeFormat="%Y-%m-%d", width = '95%'
+                        ), style = "position:absolute;bottom:0;left:0;right:0;background-color:#d34615;padding-left:3%")
+                })
+            }
+        }
+        else{
+            suppressFirstResponse3Old <<- FALSE
+        }
+    })
+    
+    observeEvent(input$obs,{
+        #for (i in 0:nrow(covid19_schools_active) - 1){
+        #    covid19_schools_active_with_demographics$confirmed_student_cases[i] = as.integer(covid19_schools_active$confirmed_student_cases[i])
+        #}
+        #df <- covid19_schools_active_with_demographics_most_recent[ , c(2, 12, 4, 15, 6:8) ]
+        geo_query_str <- sprintf('%s,%s,Ontario,Canada', 
+                                 str_trim(covid19_schools_active_with_demographics$school.name), 
+                                 covid19_schools_active_with_demographics$municipality)
+        
+        selected_date <- input$obs
+        cases_pst <-  subset(covid19_schools_active_with_demographics, collected_date == selected_date)
+        increment <- 1 #If we don't have any data from this date, then move forward until we get some
+        while(nrow(cases_pst) == 0){
+            if (selected_date >= as.Date("2021-12-22")){
+                increment = -1 #If we reach the furthest possible date and have no data to see, go backwards until we do
+            }
+            selected_date = selected_date + increment
+            cases_pst <-  subset(covid19_schools_active_with_demographics, collected_date == selected_date)
+        }
+        #cases_pst$geo_query_str <- NULL
+        cases_pst[,"geo_query_str"] <- NA
+        #cases_pst2 <- cases_pst
+        for(i in 0:nrow(cases_pst) - 1){
+            cases_pst$geo_query_str[i] = sprintf('%s,%s,Ontario,Canada', 
+                                                 str_trim(cases_pst$school[i]), 
+                                                 cases_pst$municipality[i])
+        }
+        
+        leafletProxy('basemap_leaflet') %>%
+            clearMarkers()
+    
+        leafletProxy(mapId = 'basemap_leaflet', session = session) %>%
+            addCircleMarkers( 
+                data = cases_pst, 
+                lng = cases_pst$longitude, 
+                lat = cases_pst$latitude, 
+                radius = cases_pst$total_confirmed_cases * 2,
+                weight = 1, 
+                color = '#d62728',
+                fillOpacity = 0.3,
+                label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Students receiving Special Education Services: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/></div>', 
+                #label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Students receiving Special Education Services: %s%%<br/><strong>Zero Confirmed Cases</strong></div>', 
+                                cases_pst$school.name, 
+                                cases_pst$city, 
+                                cases_pst$school.level, 
+                                cases_pst$board.name, 
+                                cases_pst$school.language, 
+                                cases_pst$enrolment, 
+                                cases_pst$percentage.of.school.aged.children.who.live.in.low.income.households, 
+                                cases_pst$percentage.of.students.whose.first.language.is.not.english, 
+                                cases_pst$percentage.of.students.who.are.new.to.canada.from.a.non.english.speaking.country, 
+                                cases_pst$percentage.of.students.whose.first.language.is.not.french, 
+                                cases_pst$percentage.of.students.who.are.new.to.canada.from.a.non.french.speaking.country,
+                                cases_pst$percentage.of.students.receiving.special.education.services,
+                                cases_pst$total_confirmed_cases,
+                                cases_pst$confirmed_staff_cases,
+                                cases_pst$confirmed_student_cases,
+                                cases_pst$confirmed_unidentified_cases) %>% 
+                    lapply(htmltools::HTML), 
+                labelOptions = labelOptions(
+                    style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
+                    textsize = '15px', direction = 'auto'))
+    
+        
+    })
+    
+    observeEvent(input$obsOld,{
+        #for (i in 0:nrow(covid19_schools_active) - 1){
+        #    covid19_schools_active_with_demographics$confirmed_student_cases[i] = as.integer(covid19_schools_active$confirmed_student_cases[i])
+        #}
+        #df <- covid19_schools_active_with_demographics_most_recent[ , c(2, 12, 4, 15, 6:8) ]
+        geo_query_str <- sprintf('%s,%s,Ontario,Canada', 
+                                 str_trim(covid19_schools_active_with_demographics_20_21$school.name), 
+                                 covid19_schools_active_with_demographics_20_21$municipality)
+        
+        selected_date <- input$obsOld
+        cases_pst_old <-  subset(covid19_schools_active_with_demographics_20_21, collected_date == selected_date)
+        increment <- 1 #If we don't have any data from this date, then move forward until we get some
+        while(nrow(cases_pst_old) == 0){
+            if (selected_date >= as.Date("2021-04-14")){
+                increment = -1 #If we reach the furthest possible date and have no data to see, go backwards until we do
+            }
+            selected_date = selected_date + increment
+            cases_pst_old <-  subset(covid19_schools_active_with_demographics_20_21, collected_date == selected_date)
+        }
+        #cases_pst$geo_query_str <- NULL
+        cases_pst_old[,"geo_query_str"] <- NA
+        #cases_pst2 <- cases_pst
+        for(i in 0:nrow(cases_pst_old) - 1){
+            cases_pst_old$geo_query_str[i] = sprintf('%s,%s,Ontario,Canada', 
+                                                 str_trim(cases_pst_old$school[i]), 
+                                                 cases_pst_old$municipality[i])
+        }
+        
+        leafletProxy('oldmap_leaflet') %>%
+            clearMarkers()
+        
+        leafletProxy(mapId = 'oldmap_leaflet', session = session) %>%
+            addCircleMarkers( 
+                data = cases_pst_old, 
+                lng = cases_pst_old$longitude, 
+                lat = cases_pst_old$latitude, 
+                radius = cases_pst_old$total_confirmed_cases * 2,
+                weight = 1, 
+                color = '#d62728',
+                fillOpacity = 0.3, 
+                label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Parents have no university education: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/></div>', 
+                                cases_pst_old$school.name, 
+                                cases_pst_old$city, 
+                                cases_pst_old$school.level, 
+                                cases_pst_old$board.name, 
+                                cases_pst_old$school.language, 
+                                cases_pst_old$enrolment,
+                                cases_pst_old$percentage.of.school.aged.children.who.live.in.low.income.households, 
+                                cases_pst_old$percentage.of.students.whose.first.language.is.not.english, 
+                                cases_pst_old$percentage.of.students.who.are.new.to.canada.from.a.non.english.speaking.country, 
+                                cases_pst_old$percentage.of.students.whose.first.language.is.not.french, 
+                                cases_pst_old$percentage.of.students.who.are.new.to.canada.from.a.non.french.speaking.country,
+                                cases_pst_old$percentage.of.students.whose.parents.have.some.university.education, 
+                                cases_pst_old$total_confirmed_cases,
+                                cases_pst_old$confirmed_staff_cases,
+                                cases_pst_old$confirmed_student_cases,
+                                cases_pst_old$confirmed_unidentified_cases) %>% 
+                    lapply(htmltools::HTML), 
+                labelOptions = labelOptions(
+                    style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
+                    textsize = '15px', direction = 'auto'))
+        
+        
+    })
     
     # basemap_leaflet ----------------------------------------------------------
     output$basemap_leaflet <- renderLeaflet({
