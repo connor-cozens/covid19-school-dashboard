@@ -1,45 +1,45 @@
-# syntax=docker/dockerfile:experimental
-FROM rocker/shiny:latest
+FROM rocker/shiny:4.0.5
 
-# system libraries of general use
-## install debian packages
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && apt-get install -y --no-install-recommends apt-utils
-RUN DEBIAN_FRONTEND=noninteractive apt-get update -qq && apt-get -y install \
-libcurl4-openssl-dev \
-libgdal-dev \
-openjdk-11-jdk \
-libbz2-dev \
-ssh \
-git
-    
-## update system libraries
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && \
-apt-get upgrade -y && \
-apt-get clean
+RUN apt-get update && apt-get install -y \
+    r-base gdebi-core \
+    r-base \
+    curl \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libxml2-dev \
+    libgdal-dev
 
-# Download public key for github.com
-# RUN mkdir -p -m 0600 ~/.ssh && ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
+RUN R -e 'install.packages(c(\
+              "shiny", \
+              "shinydashboard", \
+              "ggplot2", \
+              "DT", \
+              "reshape2", \
+              "rgdal", \
+              "shinythemes", \
+              "sp", \
+              "plotly", \
+              "xts", \
+              "data.table", \
+              "ggmap", \
+              "httr", \
+              "leaflet", \
+              "lubridate", \
+              "readxl", \
+              "RColorBrewer", \
+              "rgeos", \
+              "rvest", \
+              "stringr", \
+              "stringdist", \
+              "git2r", \
+              "Rcpp" \
+            ), \
+            repos="https://packagemanager.rstudio.com/all/__linux__/focal/latest"\
+          )'
 
-# RUN --mount=type=ssh ssh-add -L
+COPY ./shiny-app/data /srv/shiny-server/data
+COPY ./shiny-app/data/shapefiles /srv/shiny-server/data/shapefiles
+COPY ./shiny-app/* /srv/shiny-server/
+COPY ./shiny-app/www /srv/shiny-server/www
 
-# Clone private repository
-# RUN --mount=type=ssh git clone git@gitlab.com:br00t/ontario-covid19-dashboard.git
-# RUN git config --global user.name "Peter Taylor"
-# RUN git config --global user.email "peter.taylor@taypeinternational.com"
-
-# copy necessary files
-## app folder
-COPY / ./
-## renv.lock file
-COPY /renv.lock ./renv.lock
-
-# install renv & restore packages
-RUN Rscript -e 'install.packages("renv")'
-RUN Rscript -e 'renv::consent(TRUE); renv::restore()'
-
-# expose port
-EXPOSE 3838
-
-# run app on container start
-# CMD ["R", "-e", "shiny::runApp('/ontario-covid19-dashboard', host = '0.0.0.0', port = 3838)"]
-CMD ["R", "-e", "shiny::runApp('/', host = '0.0.0.0', port = 3838)"]
+CMD ["/usr/bin/shiny-server"]
