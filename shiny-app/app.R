@@ -1200,7 +1200,7 @@ server <- function(input, output, session) {
         leafletProxy('oldmap_leaflet') %>%
             clearMarkers()
         
-        if (schoolsWithoutCasesOld){
+        if (input$visOp2Old){
             leafletProxy(mapId = 'oldmap_leaflet') %>%
                 addCircleMarkers( 
                     data = get_schools_no_cases_20_21(), 
@@ -1227,7 +1227,7 @@ server <- function(input, output, session) {
                         style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
                         textsize = '15px', direction = 'auto'))
         }
-        if (schoolsWithCasesOld){
+        if (input$visOp1Old){
             leafletProxy('oldmap_leaflet') %>%
                 addCircleMarkers(
                     data = cases_per_school_20_21, 
