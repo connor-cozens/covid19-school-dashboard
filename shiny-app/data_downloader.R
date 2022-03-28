@@ -35,7 +35,6 @@ library(rgeos)
 library(rvest)
 library(stringr)
 library(xts)
-# library(utils)
 library(stringdist)
 
 # SETTINGS ---------------------------------------------------------------------
@@ -88,9 +87,6 @@ get_utf_table <- function() {
 #' 
 #' function to normalize school and school board names so we can match schools in active cases dataset
 #' with the school demographic dataset
-#' 
-#' TODO: just create a static mapping file for school and school board names, this
-#' has rapidly devolved into madness... as expected. *sigh*
 #' 	
 #' debugging
 #' df1 <- data.frame(school_name = sort(unique(covid19_schools_active$school)), 
@@ -517,8 +513,6 @@ if (needs_refresh | is.na(needs_refresh)) {
   
   # 10. combine active school cases with demographic data --------------------
   
-  # note: this whole section is still a work in progress!
-  
   # all schools with active cases
   # covid19_schools_active$school %>% unique %>% str_trim %>% sort
   
@@ -560,8 +554,6 @@ if (needs_refresh | is.na(needs_refresh)) {
   ambiguous_school_names <- character(0)
   
   covid19_schools_active_with_demographics <- apply(covid19_schools_active, 1, function(x) {
-    # print(x)
-    # browser()
     # match on cleaned school name
     idx <- which(school_demographics$school_clean == x[ 'school_clean' ])
     if (length(idx) > 1) {
@@ -569,7 +561,6 @@ if (needs_refresh | is.na(needs_refresh)) {
                                       school_demographics[ idx, c('school name', 'board name') ],
                                       x[ 'school_board' ] %>% as.character,
                                       stringsAsFactors = FALSE)
-      # print(disambiguation_df)
       # if all school boards are the same it is a question of whether this is an elementary or a high school
       if (length(unique(disambiguation_df[ , 3 ])) == 1) {
         # are we looking at the high school or the elementary school?
@@ -577,7 +568,6 @@ if (needs_refresh | is.na(needs_refresh)) {
         # browser()
         idx <- stringdistmatrix(disambiguation_df[ 1, 1 ], disambiguation_df[ , 2 ])
         idx <- which.min(idx)
-        # message(sprintf('chose entry %s', idx))
         idx2 <- which(school_demographics$`school name` == disambiguation_df[ idx, 'school.name' ] & 
                         school_demographics$`board name` == disambiguation_df[ idx, 'board.name' ])
         result <- data.frame(t(x), school_demographics[ idx2, ])
@@ -594,8 +584,6 @@ if (needs_refresh | is.na(needs_refresh)) {
                         school_demographics$`board name` == disambiguation_df[ idx, 'board.name' ])
         # message(sprintf('chose entry %s', idx))
         result <- data.frame(t(x), school_demographics[ idx2, ])
-        # print(x)
-        # print(result)
         # browser()
       }
     } else if (length(idx) == 1) {
@@ -879,51 +867,6 @@ if (needs_refresh | is.na(needs_refresh)) {
   fn <- file.path(data_dir, 'school_demographics_20_21.rdata')
   base::load(file = fn, envir = .GlobalEnv)
   
-  #covid19_schools_active_with_demographics_most_recent_20_21 <- covid19_schools_active_with_demographics_most_recent
-  #fn <- file.path(data_dir, 'covid19_schools_active_with_demographics_most_recent_20_21.rdata')
-  #save('covid19_schools_active_with_demographics_most_recent_20_21', file = fn)
-  
-  #covid19_schools_active_with_demographics_20_21 <- covid19_schools_active_with_demographics
-  # fn <- file.path(data_dir, 'covid19_schools_active_with_demographics_20_21.rdata')
-  # save('covid19_schools_active_with_demographics_20_21', file = fn)
-   
-  #covid19_schools_summary_20_21 <- covid19_schools_summary
-  #fn <- file.path(data_dir, 'covid19_schools_summary_20_21.rdata')
-  #save('covid19_schools_summary_20_21', file = fn)
-  
-  #cases_per_school_20_21 <- cases_per_school
-  #fn <- file.path(data_dir, 'cases_per_school_20_21.rdata')
-  #save('cases_per_school_20_21', file = fn)
-  
-  #school_demographics_20_21 <- school_demographics
-  #fn <- file.path(data_dir, 'school_demographics_20_21.rdata')
-  #save('school_demographics_20_21', file = fn)
-  
-  
-  #matchCheckForNA <- function(x) {
-  #  tempVal <- covid19_schools_active_with_demographics$school.name[match(x, covid19_schools_active_with_demographics$school)][ 1 ]
-  #  if (is.na(tempVal)){
-  #    return(x)
-  #  }
-  #  else{
-  #    return(tempVal)
-  #  }
-  #}
-  
-  #cases_per_school_20_21$school_name <- sapply(cases_per_school_20_21$school_name, matchCheckForNA) #%>% as.integer
-  
-  
-  
-  # do git push
-  #try(expr = {
-  #		message('committing updated data files to git')
-  #		git2r::add(path = 'data/*.rdata')
-  #		git2r::add(path = 'data/*.csv')
-  #		git2r::add(path = 'data/*.xlsx')
-  #		git2r::commit(message = sprintf('automated update of data files'))
-  #		git2r::push()	
-  #	})
-  
 } else {
   # LOAD ALL CACHED DATA -----------------------------------------------------
   fn <- file.path(data_dir, 'covid19_schools_active_with_demographics_most_recent_20_21.rdata')
@@ -956,40 +899,4 @@ if (needs_refresh | is.na(needs_refresh)) {
   base::load(file = fn, envir = .GlobalEnv)
   fn <- file.path(data_dir, 'risk_rank_neighborhood.rdata')
   base::load(file = fn, envir = .GlobalEnv)
-  
-  #Fixes the missing data rows for covid19_schools_active_with_demographics_20_21
-  
-  # for(i in 1:nrow(covid19_schools_active_with_demographics_20_21)) {
-  #   if (is.na(covid19_schools_active_with_demographics_20_21$board.number[i])){
-  #     index <- match(covid19_schools_active_with_demographics_20_21$school_id[i], school_demographics_20_21$`school number`)
-  #     if (!is.na(index)){
-  #       covid19_schools_active_with_demographics_20_21$school.name[i] = school_demographics_20_21$`school name`[index]
-  #       covid19_schools_active_with_demographics_20_21$school[i] = school_demographics_20_21$`school name`[index]
-  #       covid19_schools_active_with_demographics_20_21$board.name[i] = school_demographics_20_21$`board name`[index]
-  #       covid19_schools_active_with_demographics_20_21$school_board[i] = school_demographics_20_21$`board name`[index]
-  #       covid19_schools_active_with_demographics_20_21$board.number[i] = school_demographics_20_21$`board number`[index]
-  #       covid19_schools_active_with_demographics_20_21$board.type[i] = school_demographics_20_21$`board type`[index]
-  #       covid19_schools_active_with_demographics_20_21$school.number[i] = school_demographics_20_21$`school number`[index]
-  #       covid19_schools_active_with_demographics_20_21$school.type[i] = school_demographics_20_21$`school type`[index]
-  #       covid19_schools_active_with_demographics_20_21$school.special.condition.code[i] = school_demographics_20_21$`school special condition code`[index]
-  #       covid19_schools_active_with_demographics_20_21$school.level[i] = school_demographics_20_21$`school level`[index]
-  #       covid19_schools_active_with_demographics_20_21$school.language[i] = school_demographics_20_21$`school language`[index]
-  #       covid19_schools_active_with_demographics_20_21$grade.range[i] = school_demographics_20_21$`grade range`[index]
-  #       covid19_schools_active_with_demographics_20_21$street[i] = school_demographics_20_21$`street`[index]
-  #       covid19_schools_active_with_demographics_20_21$city[i] = school_demographics_20_21$`city`[index]
-  #       covid19_schools_active_with_demographics_20_21$province[i] = school_demographics_20_21$`province`[index]
-  #       covid19_schools_active_with_demographics_20_21$postal.code[i] = school_demographics_20_21$`postal code`[index]
-  #       covid19_schools_active_with_demographics_20_21$enrolment[i] = school_demographics_20_21$`enrolment`[index]
-  #       covid19_schools_active_with_demographics_20_21$latitude[i] = school_demographics_20_21$`latitude`[index]
-  #       covid19_schools_active_with_demographics_20_21$longitude[i] = school_demographics_20_21$`longitude`[index]
-  #       covid19_schools_active_with_demographics_20_21$percentage.of.students.whose.first.language.is.not.english[i] = school_demographics_20_21$`percentage of students whose first language is not english`[index]
-  #       covid19_schools_active_with_demographics_20_21$percentage.of.students.whose.first.language.is.not.french[i] = school_demographics_20_21$`percentage of students whose first language is not french`[index]
-  #       covid19_schools_active_with_demographics_20_21$percentage.of.students.who.are.new.to.canada.from.a.non.english.speaking.country[i] = school_demographics_20_21$`percentage of students who are new to canada from a non-english speaking country`[index]
-  #       covid19_schools_active_with_demographics_20_21$percentage.of.students.who.are.new.to.canada.from.a.non.french.speaking.country[i] = school_demographics_20_21$`percentage of students who are new to canada from a non-french speaking country`[index]
-  #       covid19_schools_active_with_demographics_20_21$percentage.of.students.identified.as.gifted[i] = school_demographics_20_21$`percentage of students identified as gifted`[index]
-  #       covid19_schools_active_with_demographics_20_21$percentage.of.school.aged.children.who.live.in.low.income.households[i] = school_demographics_20_21$`percentage of school-aged children who live in low-income households`[index]
-  #       covid19_schools_active_with_demographics_20_21$percentage.of.students.whose.parents.have.some.university.education[i] = school_demographics_20_21$`percentage of students whose parents have some university education`[index]
-  #     }
-  #   }
-  # }
 }
