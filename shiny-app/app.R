@@ -8,22 +8,16 @@ library(shinythemes)
 library(sp)
 library(plotly)
 library(xts)
-# library(renv)
-
-# renv::init()
 
 # LOAD DATA --------------------------------------------------------------------
 
 source('data_downloader.R')
 
-# SETTINGS ---------------------------------------------------------------------
-
 # FUNCTIONS --------------------------------------------------------------------
 
-#' get_summary_table
-#' 
-#' generate Daily summary table
-#' 
+# get_summary_table
+#
+# generate Daily summary table
 get_summary_table <- function() {
     df <- covid19_schools_summary
     idx <- order(df$collected_date)
@@ -35,15 +29,20 @@ get_summary_table <- function() {
         'current_schools_with_cases', 
         'current_schools_closed'
     )
+    #Take only the columns outlined in cn from covid19_schools_summary
     df <- df[ , cn ]
     idx <- which(df$collected_date <= as.Date(now()))
     idx <- max(idx)
+    #Take only the 2 most recently dated rows from df, the dataframe
     df <- df[ (idx - 1):idx, ]
     colnames(df) <- str_replace_all(colnames(df), '_', ' ')
+    #Rearrange df as df1 such that the columns become rows (with values that are the difference between the two original rows)
     df1 <- reshape2::melt(apply(df[ , -1 ], 2, diff))
     df1$variable <- rownames(df1)
     colnames(df1) <- c('change', 'variable')
+    #Rearrange df as df2 such that the columns become rows (values are the more recent of the two entries)
     df2 <- reshape2::melt(df[ 2, -1 ])
+    #Merge df1 and df2 together (row names, most recent value, change between the today and last)
     df <- merge(df2, df1, on = 'variable', all = TRUE)
     colnames(df) <- c('Variable', 'Count', 'Change')
     idx <- which(df$Change > 0)
@@ -51,6 +50,7 @@ get_summary_table <- function() {
     df$Variable <- str_to_sentence(df$Variable)
     df$Variable <- str_replace_all(df$Variable, ' w ', ' with ')
     df$Variable <- str_replace_all(df$Variable, 'school related', 'school\\-related')
+    #Add in %'s for Current Schools with Cases and Current Schools Closed
     schools_count <- max(covid19_schools_summary$current_total_number_schools)
     df$Percentage <- NA
     df[ 2, 'Percentage' ] <- round(df[ 2, 'Count' ] / schools_count, 4) * 1e2
@@ -66,25 +66,26 @@ get_summary_table <- function() {
     names(df3) <- c("Variable", "Count", "Change", "Percentage")
     df <- rbind(df,df3)
     df <- df[ c(1, 2, 3, 5, 6, 4), ]
-    
+    #Return the table
     df
 }
 
-# last_week_obtain ---------------------------------------------------------
-# Obtains the dates for the previous weeks Monday and Friday
+# last_week_obtain
+#
+# Obtains the dates (Year-Month-Day) for the previous weeks Monday and Friday
 last_week_obtain <- function() {
     theDate <- as.Date(max(covid19_schools_active$reported_date)) - 7
     while(weekdays(theDate) != "Friday"){
         theDate <- theDate + 1
     }
     earlyDate <- theDate - 4
-    #dateString <- paste(format(earlyDate, '%d %B %Y'), "to", format(theDate, '%d %B %Y'))
     df <- list(earlyDate, theDate)
     return(df)
 }
 
-# last_two_weeks_obtain ---------------------------------------------------------
-# Obtains the dates for 2 weeks ago Monday and last weeks Friday
+# last_two_weeks_obtain
+# 
+# Obtains the dates (Year-Month-Day) for 2 weeks ago Monday and last weeks Friday
 last_two_weeks_obtain <- function() {
     theDate <- as.Date(max(covid19_schools_active$reported_date)) - 7
     while(weekdays(theDate) != "Friday"){
@@ -95,10 +96,10 @@ last_two_weeks_obtain <- function() {
     return(df)
 }
 
-#' get_weekly_summary_table
-#' 
-#' generate Weekly summary table
-#' if timeFrame == TRUE, 7 days view, otherwise 14 days view
+# get_weekly_summary_table
+# 
+# generate Weekly summary table
+# similar in function to the daily summary table, but with differences calculated over 7 or 14 days instead of 2
 get_weekly_summary_table <- function(timeFrame) {
     df <- covid19_schools_summary
     idx <- order(df$collected_date)
@@ -110,14 +111,13 @@ get_weekly_summary_table <- function(timeFrame) {
         'current_schools_closed'
     )
     df <- df[ , cn ]
+    #if timeFrame == TRUE, 7 days view, otherwise 14 days view
     if (timeFrame == TRUE) {
         dates <- last_week_obtain()
     }
     if (timeFrame == FALSE) {
-        print("Here we are")
         dates <- last_two_weeks_obtain()
     }
-    #dates <- last_week_obtain()
     
     idx1 <- match(dates[[1]], df[,1])
     idx2 <- match(dates[[2]], df[,1])
@@ -144,9 +144,9 @@ get_weekly_summary_table <- function(timeFrame) {
     df
 }
 
-#get_schools_no_cases
+# get_schools_no_cases
+#
 # return dataframe from school_geocodes with schools that have cases removed from it.
-# Thinking about putting this into data_downloader. Does it have an effect on load time?
 get_schools_no_cases <- function() {
     df <- cases_per_school
     cn <- c(
@@ -160,9 +160,9 @@ get_schools_no_cases <- function() {
     return (df2)
 }
 
-#get_schools_no_cases_20_21
+# get_schools_no_cases_20_21
+# 
 # return dataframe from school_geocodes with schools that have cases removed from it. Data from 2020/2021
-# Thinking about putting this into data_downloader. Does it have an effect on load time?
 get_schools_no_cases_20_21 <- function() {
     df <- cases_per_school_20_21
     cn <- c(
@@ -177,6 +177,7 @@ get_schools_no_cases_20_21 <- function() {
 }
 
 # OVERRIDES --------------------------------------------------------------------
+#CSS style override for navbar_js
 navbar_js <- "@media (max-width: 1325px) {
     .navbar-header {
         float: none;
@@ -232,7 +233,7 @@ ui <- bootstrapPage(
                'COVID-19 School Dashboard', 
                id = 'nav',
                
-               # TAB: COVID-19 Mapper 2021-22 ------------------------------------------
+               # TAB: COVID-19 Mapper 2021-22 ----------------------------------
                tabPanel('Map - 2021-22',
                         div(class='outer',
                             
@@ -315,33 +316,32 @@ ui <- bootstrapPage(
                         ),
                         
                         tags$style(HTML(".js-irs-0 .irs-single, .js-irs-0 .irs-bar-edge, .js-irs-0 .irs-bar {background: teal}")),
-                        # TIMESLIDER
+                        # TIMESLIDER -------------------------------------------
                         uiOutput('timesliderViewer')
                         
                ),
-               # TAB: COVID-19 Mapper 2020-21 ------------------------------------------
+               # TAB: COVID-19 Mapper 2020-21 ----------------------------------
                tabPanel('Map - 2020-21',
                         div(class='outer',
                             
                             # tag: stylesheet ----------------------------------
                             tags$head(includeCSS('styles.css')),
                             
-                            # leaflet: oldmap  --------------------------------
-                            leafletOutput('oldmap_leaflet', width = '100%', height = '100%'),
+                            # leaflet: map20_21  ---------------------------------
+                            leafletOutput('map_leaflet20_21', width = '100%', height = '100%'),
                             
-                            # panel: button: viewOptionsOld
-                            absolutePanel(id = 'viewOptionsOld',
+                            # panel: button: viewOptions20_21 --------------------
+                            absolutePanel(id = 'viewOptions20_21',
                                           class = 'panel panel-default',
                                           top = "0%", 
                                           right = "0%", 
-                                          width = 'auto', 
-                                          #fixed = TRUE,
+                                          width = 'auto',
                                           draggable = FALSE, 
                                           height = 'auto',
-                                          actionButton("getOptionsOld", "Viewing Options", icon("cog"))
+                                          actionButton("getOptions20_21", "Viewing Options", icon("cog"))
                             ),
                             
-                            uiOutput('mapperViewOptionsOld'),
+                            uiOutput('mapperViewOptions20_21'),
                             
                             # panel: controls ----------------------------------
                             absolutePanel(id = 'controls', 
@@ -357,7 +357,7 @@ ui <- bootstrapPage(
                                           tags$style(HTML(".tabbable > .nav > li > a {color:#777777;}")),
                                           h2('Year Summary', align = 'center', style="font-size:200%;"),
                                           
-                                          # cumulative_case_count_text_20_21 ---------
+                                          # cumulative_case_count_text_20_21 ---
                                           h3(textOutput('cumulative_case_count_text_20_21'), align = 'right'),
                                           
                                           # clean_date_reactive_text -----------
@@ -367,22 +367,22 @@ ui <- bootstrapPage(
                             )
                         ),
                         tags$style(HTML(".js-irs-0 .irs-single, .js-irs-0 .irs-bar-edge, .js-irs-0 .irs-bar {background: teal}")),
-                        # TIMESLIDER
-                        uiOutput('timesliderViewerOld')
+                        # TIMESLIDER -------------------------------------------
+                        uiOutput('timesliderViewer20_21')
                ),
                # TAB: Overview and Search --------------------------------------
                tabPanel('Overview and Search',
                         tabsetPanel(
                             tabPanel('2021-2022',
-                                     # cumulative_plot --------------------------------------
+                                     # cumulative_plot -------------------------
                                      h3('Cumulative Case Chart'),
                                      plotlyOutput('cumulative_plot', width = '100%'),
                                      hr(),
-                                     # daily_summary_2_dt -----------------------------------
+                                     # daily_summary_2_dt ----------------------
                                      h3('Daily Summary', align = 'left'),
                                      div(tableOutput('daily_summary_2_dt'), style = 'font-size: small; width: 100%'),
                                      hr(),
-                                     # weeklyRadio2 -----------------------------------
+                                     # weeklyRadio2 ----------------------------
                                      h3('Weekly Summary', align = 'left'),
                                      div(
                                          radioButtons(
@@ -392,21 +392,21 @@ ui <- bootstrapPage(
                                              inline = TRUE
                                          ), align = "right"),
                                      
-                                     #whichWeekView2 ----------
+                                     #whichWeekView2 ---------------------------
                                      uiOutput("whichWeekView2"),
                                      hr(),
-                                     # school_details_dt ------------------------------------
+                                     # school_details_dt -----------------------
                                      h3('Search Function and Table', align = 'left'),
                                      div('Search schools, boards, municipalities for confirmed cases of COVID-19.', width = '100%', align = 'left'),
                                      br(),
                                      div(DTOutput('school_details_dt'), style = 'font-size: small; width: 100%')
                             ),
                             tabPanel('2020-2021',
-                                     # cumulative_plot_20_21 --------------------------------------
+                                     # cumulative_plot_20_21 -------------------
                                      h3('Cumulative Case Chart'),
                                      plotlyOutput('cumulative_plot_20_21', width = '100%'),
                                      hr(),
-                                     # school_details_dt_20_21 ------------------------------------
+                                     # school_details_dt_20_21 -----------------
                                      h3('Search Function and Table', align = 'left'),
                                      div('Search schools, boards, municipalities for confirmed cases of COVID-19.', width = '100%', align = 'left'),
                                      br(),
@@ -520,92 +520,6 @@ ui <- bootstrapPage(
                         p('Source code for this site can be found ', a(href = 'https://github.com/connor-cozens/covid19-school-dashboard', 'here', target = '_blank'))
                ),
                
-               # TAB: Plots ----------------------------------------------------
-               # tabPanel('Plots',
-               #          
-               #          sidebarLayout(
-               #              sidebarPanel(
-               #                  sliderInput("minimum_date",
-               #                              "Minimum date:",
-               #                              min = as.Date(cv_min_date,"%Y-%m-%d"),
-               #                              max = as.Date(current_date,"%Y-%m-%d"),
-               #                              value=as.Date(cv_min_date),
-               #                              timeFormat="%d %b")
-               #                  
-               #              ),
-               #              
-               #              mainPanel(
-               #                  tabsetPanel(
-               #                      
-               #                      tabPanel('Cumulative school-related cases', 
-               #                               br(), 
-               #                               plotlyOutput('school_related_cases_details_plot')),
-               #                      
-               #                      tabPanel('New school-related cases', 
-               #                               br(), 
-               #                               plotlyOutput('school_related_new_cases_details_plot')),
-               #                      
-               #                      tabPanel('Active school-related cases by municipality', 
-               #                               br(), 
-               #                               plotlyOutput('active_cases_by_municipality_plot')),
-               #                      
-               #                      tabPanel('Active school-related cases by school board', 
-               #                               br(), 
-               #                               plotlyOutput('active_cases_by_board_plot'))
-               #                      
-               #                      # tabPanel('Schools with cases', 
-               #                      #          br(), 
-               #                      #          plotlyOutput('schools_with_cases_plot'))
-               #                      
-               #                  )
-               #              )
-               #          )
-               # ),
-               
-               # TAB: Risk assessment ------------------------------------------
-               # tabPanel('Risk assessment',
-               # 
-               #          # h3('Reducing COVID-19 Transmission Upon School Reopening: Identifying High-Risk Neighbourhoods'),
-               #          # ('Prepared by: Toronto Public Health'),
-               #          # br(),
-               #          # ('Prepared date: August 20, 2020'),
-               #          # br(),
-               #          # ('Prepared for the Toronto Catholic District School Board (TCDSB)'),
-               #          # br(),
-               #          # h3('Background'),
-               #          # p('Toronto elementary schools are set to re-open for in-person learning in September. This document outlines a method that can be used to inform decisions about areas of the city to prioritize for mitigation strategies in order to reduce the spread of COVID-19. Neighbourhood-level data is used to produce a risk score based on case information in combination with select socioeconomic indicators. This analysis can be used in conjunction with other considerations when deciding about COVID-19 risk mitigation strategies in schools. Since the evidence around COVID-19 is ever-changing, our method allows for flexibility and continuous updates based on available data.'),
-               #          # h3('Methods'),
-               #          # p('A composite index score was generated in order to rank neighbourhoods in terms of their risk for increased COVID-19 transmission when schools reopen.'),
-               #          # h4('Rankings were generated using the following steps:'),
-               #          # tags$ol(
-               #          #     tags$li('For each neighbourhood with TCDSB schools, confirmed/probable COVID-19 case counts were obtained from May 29 (the date where widespread testing was announced in the province) to Aug 16, 2020 (most recent available data). Cases associated with outbreaks in long-term care or retirement homes among individuals aged 65+ were excluded from case rates, as they represent institutionalized individuals. Rates proportionate to neighbourhood population size were used. Select sociodemographic indicators were obtained using Census 2016 data (Table 1).'),
-               #          #     tags$li('To generate the risk score, each variable was assigned a weight. Case rates were assigned a higher weight than other variables. Effects of each socioeconomic indicator on COVID-19 transmission are difficult to tease out and therefore they have been assigned the same weight.'),
-               #          #     tags$li('Indicators within each neighbourhood were then multiplied by the assigned weight to generate a composite score. All neighbourhood scores (unique on neighbourhood level) were then subdivided into quintiles based on percentile score; higher quintiles indicate higher-risk.'),
-               #          #     tags$li('sociodemographic indicators were available at the neighbourhood level only, all schools within the neighbourhood are considered of similar risk.')
-               #          # ),
-               #          # h4('Table 1: Variables used to generate neighbourhood risk scores'),
-               #          #
-               #          # # variables_details_dt ---------------------------------
-               #          # div(DTOutput('variables_details_dt'), style = 'font-size: small; width: 100%'),
-               #          #
-               #          # h3('Results'),
-               #          # p('Note: An initial list for elementary schools was produced on August 17, 2020 that included all case dates and without the additional exclusions indicated in Step 1. Tab B shows the revised table. The "Comparison" tab illustrates the differences between the two.'),
-               # 
-               #          # # risk_assessment_elementary_dt ------------------------
-               #          # h4('Elementary School Risk Assessment'),
-               #          # DTOutput('risk_assessment_elementary_dt'),
-               #          #
-               #          # # risk_assessment_secondary_dt -------------------------
-               #          # h4('Secondary School Risk Assessment'),
-               #          # DTOutput('risk_assessment_secondary_dt')
-               # 
-               #          # risk_assessment_secondary_dt -------------------------
-               #          h3('Neighborhood Risk Assessment'),
-               #          br(),
-               #          DTOutput('risk_assessment_neighborhood_dt')
-               # 
-               # ),
-               
                # TAB: About this site ------------------------------------------
                tabPanel('About This Site',
                         absolutePanel(id = 'contents', 
@@ -639,7 +553,7 @@ ui <- bootstrapPage(
                                       )
                         ),
                         tags$div(),
-                        # Overview -----
+                        # Overview ---------------------------------------------
                         div(
                             h3(id = "Top of Page", 'COVID-19 SCHOOL DASHBOARD KEY AIMS & INFORMATION'),
                             p(a(href = 'http://covid19schooldashboard.com', 'covid19schooldashboard.com', target = '_blank'), ' reports and maps confirmed school-related cases of COVID-19 in publicly funded elementary and secondary schools in Ontario, Canada, and connects this to data on school social background characteristics (school-level demographic data).'),
@@ -670,7 +584,7 @@ ui <- bootstrapPage(
                             p('There may be some discrepancies in school demographic data if they are in the official dataset. ', a(href = 'covid19schooldashboard@gmail.com', 'Please report them to us to fix.', target = '_blank')),
                             hr()
                         ),
-                        # Policy -----
+                        # Policy -----------------------------------------------
                         div(
                             h3(id = "Policy Context", 'POLICY CONTEXT'),
                             p('Pandemic-related school closures in Ontario affect over 2 million elementary and secondary school students. The situation for students and schools is rapidly evolving in Ontario.'),
@@ -691,7 +605,7 @@ ui <- bootstrapPage(
                             p(id = "subnote", 'https://news.ontario.ca/en/release/61106/ontario-moves-schools-to-remote-learning-following-spring-break'),
                             br()
                         ),
-                        # News by Year -----
+                        # News by Year -----------------------------------------
                         div(
                             h4(id = "2021-2022", '2021-22 School Year'),
                             p('Schools operating on a modified/balanced calendar opened as early as 4 August 2021. According to board. The majority of schools opened according to regular board-level conventions from 7 to 10 September 2021. All schools should have been opened as on 13 September 2021.'),
@@ -719,7 +633,7 @@ ui <- bootstrapPage(
                             p('The first school closure announcement in Ontario was issued on 12 March 2020 for an initial period from 14 March to 4 April 2020. This compelled all publicly funded elementary and secondary schools to close. Public school closures were extended another three times – first until 4 May, then 31 May, and finally until the end of June 2020.'),
                             hr()
                         ),
-                        # Site Navigation -----
+                        # Site Navigation --------------------------------------
                         div(
                             h3(id = "Site Navigation", 'HOW TO NAVIGATE THE SITE'),
                             h4('Map 2021-22 - Affected Ontario Schools Tab'),
@@ -743,35 +657,14 @@ ui <- bootstrapPage(
                                 tags$li('proportion of students whose first language is not French;'), 
                                 tags$li('proportion of students who are immigrants from a non-English country;'),
                                 tags$li('proportion of students who are immigrants from a non-French country;'),
-                                # tags$li('proportion of students whose parents have some university education')
                             ),
-                            # p('View the Data Dictionary for definitions of these indicators.'),
                             br(),
                             h5(('Quick view summary pane')),
                             tags$ul(
-                                # tags$li(tags$i('Cumulative Case Chart:'), ' Shows the total number of cumulative school-related cases in Ontario and disaggregated to show cumulative school-related student cases, cumulative school-related staff cases, and unidentified cases. "Unidentified cases" is used by the Ministry of Education to refer to the following: "In some instances, the type of case has not been identified as either student/child or staff/provider/partner due to privacy considerations. These "individuals" only include unidentified students/children or staff/providers/partners and not visitors or parents. These cases will be tracked as "individuals" but not included in the "student/child" or "staff/provider" columns.'),
                                 tags$li(em('Daily Summary:'), ' Summarizes cumulative school-related cases, new total school-related cases, current schools with cases (and as % of schools in Ontario), and current schools closed (and as % of schools in Ontario). It also shows the count and change (+/-) from the most current date with data to the date immediately preceding. No changes will be seen on or between weekend dates (i.e., on Saturday and Sunday and between Friday and Saturday; Saturday and Sunday) or public holidays since data are only released by the Ministry on weekdays.'),
                                 tags$li(em('Weekly Summary:'), 'Summarizes cumulative school-related cases, current schools with cases (and as % of schools in Ontario), and current schools closed (and as % of schools in Ontario) for 7- or 14-day period from last known data reporting date in the Ministry of Education dataset.')
                             ),
                             br(),
-                            # h4('Plots Tab'),
-                            # p('These graphs provide an indication of the evolution of school-related cases over time. The first school-related cases appeared in the dataset on 10 September 2020. Currently, there are four graphs.'),
-                            # br(),
-                            # h5(('Cumulative school-related cases')),
-                            # p('Shows all cumulative school-related cases, including resolved cases in Ontario and the breakdown of student cases, staff, and unidentified individual cases.'),
-                            # br(),
-                            # h5(('New school-related cases')),
-                            # p('Shows all new school-related cases in Ontario, and the breakdown of student, staff, and unidentified cases.'),
-                            # br(),
-                            # h5(('Active school-related cases by municipality')),
-                            # p('Shows the top 10 municipalities with active school-related cases.'),
-                            # br(),
-                            # h5(('Active school-related cases by school board')),
-                            # p('Shows the top 10 school boards with active school-related cases.'),
-                            # br(),
-                            # h5(('Slider')),
-                            # p('Keep the slider to the minimum date (10 Sept) to see the full evolution of cases up to the most current date for every graph.'),
-                            # br(),
                             h4('Overview and Search Tab'),
                             h5(('Cumulative Case Chart')),
                             p('Shows the total number of cumulative school-related cases in Ontario, and disaggregated to show cumulative school-related student cases, cumulative school-related staff cases, and unidentified cases. "Unidentified cases" is used by the Ministry of Education to refer to the following: "In some instances, the type of case has not been identified as either student/child or staff/provider/partner due to privacy considerations. These "individuals" only include unidentified students/children or staff/providers/partners and not visitors or parents. These cases will be tracked as "individuals" but not included in the "student/child" or "staff/provider" columns.'),
@@ -803,9 +696,6 @@ ui <- bootstrapPage(
                             p('Lists definitions of terms and variables as defined in the dataset and on COVID-19 cases in schools and child care centres Ontario Ministry of Education website. '),
                             br(),
                             h4('Data Sources and Source Code Tab'),
-                            # h5(('Data Dictionary')),
-                            # p('Lists all definitions of variables and terms used. Extracted from data dictionaries of original datasets sourced.'),
-                            # br(),
                             h5(('Data sources [Currently 2020-21. To be updated for 2021-22]')),
                             p('Lists all publicly available data sources used to generate the COVID-19 School Dashboard.'),
                             br(),
@@ -813,7 +703,7 @@ ui <- bootstrapPage(
                             p('Source code for this site can be found ', a(href = 'https://github.com/connor-cozens/covid19-school-dashboard', 'here', target = "_blank"), 'To be updated foe 2021-22'),
                             hr()
                         ),
-                        # Future Developments -----
+                        # Future Developments ----------------------------------
                         div(
                             h3(id = "Future Developments", 'COMING SOON'),
                             p('The COVID-19 School Dashboard will soon add more indicators. The site has been published to balance the need for expedience in view of the need for timely public information given the effects of COVID-19 on education.'),
@@ -828,7 +718,7 @@ ui <- bootstrapPage(
                             p('We invite users to suggest further indicators for integration. Further web optimization, dynamic display features, and mobile device optimization are also planned.'),
                             hr()
                         ),
-                        # Authorship -----
+                        # Authorship -------------------------------------------
                         div(
                             h3(id = "Authorship", 'AUTHORSHIP, ATTRIBUTIONS, CITATION'),
                             h4('Cite the COVID-19 School Dashboard as:'),
@@ -944,7 +834,7 @@ ui <- bootstrapPage(
                    p(a("CTV London, Ontario - \'New website helps simplify and track school COVID-19 case data\'", href='https://london.ctvnews.ca/new-website-helps-simplify-and-track-school-covid-19-case-data-1.5201172', target = '_blank'))
                ),
                
-               # TAB: Our Team ------------------------------------------
+               # TAB: Our Team -------------------------------------------------
                tabPanel('Our Team',
                         tags$div(),
                         h3('THE TEAM AND CONTACT'),
@@ -1011,25 +901,39 @@ ui <- bootstrapPage(
 
 server <- function(input, output, session) {
     
-    # panel: button: viewOptions
+    # panel: button: viewOptions -----------------------------------------------
     
+    # Variables for the 2022-2021 map view tab
+    
+    #Is the viewing options menu open?
     viewOptionsOpen <- FALSE
+    #Are we currently viewing schools with cases? (If timeslider is closed)
     schoolsWithCases <- TRUE
+    #Are we currently viewing schools without cases? (If timeslider is closed)
     schoolsWithoutCases <- FALSE
+    #Is the timeslider currently open for this tab
     vTimeSlider <- FALSE
+    #Suppress the menu's opening for the first time counting as 'ticking' a checkbox in the menu
     suppressFirstResponse1 <- TRUE
     suppressFirstResponse2 <- TRUE
     suppressFirstResponse3 <- TRUE
     
-    viewOptionsOpenOld <- FALSE
-    schoolsWithCasesOld <- TRUE
-    schoolsWithoutCasesOld <- FALSE
-    vTimeSliderOld <- FALSE
-    suppressFirstResponse1Old <- TRUE
-    suppressFirstResponse2Old <- TRUE
-    suppressFirstResponse3Old <- TRUE
+    # Variables for the 2021-2020 map view tab
     
-    # observe: getOptions
+    #Is the viewing options menu open?
+    viewOptionsOpen20_21 <- FALSE
+    #Are we currently viewing schools with cases? (If timeslider is closed)
+    schoolsWithCases20_21 <- TRUE
+    #Are we currently viewing schools without cases? (If timeslider is closed)
+    schoolsWithoutCases20_21 <- FALSE
+    #Is the timeslider currently open for this tab
+    vTimeSlider20_21 <- FALSE
+    #Suppress the menu's opening for the first time counting as 'ticking' a checkbox in the menu
+    suppressFirstResponse1_20_21 <- TRUE
+    suppressFirstResponse2_20_21 <- TRUE
+    suppressFirstResponse3_20_21 <- TRUE
+    
+    # Observes the button for getting the viewing options menu (2022-2021)
     observeEvent(input$getOptions, {
         viewOptionsOpen <<- !viewOptionsOpen #flip when button is pressed
         if (!viewOptionsOpen){
@@ -1059,6 +963,7 @@ server <- function(input, output, session) {
         }
     })
     
+    #Update Map Markers for the 2022-2021 map
     updateMarkers <- function () {
         leafletProxy('basemap_leaflet') %>%
             clearMarkers()
@@ -1106,7 +1011,7 @@ server <- function(input, output, session) {
                     data = cases_per_school, 
                     lng = ~lon, 
                     lat = ~lat, 
-                    radius = ~(cases_per_school) * 2, # ~(cases_per_school)^(1/5), 
+                    radius = ~(cases_per_school) * 2,
                     weight = 1, 
                     color = '#d62728',
                     fillOpacity = 0.3, 
@@ -1123,7 +1028,6 @@ server <- function(input, output, session) {
                                     cases_per_school$non_french, 
                                     cases_per_school$from_non_french, 
                                     cases_per_school$special_education,
-                                    #cases_per_school$some_university, 
                                     cases_per_school$cases_per_school,
                                     cases_per_school$cases_per_school_staff,
                                     cases_per_school$cases_per_school_student,
@@ -1134,6 +1038,7 @@ server <- function(input, output, session) {
         }
     }
     
+    #Observes the activity for Mapper2022-2021 "Schools With Cases" option
     observeEvent(input$visOp1,{
         if (!suppressFirstResponse1 && !input$visTS){
             if (!input$visOp1){
@@ -1150,6 +1055,7 @@ server <- function(input, output, session) {
         }
     }, ignoreInit = TRUE)
     
+    #Observes the activity for Mapper2022-2021 "Schools Without Cases" option
     observeEvent(input$visOp2,{
         if (!suppressFirstResponse2 && !input$visTS){
             if (!input$visOp2){
@@ -1167,17 +1073,17 @@ server <- function(input, output, session) {
     }, ignoreInit = TRUE)
     
     
-    # observe: getOptionsOld
-    observeEvent(input$getOptionsOld, {
-        viewOptionsOpenOld <<- !viewOptionsOpenOld #flip when button is pressed
-        if (!viewOptionsOpenOld){
-            output$mapperViewOptionsOld <- renderUI({
+    # Observes the button for getting the viewing options menu (2021-2020)
+    observeEvent(input$getOptions20_21, {
+        viewOptionsOpen20_21 <<- !viewOptionsOpen20_21 #flip when button is pressed
+        if (!viewOptionsOpen20_21){
+            output$mapperViewOptions20_21 <- renderUI({
                 #Render nothing in this spot
             })
         }
         else{
-            output$mapperViewOptionsOld <- renderUI({
-                absolutePanel(id = 'optionsOld',
+            output$mapperViewOptions20_21 <- renderUI({
+                absolutePanel(id = 'options20_21',
                               class = 'panel panel-default',
                               top = "5%", 
                               right = "0%", 
@@ -1187,21 +1093,21 @@ server <- function(input, output, session) {
                               style = "padding-left: 1%;
                               border-radius: 25px;",
                               
-                              checkboxInput("visOp1Old", "Schools with Cases", value = schoolsWithCasesOld),
-                              checkboxInput("visOp2Old", "Schools without Cases", value = schoolsWithoutCasesOld),
-                              checkboxInput("visTSOld", "View Timeslider, Case over time", value = vTimeSliderOld)
+                              checkboxInput("visOp1_20_21", "Schools with Cases", value = schoolsWithCases20_21),
+                              checkboxInput("visOp2_20_21", "Schools without Cases", value = schoolsWithoutCases20_21),
+                              checkboxInput("visTS20_21", "View Timeslider, Case over time", value = vTimeSlider20_21)
                 )
             })
         }
     })
     
-
-    updateMarkersOld <- function () {
-        leafletProxy('oldmap_leaflet') %>%
+    #Update Map Markers for the 2021-2020 map
+    updateMarkers20_21 <- function () {
+        leafletProxy('map_leaflet20_21') %>%
             clearMarkers()
         
-        if (input$visOp2Old){
-            leafletProxy(mapId = 'oldmap_leaflet') %>%
+        if (input$visOp2_20_21){
+            leafletProxy(mapId = 'map_leaflet20_21') %>%
                 addCircleMarkers( 
                     data = get_schools_no_cases_20_21(), 
                     lng = ~longitude, 
@@ -1227,8 +1133,8 @@ server <- function(input, output, session) {
                         style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
                         textsize = '15px', direction = 'auto'))
         }
-        if (input$visOp1Old){
-            leafletProxy('oldmap_leaflet') %>%
+        if (input$visOp1_20_21){
+            leafletProxy('map_leaflet20_21') %>%
                 addCircleMarkers(
                     data = cases_per_school_20_21, 
                     lng = ~lon, 
@@ -1237,7 +1143,7 @@ server <- function(input, output, session) {
                     weight = 1, 
                     color = '#b00000',
                     fillOpacity = 1)
-            leafletProxy('oldmap_leaflet') %>%
+            leafletProxy('map_leaflet20_21') %>%
                 addCircleMarkers(
                     data = cases_per_school_20_21, 
                     lng = ~lon, 
@@ -1269,45 +1175,48 @@ server <- function(input, output, session) {
         }
     }
     
-    observeEvent(input$visOp1Old,{
-        if (!suppressFirstResponse1Old && !input$visTSOld){
-            if (!input$visOp1Old){
-                schoolsWithCasesOld <<- FALSE
-                updateMarkersOld()
+    #Observes the activity for Mapper2021-2020 "Schools With Cases" option
+    observeEvent(input$visOp1_20_21,{
+        if (!suppressFirstResponse1_20_21 && !input$visTS20_21){
+            if (!input$visOp1_20_21){
+                schoolsWithCases20_21 <<- FALSE
+                updateMarkers20_21()
             }
             else {
-                schoolsWithCasesOld <<- TRUE
-                updateMarkersOld()
+                schoolsWithCases20_21 <<- TRUE
+                updateMarkers20_21()
             }
         }
         else {
-            suppressFirstResponse1Old <<- FALSE
+            suppressFirstResponse1_20_21 <<- FALSE
         }
     }, ignoreInit = TRUE)
     
-    observeEvent(input$visOp2Old,{
-        if (!suppressFirstResponse2Old && !input$visTSOld){
-            if (!input$visOp2Old){
-                schoolsWithoutCasesOld <<- FALSE
-                updateMarkersOld()
+    #Observes the activity for Mapper2021-2020 "Schools Without Cases" option
+    observeEvent(input$visOp2_20_21,{
+        if (!suppressFirstResponse2_20_21 && !input$visTS20_21){
+            if (!input$visOp2_20_21){
+                schoolsWithoutCases20_21 <<- FALSE
+                updateMarkers20_21()
             }
             else {
-                schoolsWithoutCasesOld <<- TRUE
-                updateMarkersOld()
+                schoolsWithoutCases20_21 <<- TRUE
+                updateMarkers20_21()
             }
         }
         else {
-            suppressFirstResponse2Old <<- FALSE
+            suppressFirstResponse2_20_21 <<- FALSE
         }
     }, ignoreInit = TRUE)
     
+    #Observes the activity for Mapper2022-2021 "View Timeslider" option
     observeEvent(input$visTS,{
         if (!suppressFirstResponse3){
             if (!input$visTS){
                 vTimeSlider <<- FALSE
-                #make timeslider go away
+                #Remove timeslider
                 output$timesliderViewer <- renderUI({
-                    
+                    #Render nothing here
                 })
                 updateMarkers()
             }
@@ -1331,40 +1240,38 @@ server <- function(input, output, session) {
         
     })
     
-    observeEvent(input$visTSOld,{
-        if (!suppressFirstResponse3Old){
-            if (!input$visTSOld){
-                vTimeSliderOld <<- FALSE
-                #make timeslider go away
-                output$timesliderViewerOld <- renderUI({
-                    
+    #Observes the activity for Mapper2022-2021 "View Timeslider" option
+    observeEvent(input$visTS20_21,{
+        if (!suppressFirstResponse3_20_21){
+            if (!input$visTS20_21){
+                vTimeSlider20_21 <<- FALSE
+                #Remove the timeslider
+                output$timesliderViewer20_21 <- renderUI({
+                    #Render nothing here
                 })
-                updateMarkersOld()
+                updateMarkers20_21()
             }
             else{
-                vTimeSliderOld <<- TRUE
-                updateCheckboxInput(session, "visOp1Old", value = FALSE)
-                updateCheckboxInput(session, "visOp2Old", value = FALSE)
+                vTimeSlider20_21 <<- TRUE
+                updateCheckboxInput(session, "visOp1_20_21", value = FALSE)
+                updateCheckboxInput(session, "visOp2_20_21", value = FALSE)
                 #Make timeslider appear
-                output$timesliderViewerOld <- renderUI({
+                output$timesliderViewer20_21 <- renderUI({
                     div(
                         p("Select a date to view data reported at that time:", style = "color:white;font:Helvetica;padding-left:10px;padding-top:15px;"),
-                        sliderInput("obsOld", label = NULL,
+                        sliderInput("obs20_21", label = NULL,
                                     min = as.Date("2020-09-10","%Y-%m-%d"), max = as.Date("2021-04-14","%Y-%m-%d"), value = as.Date("2020-09-10"), timeFormat="%Y-%m-%d", width = '95%'
                         ), style = "position:absolute;bottom:0;left:0;right:0;background-color:#d34615;padding-left:3%")
                 })
             }
         }
         else{
-            suppressFirstResponse3Old <<- FALSE
+            suppressFirstResponse3_20_21 <<- FALSE
         }
     })
     
+    #Observes activity (movement) on the timeslider and adjusts data being viewed accordingly (2022-2021)
     observeEvent(input$obs,{
-        #for (i in 0:nrow(covid19_schools_active) - 1){
-        #    covid19_schools_active_with_demographics$confirmed_student_cases[i] = as.integer(covid19_schools_active$confirmed_student_cases[i])
-        #}
-        #df <- covid19_schools_active_with_demographics_most_recent[ , c(2, 12, 4, 15, 6:8) ]
         geo_query_str <- sprintf('%s,%s,Ontario,Canada', 
                                  str_trim(covid19_schools_active_with_demographics$school.name), 
                                  covid19_schools_active_with_demographics$municipality)
@@ -1379,9 +1286,7 @@ server <- function(input, output, session) {
             selected_date = selected_date + increment
             cases_pst <-  subset(covid19_schools_active_with_demographics, collected_date == selected_date)
         }
-        #cases_pst$geo_query_str <- NULL
         cases_pst[,"geo_query_str"] <- NA
-        #cases_pst2 <- cases_pst
         for(i in 0:nrow(cases_pst) - 1){
             cases_pst$geo_query_str[i] = sprintf('%s,%s,Ontario,Canada', 
                                                  str_trim(cases_pst$school[i]), 
@@ -1401,7 +1306,6 @@ server <- function(input, output, session) {
                 color = '#d62728',
                 fillOpacity = 0.3,
                 label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Students receiving Special Education Services: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/></div>', 
-                #label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Students receiving Special Education Services: %s%%<br/><strong>Zero Confirmed Cases</strong></div>', 
                                 cases_pst$school.name, 
                                 cases_pst$city, 
                                 cases_pst$school.level, 
@@ -1426,63 +1330,58 @@ server <- function(input, output, session) {
         
     })
     
-    observeEvent(input$obsOld,{
-        #for (i in 0:nrow(covid19_schools_active) - 1){
-        #    covid19_schools_active_with_demographics$confirmed_student_cases[i] = as.integer(covid19_schools_active$confirmed_student_cases[i])
-        #}
-        #df <- covid19_schools_active_with_demographics_most_recent[ , c(2, 12, 4, 15, 6:8) ]
+    #Observes activity (movement) on the timeslider and adjusts data being viewed accordingly (2021-2020)
+    observeEvent(input$obs20_21,{
         geo_query_str <- sprintf('%s,%s,Ontario,Canada', 
                                  str_trim(covid19_schools_active_with_demographics_20_21$school.name), 
                                  covid19_schools_active_with_demographics_20_21$municipality)
         
-        selected_date <- input$obsOld
-        cases_pst_old <-  subset(covid19_schools_active_with_demographics_20_21, collected_date == selected_date)
+        selected_date <- input$obs20_21
+        cases_pst_20_21 <-  subset(covid19_schools_active_with_demographics_20_21, collected_date == selected_date)
         increment <- 1 #If we don't have any data from this date, then move forward until we get some
-        while(nrow(cases_pst_old) == 0){
+        while(nrow(cases_pst_20_21) == 0){
             if (selected_date >= as.Date("2021-04-14")){
                 increment = -1 #If we reach the furthest possible date and have no data to see, go backwards until we do
             }
             selected_date = selected_date + increment
-            cases_pst_old <-  subset(covid19_schools_active_with_demographics_20_21, collected_date == selected_date)
+            cases_pst_20_21 <-  subset(covid19_schools_active_with_demographics_20_21, collected_date == selected_date)
         }
-        #cases_pst$geo_query_str <- NULL
-        cases_pst_old[,"geo_query_str"] <- NA
-        #cases_pst2 <- cases_pst
-        for(i in 0:nrow(cases_pst_old) - 1){
-            cases_pst_old$geo_query_str[i] = sprintf('%s,%s,Ontario,Canada', 
-                                                 str_trim(cases_pst_old$school[i]), 
-                                                 cases_pst_old$municipality[i])
+        cases_pst_20_21[,"geo_query_str"] <- NA
+        for(i in 0:nrow(cases_pst_20_21) - 1){
+            cases_pst_20_21$geo_query_str[i] = sprintf('%s,%s,Ontario,Canada', 
+                                                 str_trim(cases_pst_20_21$school[i]), 
+                                                 cases_pst_20_21$municipality[i])
         }
         
-        leafletProxy('oldmap_leaflet') %>%
+        leafletProxy('map_leaflet20_21') %>%
             clearMarkers()
         
-        leafletProxy(mapId = 'oldmap_leaflet', session = session) %>%
+        leafletProxy(mapId = 'map_leaflet20_21', session = session) %>%
             addCircleMarkers( 
-                data = cases_pst_old, 
-                lng = cases_pst_old$longitude, 
-                lat = cases_pst_old$latitude, 
-                radius = cases_pst_old$total_confirmed_cases * 2,
+                data = cases_pst_20_21, 
+                lng = cases_pst_20_21$longitude, 
+                lat = cases_pst_20_21$latitude, 
+                radius = cases_pst_20_21$total_confirmed_cases * 2,
                 weight = 1, 
                 color = '#d62728',
                 fillOpacity = 0.3, 
                 label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Parents have no university education: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/></div>', 
-                                cases_pst_old$school.name, 
-                                cases_pst_old$city, 
-                                cases_pst_old$school.level, 
-                                cases_pst_old$board.name, 
-                                cases_pst_old$school.language, 
-                                cases_pst_old$enrolment,
-                                cases_pst_old$percentage.of.school.aged.children.who.live.in.low.income.households, 
-                                cases_pst_old$percentage.of.students.whose.first.language.is.not.english, 
-                                cases_pst_old$percentage.of.students.who.are.new.to.canada.from.a.non.english.speaking.country, 
-                                cases_pst_old$percentage.of.students.whose.first.language.is.not.french, 
-                                cases_pst_old$percentage.of.students.who.are.new.to.canada.from.a.non.french.speaking.country,
-                                cases_pst_old$percentage.of.students.whose.parents.have.some.university.education, 
-                                cases_pst_old$total_confirmed_cases,
-                                cases_pst_old$confirmed_staff_cases,
-                                cases_pst_old$confirmed_student_cases,
-                                cases_pst_old$confirmed_unidentified_cases) %>% 
+                                cases_pst_20_21$school.name, 
+                                cases_pst_20_21$city, 
+                                cases_pst_20_21$school.level, 
+                                cases_pst_20_21$board.name, 
+                                cases_pst_20_21$school.language, 
+                                cases_pst_20_21$enrolment,
+                                cases_pst_20_21$percentage.of.school.aged.children.who.live.in.low.income.households, 
+                                cases_pst_20_21$percentage.of.students.whose.first.language.is.not.english, 
+                                cases_pst_20_21$percentage.of.students.who.are.new.to.canada.from.a.non.english.speaking.country, 
+                                cases_pst_20_21$percentage.of.students.whose.first.language.is.not.french, 
+                                cases_pst_20_21$percentage.of.students.who.are.new.to.canada.from.a.non.french.speaking.country,
+                                cases_pst_20_21$percentage.of.students.whose.parents.have.some.university.education, 
+                                cases_pst_20_21$total_confirmed_cases,
+                                cases_pst_20_21$confirmed_staff_cases,
+                                cases_pst_20_21$confirmed_student_cases,
+                                cases_pst_20_21$confirmed_unidentified_cases) %>% 
                     lapply(htmltools::HTML), 
                 labelOptions = labelOptions(
                     style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
@@ -1524,7 +1423,7 @@ server <- function(input, output, session) {
                                                      data = cases_per_school, 
                                                      lng = ~lon, 
                                                      lat = ~lat, 
-                                                     radius = ~(cases_per_school) * 2, # ~(cases_per_school)^(1/5), 
+                                                     radius = ~(cases_per_school) * 2, 
                                                      weight = 1, 
                                                      color = '#d62728',
                                                      fillOpacity = 0.3, 
@@ -1541,7 +1440,6 @@ server <- function(input, output, session) {
                                                                      cases_per_school$non_french, 
                                                                      cases_per_school$from_non_french,
                                                                      cases_per_school$special_education,
-                                                                     #cases_per_school$some_university, 
                                                                      cases_per_school$cases_per_school,
                                                                      cases_per_school$cases_per_school_staff,
                                                                      cases_per_school$cases_per_school_student,
@@ -1555,28 +1453,28 @@ server <- function(input, output, session) {
         
     })
     
-    # oldmap_leaflet ----------------------------------------------------------
-    output$oldmap_leaflet <- renderLeaflet({
+    # map_leaflet20_21 ----------------------------------------------------------
+    output$map_leaflet20_21 <- renderLeaflet({
         withProgress(max = 6, 
                      value = 0, 
                      message = 'please wait...', 
                      expr = {
                          incProgress(1, 'loading shapes')
-                         # regenerate the oldmap
+                         # regenerate the 20_21 map
                          # https://geohub.lio.gov.on.ca/datasets/province/data
                          ontario <- readOGR(dsn = 'data/shapefiles', layer = 'PROVINCE')
                          incProgress(1, 'generating map')
-                         oldmap <- leaflet(ontario)
+                         map20_21 <- leaflet(ontario)
                          incProgress(1, 'setting view')
-                         oldmap <- setView(oldmap, lng = -79.7, lat = 44.39, zoom = 8) 
+                         map20_21 <- setView(map20_21, lng = -79.7, lat = 44.39, zoom = 8) 
                          incProgress(1, 'adding polygons')
-                         oldmap <- addPolygons(oldmap, weight = 3, fillColor = '#696969', opacity = 0.5)
+                         map20_21 <- addPolygons(map20_21, weight = 3, fillColor = '#696969', opacity = 0.5)
                          incProgress(1, 'adding tiles')
-                         oldmap <- addProviderTiles(oldmap, providers$Esri.NatGeoWorldMap)
+                         map20_21 <- addProviderTiles(map20_21, providers$Esri.NatGeoWorldMap)
                          
                          # add case data markers
                          incProgress(1, 'adding markers')
-                         oldmap <- addCircleMarkers(oldmap,
+                         map20_21 <- addCircleMarkers(map20_21,
                                                     data = cases_per_school_20_21, 
                                                     lng = ~lon, 
                                                     lat = ~lat, 
@@ -1584,7 +1482,7 @@ server <- function(input, output, session) {
                                                     weight = 1, 
                                                     color = '#b00000',
                                                     fillOpacity = 1)
-                         oldmap <- addCircleMarkers(oldmap, 
+                         map20_21 <- addCircleMarkers(map20_21, 
                                                     data = cases_per_school_20_21, 
                                                     lng = ~lon, 
                                                     lat = ~lat, 
@@ -1613,7 +1511,7 @@ server <- function(input, output, session) {
                                                         style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
                                                         textsize = '15px', direction = 'auto'))
                          
-                         oldmap
+                         map20_21
                      })
         
     })
@@ -1629,7 +1527,6 @@ server <- function(input, output, session) {
                               legend = list(x = 0.1, y = 0.9),
                               xaxis = list(title = 'Collected date'),
                               yaxis = list (title = 'Cumulative cases'))
-        # fig <- config(fig, displayModeBar = FALSE)
         fig
     })
     
@@ -1644,11 +1541,10 @@ server <- function(input, output, session) {
                               legend = list(x = 0.1, y = 0.9),
                               xaxis = list(title = 'Collected date'),
                               yaxis = list (title = 'Cumulative cases'))
-        # fig <- config(fig, displayModeBar = FALSE)
         fig
     })
     
-    # whichWeekView ------------------------------------------------------------
+    # whichWeekView (2022-2021)-------------------------------------------------
     observeEvent(input$weeklyRadio,{
         if (input$weeklyRadio == "7-day view"){
             output$whichWeekView <- renderUI({
@@ -1662,7 +1558,7 @@ server <- function(input, output, session) {
                 )
             })
         }
-        else {
+        else { #14 day view
             output$whichWeekView <- renderUI({
                 div(
                     h6(div('Data reported from'), textOutput('clean_two_weeks_old_date_text'), align = 'right'),
@@ -1676,24 +1572,24 @@ server <- function(input, output, session) {
         }
     })
     
-    # whichWeekView2 ------------------------------------------------------------
+    # whichWeekView2 (2021-2020) -----------------------------------------------
     observeEvent(input$weeklyRadio2,{
         if (input$weeklyRadio2 == "7-day view"){
             output$whichWeekView2 <- renderUI({
                 div(
-                    h6(div('Data reported from'), textOutput('clean_week_old_date_text2'), align = 'right'),
+                    h6(div('Data reported from'), textOutput('clean_week_old_date_text20_21'), align = 'right'),
                     
-                    # weekly_summary_1_dt -----------------
+                    # weekly_summary_4_dt -----------------
                     div(tableOutput('weekly_summary_4_dt'), style = 'font-size: small; width: 100%'),
                     
                     h6('Drag this box to move it', align = 'right')
                 )
             })
         }
-        else {
+        else { #14 day view
             output$whichWeekView2 <- renderUI({
                 div(
-                    h6(div('Data reported from'), textOutput('clean_two_weeks_old_date_text2'), align = 'right'),
+                    h6(div('Data reported from'), textOutput('clean_two_weeks_old_date_text20_21'), align = 'right'),
                     
                     # weekly_summary_2_dt -----------------
                     div(tableOutput('weekly_summary_2_dt'), style = 'font-size: small; width: 100%'),
@@ -1726,6 +1622,7 @@ server <- function(input, output, session) {
     
     # 1 and 4, 2 and 3  have to exist separately because separate tabs can't use them at the same time
     #IE one tab can't be using 1 and another tab be using 1 as well
+    #So different ones for 2022-2021 and 2021-2020
     
     # weekly_summary_3_dt -------------------------------------------------------
     output$weekly_summary_3_dt <- renderTable({
@@ -1762,8 +1659,6 @@ server <- function(input, output, session) {
     
     # school_details_dt_20_21 --------------------------------------------------------
     output$school_details_dt_20_21 <- renderDT({
-        #df <- covid19_schools_active_with_demographics_most_recent[ , c(2, 12, 4, 15, 6:8) ]
-        # Need to fix 2020/2021 data to have the school and board names that fixed filled out
         df <- covid19_schools_active_with_demographics_most_recent_20_21[ , 2:8 ]
         colnames(df) <- str_replace_all(colnames(df), '_', ' ')
         colnames(df) <- str_to_title(colnames(df))
@@ -1812,16 +1707,16 @@ server <- function(input, output, session) {
     
     #Duplicates for logic on separate tabs, two tabs can't be using the same one at the same time!
     
-    # clean_week_old_date_text2 -------------------------------------------------
-    output $clean_week_old_date_text2 <- renderText ({
+    # clean_week_old_date_text20_21 -------------------------------------------------
+    output $clean_week_old_date_text20_21 <- renderText ({
         dates <- last_week_obtain()
         #Cheating on the dates a little bit, but the data is only updated / reported Monday-Friday anyway
         dateString <- paste(format(dates[[1]] - 1, '%d %B %Y'), "to", format(dates[[2]] + 1, '%d %B %Y'))
         dateString
     })
     
-    # clean_two_weeks_old_date_text2 -------------------------------------------------
-    output $clean_two_weeks_old_date_text2 <- renderText ({
+    # clean_two_weeks_old_date_text20_21 -------------------------------------------------
+    output $clean_two_weeks_old_date_text20_21 <- renderText ({
         dates <- last_two_weeks_obtain()
         #Cheating on the dates a little bit, but the data is only updated / reported Monday-Friday anyway
         dateString <- paste(format(dates[[1]] - 1, '%d %B %Y'), "to", format(dates[[2]] + 1, '%d %B %Y'))
@@ -2168,8 +2063,6 @@ server <- function(input, output, session) {
         df <- covid19_schools_active_with_demographics[ , c(1, 2, 12, 4, 15, 6:11, 13, 14, 16:36)]
         idx <- order(df$reported_date, decreasing = TRUE)
         df <- df[ idx, ]
-        #df$board.name <- NULL
-        #df$school.name <- NULL
         colnames(df) <- str_replace_all(colnames(df), '_|\\.', ' ')
         colnames(df) <- str_to_title(colnames(df))
         datatable(
@@ -2438,6 +2331,3 @@ server <- function(input, output, session) {
 
 # RUN THE APPLICATION ----------------------------------------------------------
 shinyApp(ui = ui, server = server)
-
-# DEPENDENCY MANAGEMENT --------------------------------------------------------
-# renv::snapshot()
