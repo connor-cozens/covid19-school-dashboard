@@ -18,7 +18,7 @@ source('data_downloader.R')
 # get_summary_table
 #
 # generate Daily summary table
-get_summary_table <- function() {
+get_summary_table <- function(givenDate) {
     df <- covid19_schools_summary
     idx <- order(df$collected_date)
     df <- df[ idx, ]
@@ -31,7 +31,12 @@ get_summary_table <- function() {
     )
     #Take only the columns outlined in cn from covid19_schools_summary
     df <- df[ , cn ]
-    idx <- which(df$collected_date <= as.Date(now()))
+    if (givenDate == 0){
+        idx <- which(df$collected_date <= as.Date(now()))
+    }
+    else{
+        idx <- which(df$collected_date <= givenDate)
+    }
     idx <- max(idx)
     #Take only the 2 most recently dated rows from df, the dataframe
     df <- df[ (idx - 1):idx, ]
@@ -73,26 +78,44 @@ get_summary_table <- function() {
 # last_week_obtain
 #
 # Obtains the dates (Year-Month-Day) for the previous weeks Monday and Friday
-last_week_obtain <- function() {
-    theDate <- as.Date(max(covid19_schools_active$reported_date)) - 7
-    while(weekdays(theDate) != "Friday"){
-        theDate <- theDate + 1
+last_week_obtain <- function(givenDate) {
+    if (givenDate == 0){
+        theDate <- as.Date(max(covid19_schools_active$reported_date)) - 7
+        while(weekdays(theDate) != "Friday"){
+            theDate <- theDate + 1
+        }
+        earlyDate <- theDate - 4
+        df <- list(earlyDate, theDate)
     }
-    earlyDate <- theDate - 4
-    df <- list(earlyDate, theDate)
+    else{
+        while(weekdays(givenDate) != "Friday"){
+            givenDate <- givenDate + 1
+        }
+        earlyDate <- givenDate - 4
+        df <- list(earlyDate, givenDate)
+    }
     return(df)
 }
 
 # last_two_weeks_obtain
 # 
 # Obtains the dates (Year-Month-Day) for 2 weeks ago Monday and last weeks Friday
-last_two_weeks_obtain <- function() {
-    theDate <- as.Date(max(covid19_schools_active$reported_date)) - 7
-    while(weekdays(theDate) != "Friday"){
-        theDate <- theDate + 1
+last_two_weeks_obtain <- function(givenDate) {
+    if (givenDate == 0){
+        theDate <- as.Date(max(covid19_schools_active$reported_date)) - 7
+        while(weekdays(theDate) != "Friday"){
+            theDate <- theDate + 1
+        }
+        earlyDate <- theDate - 11
+        df <- list(earlyDate, theDate)
     }
-    earlyDate <- theDate - 11
-    df <- list(earlyDate, theDate)
+    else{
+        while(weekdays(givenDate) != "Friday"){
+            givenDate <- givenDate + 1
+        }
+        earlyDate <- givenDate - 11
+        df <- list(earlyDate, givenDate)
+    }
     return(df)
 }
 
@@ -100,7 +123,7 @@ last_two_weeks_obtain <- function() {
 # 
 # generate Weekly summary table
 # similar in function to the daily summary table, but with differences calculated over 7 or 14 days instead of 2
-get_weekly_summary_table <- function(timeFrame) {
+get_weekly_summary_table <- function(timeFrame, givenDate) {
     df <- covid19_schools_summary
     idx <- order(df$collected_date)
     df <- df[ idx, ]
@@ -113,10 +136,10 @@ get_weekly_summary_table <- function(timeFrame) {
     df <- df[ , cn ]
     #if timeFrame == TRUE, 7 days view, otherwise 14 days view
     if (timeFrame == TRUE) {
-        dates <- last_week_obtain()
+        dates <- last_week_obtain(givenDate)
     }
     if (timeFrame == FALSE) {
-        dates <- last_two_weeks_obtain()
+        dates <- last_two_weeks_obtain(givenDate)
     }
     
     idx1 <- match(dates[[1]], df[,1])
@@ -1219,6 +1242,40 @@ server <- function(input, output, session) {
                     #Render nothing here
                 })
                 updateMarkers()
+                
+                #Update daily summary tab when timeslider input changes
+                # daily_summary_1_dt -------------------------------------------------------
+                output$daily_summary_1_dt <- renderTable({
+                    get_summary_table(0)
+                }, align = 'r', striped = TRUE, width = '100%')
+                # clean_date_reactive_text -------------------------------------------------
+                output$clean_date_reactive_text <- renderText({
+                    #Changed from covid19_schools_active to covid19_schools_summary, which has the correct latest date matching with the case count given
+                    format(max(covid19_schools_summary$reported_date), '%d %B %Y')
+                })
+                #Update weekly summary tab when timeslider goes away
+                #7 days
+                output$weekly_summary_1_dt <- renderTable({
+                    get_weekly_summary_table(TRUE, 0)
+                }, align = 'r', striped = TRUE, width = '100%')
+                # clean_week_old_date_text -------------------------------------------------
+                output $clean_week_old_date_text <- renderText ({
+                    dates <- last_week_obtain(0)
+                    #Cheating on the dates a little bit, but the data is only updated / reported Monday-Friday anyway
+                    dateString <- paste(format(dates[[1]] - 1, '%d %B %Y'), "to", format(dates[[2]] + 1, '%d %B %Y'))
+                    dateString
+                })
+                #14 days
+                output$weekly_summary_3_dt <- renderTable({
+                    get_weekly_summary_table(FALSE, 0)
+                }, align = 'r', striped = TRUE, width = '100%')
+                # clean_two_weeks_old_date_text -------------------------------------------------
+                output $clean_two_weeks_old_date_text <- renderText ({
+                    dates <- last_two_weeks_obtain(0)
+                    #Cheating on the dates a little bit, but the data is only updated / reported Monday-Friday anyway
+                    dateString <- paste(format(dates[[1]] - 1, '%d %B %Y'), "to", format(dates[[2]] + 1, '%d %B %Y'))
+                    dateString
+                })
             }
             else{
                 vTimeSlider <<- TRUE
@@ -1277,6 +1334,41 @@ server <- function(input, output, session) {
                                  covid19_schools_active_with_demographics$municipality)
         
         selected_date <- input$obs
+        
+        #Update daily summary tab when timeslider input changes
+        # daily_summary_1_dt -------------------------------------------------------
+        output$daily_summary_1_dt <- renderTable({
+            get_summary_table(selected_date)
+        }, align = 'r', striped = TRUE, width = '100%')
+        # clean_date_reactive_text -------------------------------------------------
+        output$clean_date_reactive_text <- renderText({
+            #Changed from covid19_schools_active to covid19_schools_summary, which has the correct latest date matching with the case count given
+            format(selected_date, '%d %B %Y')
+        })
+        #Update weekly summary tab when timeslider input changes
+        #7 days
+        output$weekly_summary_1_dt <- renderTable({
+            get_weekly_summary_table(TRUE, selected_date)
+        }, align = 'r', striped = TRUE, width = '100%')
+        # clean_week_old_date_text -------------------------------------------------
+        output $clean_week_old_date_text <- renderText ({
+            dates <- last_week_obtain(selected_date)
+            #Cheating on the dates a little bit, but the data is only updated / reported Monday-Friday anyway
+            dateString <- paste(format(dates[[1]] - 1, '%d %B %Y'), "to", format(dates[[2]] + 1, '%d %B %Y'))
+            dateString
+        })
+        #14 days
+        output$weekly_summary_3_dt <- renderTable({
+            get_weekly_summary_table(FALSE, selected_date)
+        }, align = 'r', striped = TRUE, width = '100%')
+        # clean_two_weeks_old_date_text -------------------------------------------------
+        output $clean_two_weeks_old_date_text <- renderText ({
+            dates <- last_two_weeks_obtain(selected_date)
+            #Cheating on the dates a little bit, but the data is only updated / reported Monday-Friday anyway
+            dateString <- paste(format(dates[[1]] - 1, '%d %B %Y'), "to", format(dates[[2]] + 1, '%d %B %Y'))
+            dateString
+        })
+        
         cases_pst <-  subset(covid19_schools_active_with_demographics, collected_date == selected_date)
         increment <- 1 #If we don't have any data from this date, then move forward until we get some
         while(nrow(cases_pst) == 0){
@@ -1602,22 +1694,22 @@ server <- function(input, output, session) {
     
     # daily_summary_1_dt -------------------------------------------------------
     output$daily_summary_1_dt <- renderTable({
-        get_summary_table()
+        get_summary_table(0)
     }, align = 'r', striped = TRUE, width = '100%')
     
     # daily_summary_2_dt -------------------------------------------------------
     output$daily_summary_2_dt <- renderTable({
-        get_summary_table()
+        get_summary_table(0)
     }, align = 'r', striped = TRUE, width = '100%')
     
     # weekly_summary_1_dt -------------------------------------------------------
     output$weekly_summary_1_dt <- renderTable({
-        get_weekly_summary_table(TRUE) #FIX
+        get_weekly_summary_table(TRUE, 0) #FIX
     }, align = 'r', striped = TRUE, width = '100%')
     
     # weekly_summary_2_dt -------------------------------------------------------
     output$weekly_summary_2_dt <- renderTable({
-        get_weekly_summary_table(FALSE) #FIX
+        get_weekly_summary_table(FALSE, 0) #FIX
     }, align = 'r', striped = TRUE, width = '100%')
     
     # 1 and 4, 2 and 3  have to exist separately because separate tabs can't use them at the same time
@@ -1626,12 +1718,12 @@ server <- function(input, output, session) {
     
     # weekly_summary_3_dt -------------------------------------------------------
     output$weekly_summary_3_dt <- renderTable({
-        get_weekly_summary_table(FALSE) #FIX
+        get_weekly_summary_table(FALSE, 0) #FIX
     }, align = 'r', striped = TRUE, width = '100%')
     
     # weekly_summary_4_dt -------------------------------------------------------
     output$weekly_summary_4_dt <- renderTable({
-        get_weekly_summary_table(TRUE) #FIX
+        get_weekly_summary_table(TRUE, 0) #FIX
     }, align = 'r', striped = TRUE, width = '100%')
     
     # school_details_dt --------------------------------------------------------
@@ -1691,7 +1783,7 @@ server <- function(input, output, session) {
     
     # clean_week_old_date_text -------------------------------------------------
     output $clean_week_old_date_text <- renderText ({
-        dates <- last_week_obtain()
+        dates <- last_week_obtain(0)
         #Cheating on the dates a little bit, but the data is only updated / reported Monday-Friday anyway
         dateString <- paste(format(dates[[1]] - 1, '%d %B %Y'), "to", format(dates[[2]] + 1, '%d %B %Y'))
         dateString
@@ -1699,7 +1791,7 @@ server <- function(input, output, session) {
     
     # clean_two_weeks_old_date_text -------------------------------------------------
     output $clean_two_weeks_old_date_text <- renderText ({
-        dates <- last_two_weeks_obtain()
+        dates <- last_two_weeks_obtain(0)
         #Cheating on the dates a little bit, but the data is only updated / reported Monday-Friday anyway
         dateString <- paste(format(dates[[1]] - 1, '%d %B %Y'), "to", format(dates[[2]] + 1, '%d %B %Y'))
         dateString
@@ -1709,7 +1801,7 @@ server <- function(input, output, session) {
     
     # clean_week_old_date_text20_21 -------------------------------------------------
     output $clean_week_old_date_text20_21 <- renderText ({
-        dates <- last_week_obtain()
+        dates <- last_week_obtain(0)
         #Cheating on the dates a little bit, but the data is only updated / reported Monday-Friday anyway
         dateString <- paste(format(dates[[1]] - 1, '%d %B %Y'), "to", format(dates[[2]] + 1, '%d %B %Y'))
         dateString
@@ -1717,7 +1809,7 @@ server <- function(input, output, session) {
     
     # clean_two_weeks_old_date_text20_21 -------------------------------------------------
     output $clean_two_weeks_old_date_text20_21 <- renderText ({
-        dates <- last_two_weeks_obtain()
+        dates <- last_two_weeks_obtain(0)
         #Cheating on the dates a little bit, but the data is only updated / reported Monday-Friday anyway
         dateString <- paste(format(dates[[1]] - 1, '%d %B %Y'), "to", format(dates[[2]] + 1, '%d %B %Y'))
         dateString
