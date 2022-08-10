@@ -1244,6 +1244,12 @@ server <- function(input, output, session) {
                 updateMarkers()
                 
                 #Update daily summary tab when timeslider input changes
+                # cumulative_case_count_text -----------------------------------------------
+                output$cumulative_case_count_text <- renderText({
+                    idx <- max(which(covid19_schools_summary$collected_date <= as.Date(now())))
+                    count <- last(covid19_schools_summary[ idx, 'cumulative_school_related_cases' ])
+                    paste0(prettyNum(count, big.mark = ','), ' cumulative cases')
+                })
                 # daily_summary_1_dt -------------------------------------------------------
                 output$daily_summary_1_dt <- renderTable({
                     get_summary_table(0)
@@ -1297,7 +1303,7 @@ server <- function(input, output, session) {
         
     })
     
-    #Observes the activity for Mapper2022-2021 "View Timeslider" option
+    #Observes the activity for Mapper2021-2020 "View Timeslider" option
     observeEvent(input$visTS20_21,{
         if (!suppressFirstResponse3_20_21){
             if (!input$visTS20_21){
@@ -1307,6 +1313,12 @@ server <- function(input, output, session) {
                     #Render nothing here
                 })
                 updateMarkers20_21()
+                # cumulative_case_count_text_20_21 -----------------------------------------------
+                output$cumulative_case_count_text_20_21 <- renderText({
+                    idx <- max(which(covid19_schools_summary_20_21$collected_date <= as.Date(now())))
+                    count <- last(covid19_schools_summary_20_21[ idx, 'cumulative_school_related_cases' ])
+                    paste0(prettyNum(count, big.mark = ','), ' cumulative cases')
+                })
             }
             else{
                 vTimeSlider20_21 <<- TRUE
@@ -1336,6 +1348,12 @@ server <- function(input, output, session) {
         selected_date <- input$obs
         
         #Update daily summary tab when timeslider input changes
+        # cumulative_case_count_text -----------------------------------------------
+        output$cumulative_case_count_text <- renderText({
+            idx <- max(which(covid19_schools_summary$collected_date <= as.Date(selected_date)))
+            count <- last(covid19_schools_summary[ idx, 'cumulative_school_related_cases' ])
+            paste0(prettyNum(count, big.mark = ','), ' cumulative cases')
+        })
         # daily_summary_1_dt -------------------------------------------------------
         output$daily_summary_1_dt <- renderTable({
             get_summary_table(selected_date)
@@ -1429,6 +1447,12 @@ server <- function(input, output, session) {
                                  covid19_schools_active_with_demographics_20_21$municipality)
         
         selected_date <- input$obs20_21
+        # cumulative_case_count_text_20_21 -----------------------------------------------
+        output$cumulative_case_count_text_20_21 <- renderText({
+            idx <- max(which(covid19_schools_summary_20_21$collected_date <= as.Date(selected_date)))
+            count <- last(covid19_schools_summary_20_21[ idx, 'cumulative_school_related_cases' ])
+            paste0(prettyNum(count, big.mark = ','), ' cumulative cases')
+        })
         cases_pst_20_21 <-  subset(covid19_schools_active_with_demographics_20_21, collected_date == selected_date)
         increment <- 1 #If we don't have any data from this date, then move forward until we get some
         while(nrow(cases_pst_20_21) == 0){
