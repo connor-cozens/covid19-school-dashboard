@@ -868,10 +868,11 @@ ui <- bootstrapPage(
                    br(),
                    p('Srivastava, P., Invited panellist, for ‘Education continuity, school operations, and the COVID-19 pandemic: lessons from the United States and Canada’, Consortium of Universities for Global Health, 8 June 2021.'),
                    br(),
-                   p('Srivastava, P., Invited speaker, What the pandemic has taught us about education. Speaker’s Corner with David Crombie, The Enoch Turner Schoolhouse, 21 April 2021.'),
+                   p('Srivastava, P., Invited panellist, Arts, humanities and social science response panel discussion, Innovation Ambassadors Showcase: COVID-19’s Impact on the Innovation Ecosystem. WorlDiscoveries, Western Morrisette Institute of Entrepreneurship, 20 May 2021.'),
                    br(),
                    p('Srivastava, P., Invited speaker, What the pandemic has taught us about education. Speaker’s Corner with David Crombie, The Enoch Turner Schoolhouse, 21 April 2021.'),
-                   br()
+                   br(),
+                   
                ),
                
                # TAB: Our Team -------------------------------------------------
