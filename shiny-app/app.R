@@ -542,7 +542,7 @@ ui <- bootstrapPage(
                         h3('Source Code'),
                         p('Source code for this site can be found ', a(href = 'https://github.com/connor-cozens/covid19-school-dashboard', 'here', target = '_blank')),
                         h3('Archive'),
-                        p('The archival material, code for the site can be found here , and the integrated dataset can be found here.')
+                        p('The archival material, code for the site can be found ', a(href = 'https://doi.org/10.5683/SP3/Z9SNP0', 'here', target = '_blank'), 'and the integrated dataset can be found ', a(href = 'https://doi.org/10.5683/SP3/D0QXGQ', 'here.', target = '_blank'))
                ),
                
                # TAB: About this site ------------------------------------------
