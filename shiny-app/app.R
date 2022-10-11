@@ -394,7 +394,7 @@ ui <- bootstrapPage(
                         uiOutput('timesliderViewer20_21')
                ),
                # TAB: Overview and Search --------------------------------------
-               tabPanel('Overview and Search',
+               tabPanel('Overview & Search',
                         tabsetPanel(
                             tabPanel('2021-2022',
                                      # cumulative_plot -------------------------
@@ -526,7 +526,7 @@ ui <- bootstrapPage(
                ),
                
                # TAB: Data Sources and Source Code -----------------------------
-               tabPanel('Data Sources and Source Code',
+               tabPanel('Data Sources & Code',
                         h3('Data Sources 2021-22'),
                         tags$ul(
                             tags$li(a(href = 'https://data.ontario.ca/dataset?keywords_en=COVID-19', 'All COVID-19 datasets', target = '_blank')),
@@ -699,7 +699,7 @@ ui <- bootstrapPage(
                                 tags$li(em('Weekly Summary:'), 'Summarizes cumulative school-related cases, current schools with cases (and as % of schools in Ontario), and current schools closed (and as % of schools in Ontario) for 7- or 14-day period from last known data reporting date in the Ministry of Education dataset.')
                             ),
                             br(),
-                            h4('Overview and Search Tab'),
+                            h4('Overview & Search Tab'),
                             h5(('Cumulative Case Chart')),
                             p('Shows the total number of cumulative school-related cases in Ontario, and disaggregated to show cumulative school-related student cases, cumulative school-related staff cases, and unidentified cases. "Unidentified cases" is used by the Ministry of Education to refer to the following: "In some instances, the type of case has not been identified as either student/child or staff/provider/partner due to privacy considerations. These "individuals" only include unidentified students/children or staff/providers/partners and not visitors or parents. These cases will be tracked as "individuals" but not included in the "student/child" or "staff/provider" columns.'),
                             br(),
@@ -769,7 +769,7 @@ ui <- bootstrapPage(
                
                # TAB: Media Section --------------------------------------------
                tabPanel
-               ('Media',
+               ('Media & Research',
                    tags$div(),
                    h3('Covid-19 School Dashboard: Research applications and media coverage'),
                    p('Some research-related applications and media coverage of the COVID-19 School Dashboard.'),
