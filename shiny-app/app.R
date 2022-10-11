@@ -744,7 +744,7 @@ ui <- bootstrapPage(
                         div(
                             h3(id = "Authorship", 'AUTHORSHIP, ATTRIBUTIONS, CITATION'),
                             h4('Cite the COVID-19 School Dashboard as:'),
-                            p('Srivastava, P., & Taylor, P.J. (2021). ', tags$em('COVID-19 school dashboard (1.1 May 2021). '), '[Web application]. ', a(href = 'http://covid19schooldashboard.com/', 'http://covid19schooldashboard.com/')),
+                            p('Srivastava, P., Marshall, J., Cozens, C., & Taylor, P.J. (2022). ', tags$em('COVID-19 school dashboard (2.0 March 2022). '), '[Web application]. ', a(href = 'http://covid19schooldashboard.com/', 'http://covid19schooldashboard.com/')),
                             br(),
                             p(a(href = 'https://www.edu.uwo.ca/faculty-profiles/prachi-srivastava.html', target = '_blank', 'Dr. Prachi Srivastava'), ', Associate Professor, Faculty of Education, University of Western Ontario, Canada.'),
                             p(a(href = 'mailto:prachi.srivastava@uwo.ca', 'prachi.srivastava@uwo.ca')),
