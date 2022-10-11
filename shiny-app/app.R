@@ -540,7 +540,9 @@ ui <- bootstrapPage(
                         h3('Data 2020-21'),
                         downloadButton('download_csv_button_3_20_21', 'schoolcovidsummary20_21.csv'),
                         h3('Source Code'),
-                        p('Source code for this site can be found ', a(href = 'https://github.com/connor-cozens/covid19-school-dashboard', 'here', target = '_blank'))
+                        p('Source code for this site can be found ', a(href = 'https://github.com/connor-cozens/covid19-school-dashboard', 'here', target = '_blank')),
+                        h3('Archive'),
+                        p('The archival material, code for the site can be found here , and the integrated dataset can be found here.')
                ),
                
                # TAB: About this site ------------------------------------------
@@ -683,8 +685,8 @@ ui <- bootstrapPage(
                                 tags$li('proportion of students whose first language is not French;'), 
                                 tags$li('proportion of students who are immigrants from a non-English country;'),
                                 tags$li('proportion of students who are immigrants from a non-French country;'),
-                                tags$li('proportion of students who are receiving special education services (for 2021-2022 school year only)'),
-                                tags$li('parents have no university education (for 2020-21 school year only);'),
+                                tags$li('proportion of students who are receiving special education services (for 2021-2022 school year only);'),
+                                tags$li('parents have no university education (for 2020-21 school year only)'),
                             ),
                             br(),
                             h5(tags$b('Viewing Options')),

@@ -20,6 +20,10 @@ div.outer {
   padding: 0;
 }
 
+ul {
+  font-family: 'Nunito Sans';
+}
+
 /* Customize fonts */
 body, label, input, button, select { 
   font-family: 'Helvetica Neue', Helvetica;
