@@ -9,7 +9,7 @@ sudo apt update
 sudo apt -y install r-base gdebi-core
 ```
 
-## Setting up the R Environment
+## Setting up new R Environment
 
 ```
 sudo apt install r-base
