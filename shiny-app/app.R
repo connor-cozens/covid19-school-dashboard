@@ -118,7 +118,6 @@ last_two_weeks_obtain <- function(givenDate) {
     }
     return(df)
 }
-
 # get_weekly_summary_table
 # 
 # generate Weekly summary table
@@ -166,6 +165,11 @@ get_weekly_summary_table <- function(timeFrame, givenDate) {
     df <- df[ c(1, 3, 2), ]
     df
 }
+
+
+x <- 1:10
+y <- x^2
+plot(x, y, type="b", col="blue", main="Basic Scatter Plot", xlab="X-Axis", ylab="Y-Axis")
 
 # get_schools_no_cases
 #
