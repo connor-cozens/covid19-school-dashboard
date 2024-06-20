@@ -31,7 +31,7 @@ library(leaflet)
 library(lubridate)
 library(readxl)
 library(RColorBrewer)
-library(rgeos)
+# library(rgeos)
 library(rvest)
 library(stringr)
 library(xts)
@@ -39,7 +39,7 @@ library(stringdist)
 
 # SETTINGS ---------------------------------------------------------------------
 
-google_api_key <- '' # you need a google api key with maps javascript api and geocoding api enabled
+google_api_key <- 'AIzaSyAoIvUXeagJj5p7o3Tx2wLSjc60gjy1Kqc' # you need a google api key with maps javascript api and geocoding api enabled
 
 data_dir <- 'data'
 
@@ -304,7 +304,8 @@ clean_all_names <- function(dirty_names) {
 # if we need refresh make sure newer data files are not available in git first
 url <- 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/7e644a48-6040-4ee0-9216-1f88121b21ba/download/schoolcovidsummary2021_2022.csv'
 fname_summary <- sprintf('%s/%s', data_dir, basename(url))
-needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_summary)$mtime), units = 'hours') >= max_file_age_hrs
+# needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_summary)$mtime), units = 'hours') >= max_file_age_hrs
+needs_refresh <- FALSE
 if (needs_refresh | is.na(needs_refresh)) {
   # message('data file refresh required, trying git first')
   # try(expr = {
@@ -317,7 +318,8 @@ if (needs_refresh | is.na(needs_refresh)) {
 # school summary data
 url <- 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/7e644a48-6040-4ee0-9216-1f88121b21ba/download/schoolcovidsummary2021_2022.csv'
 fname_summary <- sprintf('%s/%s', data_dir, basename(url))
-needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_summary)$mtime), units = 'hours') >= max_file_age_hrs
+# needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_summary)$mtime), units = 'hours') >= max_file_age_hrs
+needs_refresh <- FALSE
 if (needs_refresh | is.na(needs_refresh)) { 
   message('updating summary data file')
   GET(url, write_disk(fname_summary, overwrite = TRUE))
@@ -326,7 +328,8 @@ if (needs_refresh | is.na(needs_refresh)) {
 # schools active cases data
 url <- 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/dc5c8788-792f-4f91-a400-036cdf28cfe8/download/schoolrecentcovid2021_2022.csv'
 fname_active <- sprintf('%s/%s', data_dir, basename(url))
-needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_active)$mtime), units = 'hours') >= max_file_age_hrs
+#needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_active)$mtime), units = 'hours') >= max_file_age_hrs
+needs_refresh <- FALSE
 if (needs_refresh | is.na(needs_refresh)) { 
   message('updating active cases data file')
   GET(url, write_disk(fname_active, overwrite = TRUE))
