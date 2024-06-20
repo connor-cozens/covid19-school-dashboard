@@ -4,7 +4,7 @@
 
 # DEPENDENCIES -----------------------------------------------------------------
 
-library(rgdal)
+library(sf)
 
 # LOAD DATA --------------------------------------------------------------------
 
@@ -12,7 +12,7 @@ source('data_downloader.R')
 
 # MAIN -------------------------------------------------------------------------
 
-neighborhoods <- readOGR(dsn = 'data/shapefiles/toronto_neighborhoods', layer = 'Neighbourhoods') 
+neighborhoods <- st_read(system.file('data/shapefiles/toronto_neighborhoods', layer = 'Neighbourhoods.shp'))
 
 # find neighborhood centers so we can label neighborhoods
 centers <- data.frame(gCentroid(neighborhoods, byid = TRUE))
