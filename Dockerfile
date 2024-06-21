@@ -7,7 +7,10 @@ RUN apt-get update && apt-get install -y \
     libcurl4-openssl-dev \
     libssl-dev \
     libxml2-dev \
-    libgdal-dev
+    libgdal-dev \
+    libudunits2-dev \
+    libgeos-dev \
+    libproj-dev
 
 RUN R -e 'install.packages(c(\
               "shiny", \
