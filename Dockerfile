@@ -40,9 +40,9 @@ RUN R -e 'install.packages(c(\
             repos="https://packagemanager.rstudio.com/all/__linux__/focal/latest"\
           )'
 
-COPY ./shiny-app/data /srv/shiny-server/data
-COPY ./shiny-app/data/shapefiles /srv/shiny-server/data/shapefiles
+#COPY ./shiny-app/data /srv/shiny-server/data
+#COPY ./shiny-app/data/shapefiles /srv/shiny-server/data/shapefiles
 COPY ./shiny-app/* /srv/shiny-server/
-COPY ./shiny-app/www /srv/shiny-server/www
+#COPY ./shiny-app/www /srv/shiny-server/www
 
 CMD ["/usr/bin/shiny-server"]
