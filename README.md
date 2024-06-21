@@ -37,10 +37,15 @@ Some files in the project won't be tracked, which includes the RStudio project f
 
 First, open the `app.js` file and install the dependencies that the file needs. You will need to run the following commands in order to prevent the errors and have the right packages for the installation to go through.
 
+Linux/Ubuntu Commands
 ```
 sudo apt-get install curl
 sudo apt-get install libcurl14-openssl-dev
 sudo apt-get install libssl-dev
 sudo apt-get install libxml2-dev
 sudo apt-get install libgdal-dev
+```
+Windows Commands
+```
+winget install curl
 ```

@@ -2,12 +2,17 @@
 
 library(DT)
 library(reshape2)
-library(rgdal)
 library(shiny)
 library(shinythemes)
 library(sp)
 library(plotly)
 library(xts)
+library(ggplot2)
+library(scales)
+library(lubridate)
+library(sf)
+
+# renv::init()
 
 # LOAD DATA --------------------------------------------------------------------
 
@@ -198,6 +203,86 @@ get_schools_no_cases_20_21 <- function() {
     df2 <- df2[!(df2$'school name' %in% df$school_name), , drop = FALSE]
     return (df2)
 }
+
+#create timeline image
+#create_timeline <- function() {
+df <- read.csv('data/timeline.csv', header=TRUE, fileEncoding="UTF-8-BOM")
+df$date <- with(df, ymd(sprintf('%04d%02d%02d', year, month, 1)))
+df <- df[with(df, order(date)), ]
+status_levels <- c("2019-2020", "2020-2021", "2021-2022")
+status_colors <- c("#0070C0", "#00B050", "#FFC000")
+positions <- c(0.5, -0.5, 1.0, -1.0, 1.5, -1.5)
+directions <- c(1, -1)
+
+line_pos <- data.frame(
+  "date"=unique(df$date),
+  "position"=rep(positions, length.out=length(unique(df$date))),
+  "direction"=rep(directions, length.out=length(unique(df$date)))
+)
+
+df <- merge(x=df, y=line_pos, by="date", all = TRUE)
+df <- df[with(df, order(date, status)), ]
+
+df$status <- factor(df$status, levels=status_levels, ordered=TRUE)
+
+text_offset <- 0.05
+
+df$month_count <- ave(df$date==df$date, df$date, FUN=cumsum)
+df$text_position <- (df$month_count * text_offset * df$direction) + df$position
+
+month_buffer <- 4
+
+month_date_range <- seq(min(df$date) - months(month_buffer), max(df$date) + months(month_buffer), by='month')
+month_format <- format(month_date_range, '%b')
+month_df <- data.frame(month_date_range, month_format)
+
+year_date_range <- seq(min(df$date) - months(month_buffer), max(df$date) + months(month_buffer), by='year')
+year_date_range <- as.Date(
+  intersect(
+    ceiling_date(year_date_range, unit="year"),
+    floor_date(year_date_range, unit="year")
+  ),  origin = "1970-01-01"
+)
+year_format <- format(year_date_range, '%Y')
+year_df <- data.frame(year_date_range, year_format)
+
+#### PLOT ####
+
+timeline_plot<-ggplot(df,aes(x=date,y=0, col=status, label=milestone))
+timeline_plot<-timeline_plot+labs(col="Milestones")
+timeline_plot<-timeline_plot+scale_color_manual(values=status_colors, labels=status_levels, drop = FALSE)
+timeline_plot<-timeline_plot+theme_classic()
+
+# Plot horizontal black line for timeline
+timeline_plot<-timeline_plot+geom_hline(yintercept=0, 
+                                        color = "black", size=0.3)
+
+# Plot vertical segment lines for milestones
+timeline_plot<-timeline_plot+geom_segment(data=df[df$month_count == 1,], aes(y=position,yend=0,xend=date), color='black', size=0.2)
+
+# Plot scatter points at zero and date
+timeline_plot<-timeline_plot+geom_point(aes(y=0), size=3)
+
+# Don't show axes, appropriately position legend
+timeline_plot<-timeline_plot+theme(axis.line.y=element_blank(),
+                                   axis.text.y=element_blank(),
+                                   axis.title.x=element_blank(),
+                                   axis.title.y=element_blank(),
+                                   axis.ticks.y=element_blank(),
+                                   axis.text.x =element_blank(),
+                                   axis.ticks.x =element_blank(),
+                                   axis.line.x =element_blank(),
+                                   legend.position = "bottom"
+)
+
+# Show text for each month
+timeline_plot<-timeline_plot+geom_text(data=month_df, aes(x=month_date_range,y=-0.1,label=month_format),size=2.5,vjust=0.5, color='black', angle=90)
+# Show year text
+timeline_plot<-timeline_plot+geom_text(data=year_df, aes(x=year_date_range,y=-0.2,label=year_format, fontface="bold"),size=2.5, color='black')
+# Show text for each milestone
+timeline_plot<-timeline_plot+geom_text(aes(y=text_position,label=milestone),size=2.5)
+#ggsave('timeline_plot.jpg', timeline_plot, device="jpg", path="www")
+
 
 # OVERRIDES --------------------------------------------------------------------
 #CSS style override for navbar_js
@@ -615,7 +700,9 @@ ui <- bootstrapPage(
                             p('Pandemic-related school closures in Ontario affected over 2 million elementary and secondary school students. The situation for students and schools evolved rapidly.'),
                             p('The following provides a brief policy context of provincial policy responses on school closures and reopening. It does not outline decisions of individual school boards or regional public health units (PHUs), unless they were named in provincial announcements.'),
                             p('The figure below shows the main Ontario-level school closure and re-opening periods from September 2020 – April 2021. Schools did not reopen for face-to-face instruction for the remainder of the school year (30 June 2021). There were exceptions for schools and programs serving children with special needs.'),
-                            img(src='timeline.png', width='100%'),
+                            #renderPlot(create_timeline),
+                            #img(src='timeline_plot.jpg', width='80%', height='80%'),
+                            img(src='timeline.png', width='80%', height='80%'),
                             tags$style("#subnote"),
                             p(id = "subnote", tags$b('Figure 1 Ontario-level school closures and reopening policy tracing (March 2020 – April 2021)')),
                             p(id = "subnote", 'Cite as: Srivastava, P., Taylor, P.J. (2021). COVID-19 school dashboard (1.1 May 2021). [Web application]. http://covid19schooldashboard.com/'),
@@ -1535,7 +1622,7 @@ server <- function(input, output, session) {
                          incProgress(1, 'loading shapes')
                          # regenerate the basemap
                          # https://geohub.lio.gov.on.ca/datasets/province/data
-                         ontario <- readOGR(dsn = 'data/shapefiles', layer = 'PROVINCE')
+                         ontario <- st_read(file.path('data/shapefiles', layer = 'PROVINCE.shp'))
                          incProgress(1, 'generating map')
                          basemap <- leaflet(ontario)
                          incProgress(1, 'setting view')
@@ -1598,7 +1685,7 @@ server <- function(input, output, session) {
                          incProgress(1, 'loading shapes')
                          # regenerate the 20_21 map
                          # https://geohub.lio.gov.on.ca/datasets/province/data
-                         ontario <- readOGR(dsn = 'data/shapefiles', layer = 'PROVINCE')
+                         ontario <- st_read(file.path('data/shapefiles', layer = 'PROVINCE.shp'))
                          incProgress(1, 'generating map')
                          map20_21 <- leaflet(ontario)
                          incProgress(1, 'setting view')
