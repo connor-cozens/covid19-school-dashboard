@@ -281,7 +281,7 @@ timeline_plot<-timeline_plot+geom_text(data=month_df, aes(x=month_date_range,y=-
 timeline_plot<-timeline_plot+geom_text(data=year_df, aes(x=year_date_range,y=-0.2,label=year_format, fontface="bold"),size=2.5, color='black')
 # Show text for each milestone
 timeline_plot<-timeline_plot+geom_text(aes(y=text_position,label=milestone),size=2.5)
-ggsave('timeline_plot.jpg', timeline_plot, device="jpg", path="www")
+#ggsave('timeline_plot.jpg', timeline_plot, device="jpg", path="www")
 
 
 # OVERRIDES --------------------------------------------------------------------
