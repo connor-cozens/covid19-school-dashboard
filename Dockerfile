@@ -15,7 +15,7 @@ RUN R -e 'install.packages(c(\
               "ggplot2", \
               "DT", \
               "reshape2", \
-              "rgdal", \
+              "sf", \
               "shinythemes", \
               "sp", \
               "plotly", \
