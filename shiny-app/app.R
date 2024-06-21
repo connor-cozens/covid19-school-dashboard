@@ -1622,7 +1622,7 @@ server <- function(input, output, session) {
                          incProgress(1, 'loading shapes')
                          # regenerate the basemap
                          # https://geohub.lio.gov.on.ca/datasets/province/data
-                         ontario <- st_read(file.path('data/shapefiles', layer = 'PROVINCE.SHP'))
+                         ontario <- st_read(file.path('data/shapefiles', layer = 'PROVINCE.shp'))
                          incProgress(1, 'generating map')
                          basemap <- leaflet(ontario)
                          incProgress(1, 'setting view')
@@ -1685,7 +1685,7 @@ server <- function(input, output, session) {
                          incProgress(1, 'loading shapes')
                          # regenerate the 20_21 map
                          # https://geohub.lio.gov.on.ca/datasets/province/data
-                         ontario <- st_read(file.path('data/shapefiles', layer = 'PROVINCE.SHP'))
+                         ontario <- st_read(file.path('data/shapefiles', layer = 'PROVINCE.shp'))
                          incProgress(1, 'generating map')
                          map20_21 <- leaflet(ontario)
                          incProgress(1, 'setting view')
