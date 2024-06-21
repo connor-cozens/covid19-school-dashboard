@@ -702,6 +702,7 @@ ui <- bootstrapPage(
                             p('The figure below shows the main Ontario-level school closure and re-opening periods from September 2020 – April 2021. Schools did not reopen for face-to-face instruction for the remainder of the school year (30 June 2021). There were exceptions for schools and programs serving children with special needs.'),
                             #renderPlot(create_timeline),
                             img(src='timeline_plot.jpg', width='80%', height='80%'),
+                            img(src='timeline.png', width='80%', height='80%'),
                             tags$style("#subnote"),
                             p(id = "subnote", tags$b('Figure 1 Ontario-level school closures and reopening policy tracing (March 2020 – April 2021)')),
                             p(id = "subnote", 'Cite as: Srivastava, P., Taylor, P.J. (2021). COVID-19 school dashboard (1.1 May 2021). [Web application]. http://covid19schooldashboard.com/'),
