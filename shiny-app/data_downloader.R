@@ -362,11 +362,11 @@ if (needs_refresh | is.na(needs_refresh)) {
   
   # 1. load school summary data into memory ----------------------------------
   
-  covid19_schools_summary <- read.csv(fname_summary, fileEncoding = 'Windows-1252', stringsAsFactors = FALSE)
+  # covid19_schools_summary <- read.csv(fname_summary, fileEncoding = 'Windows-1252', stringsAsFactors = FALSE)
   
   # 2. load school active cases data into memory -----------------------------
   
-  covid19_schools_active <- read.csv(fname_active, fileEncoding = 'Windows-1252', stringsAsFactors = FALSE)
+  # covid19_schools_active <- read.csv(fname_active, fileEncoding = 'Windows-1252', stringsAsFactors = FALSE)
   
   # 3. load all cases data into memory ---------------------------------------
   
@@ -374,8 +374,8 @@ if (needs_refresh | is.na(needs_refresh)) {
   
   # 4. load school demographic data into memory ------------------------------
   
-  school_demographics <- read_xlsx(fname_demographics)
-  school_demographics <- as.data.frame(school_demographics, stringsAsFactors = FALSE)
+  # school_demographics <- read_xlsx(fname_demographics)
+  # school_demographics <- as.data.frame(school_demographics, stringsAsFactors = FALSE)
   
   # 5. load school risk rank data --------------------------------------------
   
@@ -457,13 +457,13 @@ if (needs_refresh | is.na(needs_refresh)) {
   
   # 7. clean all cases data --------------------------------------------------
   
-  #message('cleaning all cases data')
-  #colnames(covid19_all_cases) <- tolower(colnames(covid19_all_cases))
-  #covid19_all_cases$accurate_episode_date <- as.Date(covid19_all_cases$accurate_episode_date)
-  #covid19_all_cases$case_reported_date <- as.Date(covid19_all_cases$case_reported_date)
-  #covid19_all_cases$test_reported_date <- as.Date(covid19_all_cases$test_reported_date)
-  #fn <- file.path(data_dir, 'covid19_all_cases.rdata')
-  #save('covid19_all_cases', file = fn)
+  # message('cleaning all cases data')
+  # colnames(covid19_all_cases) <- tolower(colnames(covid19_all_cases))
+  # covid19_all_cases$accurate_episode_date <- as.Date(covid19_all_cases$accurate_episode_date)
+  # covid19_all_cases$case_reported_date <- as.Date(covid19_all_cases$case_reported_date)
+  # covid19_all_cases$test_reported_date <- as.Date(covid19_all_cases$test_reported_date)
+  # fn <- file.path(data_dir, 'covid19_all_cases.rdata')
+  # save('covid19_all_cases', file = fn)
   
   # 8. clean school demographics data ----------------------------------------
   
@@ -496,8 +496,8 @@ if (needs_refresh | is.na(needs_refresh)) {
   cached_geocodes <- data.frame(geo_query_str = NA, lon = NA, lat = NA)
   if (file.exists(geocodes_cache_file)) base::load(file = geocodes_cache_file)
   # create query strings
-  geo_query_str <- sprintf('%s,%s,Ontario,Canada', 
-                           str_trim(covid19_schools_active$school), 
+  geo_query_str <- sprintf('%s,%s,Ontario,Canada',
+                           str_trim(covid19_schools_active$school),
                            covid19_schools_active$municipality)
   geo_query_str <- unique(geo_query_str)
   message(sprintf('we have %s geocode queries to make', length(geo_query_str)))
@@ -513,7 +513,7 @@ if (needs_refresh | is.na(needs_refresh)) {
     school_geocodes <- rbind(school_geocodes, cached_geocodes)
     # save known geocodes to local db to save api calls
     idx <- which(!is.na(school_geocodes$lon))
-    cached_geocodes <- school_geocodes[ idx, ] 
+    cached_geocodes <- school_geocodes[ idx, ]
     save('cached_geocodes', file = geocodes_cache_file)
     school_geocodes <- cached_geocodes
   } else {
