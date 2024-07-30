@@ -39,7 +39,7 @@ library(stringdist)
 
 # SETTINGS ---------------------------------------------------------------------
 
-google_api_key <- '' # you need a google api key with maps javascript api and geocoding api enabled
+google_api_key <- 'AIzaSyBCt0bFhQYE7fqIoPAQMr30jMvTPxUhuRs' # you need a google api key with maps javascript api and geocoding api enabled
 
 data_dir <- 'data'
 
@@ -301,39 +301,39 @@ clean_all_names <- function(dirty_names) {
 
 # 1. download data -------------------------------------------------------------
 
-# if we need refresh make sure newer data files are not available in git first
-url <- 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/7e644a48-6040-4ee0-9216-1f88121b21ba/download/schoolcovidsummary2021_2022.csv'
-fname_summary <- sprintf('%s/%s', data_dir, basename(url))
-# needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_summary)$mtime), units = 'hours') >= max_file_age_hrs
-needs_refresh <- FALSE
-if (needs_refresh | is.na(needs_refresh)) {
-  # message('data file refresh required, trying git first')
-  # try(expr = {
-  #   git2r::pull()		
-  # })
-  needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_summary)$mtime), units = 'hours') >= max_file_age_hrs
-  message('needs_refresh = ', needs_refresh)
-}
-
-# school summary data
-url <- 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/7e644a48-6040-4ee0-9216-1f88121b21ba/download/schoolcovidsummary2021_2022.csv'
-fname_summary <- sprintf('%s/%s', data_dir, basename(url))
-# needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_summary)$mtime), units = 'hours') >= max_file_age_hrs
-needs_refresh <- FALSE
-if (needs_refresh | is.na(needs_refresh)) { 
-  message('updating summary data file')
-  GET(url, write_disk(fname_summary, overwrite = TRUE))
-}
-
-# schools active cases data
-url <- 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/dc5c8788-792f-4f91-a400-036cdf28cfe8/download/schoolrecentcovid2021_2022.csv'
-fname_active <- sprintf('%s/%s', data_dir, basename(url))
-#needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_active)$mtime), units = 'hours') >= max_file_age_hrs
-needs_refresh <- FALSE
-if (needs_refresh | is.na(needs_refresh)) { 
-  message('updating active cases data file')
-  GET(url, write_disk(fname_active, overwrite = TRUE))
-}
+# # if we need refresh make sure newer data files are not available in git first
+# url <- 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/7e644a48-6040-4ee0-9216-1f88121b21ba/download/schoolcovidsummary2021_2022.csv'
+# fname_summary <- sprintf('%s/%s', data_dir, basename(url))
+# # needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_summary)$mtime), units = 'hours') >= max_file_age_hrs
+# needs_refresh <- FALSE
+# if (needs_refresh | is.na(needs_refresh)) {
+#   # message('data file refresh required, trying git first')
+#   # try(expr = {
+#   #   git2r::pull()		
+#   # })
+#   needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_summary)$mtime), units = 'hours') >= max_file_age_hrs
+#   message('needs_refresh = ', needs_refresh)
+# }
+# 
+# # school summary data
+# url <- 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/7e644a48-6040-4ee0-9216-1f88121b21ba/download/schoolcovidsummary2021_2022.csv'
+# fname_summary <- sprintf('%s/%s', data_dir, basename(url))
+# # needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_summary)$mtime), units = 'hours') >= max_file_age_hrs
+# needs_refresh <- FALSE
+# if (needs_refresh | is.na(needs_refresh)) { 
+#   message('updating summary data file')
+#   GET(url, write_disk(fname_summary, overwrite = TRUE))
+# }
+# 
+# # schools active cases data
+# url <- 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/dc5c8788-792f-4f91-a400-036cdf28cfe8/download/schoolrecentcovid2021_2022.csv'
+# fname_active <- sprintf('%s/%s', data_dir, basename(url))
+# #needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_active)$mtime), units = 'hours') >= max_file_age_hrs
+# needs_refresh <- FALSE
+# if (needs_refresh | is.na(needs_refresh)) { 
+#   message('updating active cases data file')
+#   GET(url, write_disk(fname_active, overwrite = TRUE))
+# }
 
 # ontario all covid cases data
 #url <- 'https://data.ontario.ca/dataset/f4112442-bdc8-45d2-be3c-12efae72fb27/resource/455fd63b-603d-4608-8216-7d8647f43350/download/conposcovidloc.csv'
@@ -347,12 +347,14 @@ if (needs_refresh | is.na(needs_refresh)) {
 # schools demographic data
 #url <- 'https://data.ontario.ca/dataset/d85f68c5-fcb0-4b4d-aec5-3047db47dcd5/resource/602a5186-67f5-4faf-94f3-7c61ffc4719a/download/new_sif_data_table_2019_20prelim_en_september2021.xlsx'
 #fname_demographics <- sprintf('%s/%s', data_dir, basename(url))
-fname_demographics <- "data/new_sif_data_table_2019_20prelim_en_september2021.xlsx"
+# fname_demographics <- "data/new_sif_data_table_2019_20prelim_en_september2021.xlsx"
 #needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_demographics)$mtime), units = 'hours') >= max_file_age_hrs
 #if (needs_refresh | is.na(needs_refresh)) { 
 #  message('updating student demographics data file')
 #  GET(url, write_disk(fname_demographics, overwrite = TRUE))
 #}
+
+needs_refresh <- TRUE
 
 if (needs_refresh | is.na(needs_refresh)) {
   
@@ -418,6 +420,12 @@ if (needs_refresh | is.na(needs_refresh)) {
   risk_rank_neighborhood$neighborhood_name <- str_replace(risk_rank_neighborhood$neighborhood_name, 'Weston-Pelham Park', 'Weston-Pellam Park')
   fn <- file.path(data_dir, 'risk_rank_neighborhood.rdata')
   save('risk_rank_neighborhood', file = fn)
+  
+  # 6.5 load school closure data ---------------------------------------------
+  fname_school_closure <- file.path(data_dir, 'COVID_School_Closures_V2.xlsx')
+  school_closures_sept_april_20_21 <- read_xlsx(fname_school_closure, sheet = 1, col_names = TRUE)
+  school_closures_sept_dec_21_21 <- read_xlsx(fname_school_closure, sheet = 2, col_names = TRUE)
+  school_closures_jan_may_22_22 <- read_xlsx(fname_school_closure, sheet = 3, col_names = TRUE)
   
   # 7. clean active cases data -----------------------------------------------
   
