@@ -31,7 +31,6 @@ library(leaflet)
 library(lubridate)
 library(readxl)
 library(RColorBrewer)
-# library(rgeos)
 library(rvest)
 library(stringr)
 library(xts)
@@ -50,7 +49,7 @@ max_file_age_hrs <- 800000000L
 debug <- FALSE
 
 # UTILITY FUNCTIONS ------------------------------------------------------------
-
+## Get UTF Table Function  -----------------------------------------------------
 get_utf_table <- function() {
   url <- 'https://www.utf8-chartable.de/'
   pg_html <- read_html(url)
@@ -83,6 +82,7 @@ get_utf_table <- function() {
   utf8_tbl
 }
 
+## Clean All Names Function  ---------------------------------------------------
 #' clean_all_names
 #' 
 #' function to normalize school and school board names so we can match schools in active cases dataset
@@ -299,91 +299,19 @@ clean_all_names <- function(dirty_names) {
 
 # MAIN -------------------------------------------------------------------------
 
-# 1. download data -------------------------------------------------------------
-
-# # if we need refresh make sure newer data files are not available in git first
-# url <- 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/7e644a48-6040-4ee0-9216-1f88121b21ba/download/schoolcovidsummary2021_2022.csv'
-# fname_summary <- sprintf('%s/%s', data_dir, basename(url))
-# # needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_summary)$mtime), units = 'hours') >= max_file_age_hrs
-# needs_refresh <- FALSE
-# if (needs_refresh | is.na(needs_refresh)) {
-#   # message('data file refresh required, trying git first')
-#   # try(expr = {
-#   #   git2r::pull()		
-#   # })
-#   needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_summary)$mtime), units = 'hours') >= max_file_age_hrs
-#   message('needs_refresh = ', needs_refresh)
-# }
-# 
-# # school summary data
-# url <- 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/7e644a48-6040-4ee0-9216-1f88121b21ba/download/schoolcovidsummary2021_2022.csv'
-# fname_summary <- sprintf('%s/%s', data_dir, basename(url))
-# # needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_summary)$mtime), units = 'hours') >= max_file_age_hrs
-# needs_refresh <- FALSE
-# if (needs_refresh | is.na(needs_refresh)) { 
-#   message('updating summary data file')
-#   GET(url, write_disk(fname_summary, overwrite = TRUE))
-# }
-# 
-# # schools active cases data
-# url <- 'https://data.ontario.ca/dataset/b1fef838-8784-4338-8ef9-ae7cfd405b41/resource/dc5c8788-792f-4f91-a400-036cdf28cfe8/download/schoolrecentcovid2021_2022.csv'
-# fname_active <- sprintf('%s/%s', data_dir, basename(url))
-# #needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_active)$mtime), units = 'hours') >= max_file_age_hrs
-# needs_refresh <- FALSE
-# if (needs_refresh | is.na(needs_refresh)) { 
-#   message('updating active cases data file')
-#   GET(url, write_disk(fname_active, overwrite = TRUE))
-# }
-
-# ontario all covid cases data
-#url <- 'https://data.ontario.ca/dataset/f4112442-bdc8-45d2-be3c-12efae72fb27/resource/455fd63b-603d-4608-8216-7d8647f43350/download/conposcovidloc.csv'
-#fname_all_cases <- sprintf('%s/%s', data_dir, basename(url))
-#needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_all_cases)$mtime), units = 'hours') >= max_file_age_hrs
-#if (needs_refresh | is.na(needs_refresh)) { 
-#  message('updating all cases data file')
-#  GET(url, write_disk(fname_all_cases, overwrite = TRUE))
-#}
-
-# schools demographic data
-#url <- 'https://data.ontario.ca/dataset/d85f68c5-fcb0-4b4d-aec5-3047db47dcd5/resource/602a5186-67f5-4faf-94f3-7c61ffc4719a/download/new_sif_data_table_2019_20prelim_en_september2021.xlsx'
-#fname_demographics <- sprintf('%s/%s', data_dir, basename(url))
-# fname_demographics <- "data/new_sif_data_table_2019_20prelim_en_september2021.xlsx"
-#needs_refresh <- difftime(now(), as.POSIXct(file.info(fname_demographics)$mtime), units = 'hours') >= max_file_age_hrs
-#if (needs_refresh | is.na(needs_refresh)) { 
-#  message('updating student demographics data file')
-#  GET(url, write_disk(fname_demographics, overwrite = TRUE))
-#}
-
+# When set to TRUE, all data will be refreshed from the excel files, any updated
+# will be propogated through the Rdata files, new geocodes will be written, and
+# any other updated data will be updated.
 needs_refresh <- TRUE
 
-if (needs_refresh | is.na(needs_refresh)) {
-  
-  # REFRESH ALL DATA ---------------------------------------------------------
-  
-  # 1. load school summary data into memory ----------------------------------
-  
-  # covid19_schools_summary <- read.csv(fname_summary, fileEncoding = 'Windows-1252', stringsAsFactors = FALSE)
-  
-  # 2. load school active cases data into memory -----------------------------
-  
-  # covid19_schools_active <- read.csv(fname_active, fileEncoding = 'Windows-1252', stringsAsFactors = FALSE)
-  
-  # 3. load all cases data into memory ---------------------------------------
-  
-  #covid19_all_cases <- read.csv(fname_all_cases, fileEncoding = 'Windows-1252', stringsAsFactors = FALSE)
-  
-  # 4. load school demographic data into memory ------------------------------
-  
-  # school_demographics <- read_xlsx(fname_demographics)
-  # school_demographics <- as.data.frame(school_demographics, stringsAsFactors = FALSE)
-  
-  # 5. load school risk rank data --------------------------------------------
+if (needs_refresh) {
+  # 1. load school risk rank data --------------------------------------------
   
   fname_school_risk_rank <- file.path(data_dir, 'COVID19NeighbRiskRank_TCDSBElemSecond_2020-08-20.xlsx')
   risk_rank_elementary <- read_xlsx(fname_school_risk_rank, sheet = 2, skip = 3, col_names = TRUE)
   risk_rank_secondary <- read_xlsx(fname_school_risk_rank, sheet = 4, skip = 3, col_names = TRUE)
   
-  # 6. load neighborhood risk rank data --------------------------------------
+  # 2. load neighborhood risk rank data --------------------------------------
   
   fname_neighborhood_risk_rank <- file.path(data_dir, '11042020 with Demographics WALLACE.xlsx')
   risk_rank_neighborhood <- read_xlsx(fname_neighborhood_risk_rank, sheet = 1, skip = 2, col_names = FALSE)
@@ -421,13 +349,13 @@ if (needs_refresh | is.na(needs_refresh)) {
   fn <- file.path(data_dir, 'risk_rank_neighborhood.rdata')
   save('risk_rank_neighborhood', file = fn)
   
-  # 6.5 load school closure data ---------------------------------------------
+  # 3. load school closure data ---------------------------------------------
   fname_school_closure <- file.path(data_dir, 'COVID_School_Closures_V2.xlsx')
   school_closures_sept_april_20_21 <- read_xlsx(fname_school_closure, sheet = 1, col_names = TRUE)
   school_closures_sept_dec_21_21 <- read_xlsx(fname_school_closure, sheet = 2, col_names = TRUE)
   school_closures_jan_may_22_22 <- read_xlsx(fname_school_closure, sheet = 3, col_names = TRUE)
   
-  # 7. clean active cases data -----------------------------------------------
+  # 4. clean active cases data -----------------------------------------------
   
   message('cleaning active cases data')
   colnames(covid19_schools_active) <- tolower(colnames(covid19_schools_active))
@@ -440,7 +368,7 @@ if (needs_refresh | is.na(needs_refresh)) {
   fn <- file.path(data_dir, 'covid19_schools_active.rdata')
   save('covid19_schools_active', file = fn)
   
-  # 8. clean summary data ----------------------------------------------------
+  # 5. clean summary data ----------------------------------------------------
   
   message('cleaning summary data')
   colnames(covid19_schools_summary) <- tolower(colnames(covid19_schools_summary))
@@ -455,17 +383,7 @@ if (needs_refresh | is.na(needs_refresh)) {
   fn <- file.path(data_dir, 'covid19_schools_summary.rdata')
   save('covid19_schools_summary', file = fn)
   
-  # 7. clean all cases data --------------------------------------------------
-  
-  # message('cleaning all cases data')
-  # colnames(covid19_all_cases) <- tolower(colnames(covid19_all_cases))
-  # covid19_all_cases$accurate_episode_date <- as.Date(covid19_all_cases$accurate_episode_date)
-  # covid19_all_cases$case_reported_date <- as.Date(covid19_all_cases$case_reported_date)
-  # covid19_all_cases$test_reported_date <- as.Date(covid19_all_cases$test_reported_date)
-  # fn <- file.path(data_dir, 'covid19_all_cases.rdata')
-  # save('covid19_all_cases', file = fn)
-  
-  # 8. clean school demographics data ----------------------------------------
+  # 6. clean school demographics data ----------------------------------------
   
   message('cleaning demographic data')
   colnames(school_demographics) <- tolower(colnames(school_demographics))
@@ -477,7 +395,7 @@ if (needs_refresh | is.na(needs_refresh)) {
   fn <- file.path(data_dir, 'school_demographics.rdata')
   save('school_demographics', file = fn)
   
-  # 9. clean risk assessment data --------------------------------------------
+  # 7. clean risk assessment data --------------------------------------------
   
   message('cleaning risk assessment data')
   risk_rank_elementary <- risk_rank_elementary[ , c(1:9, 13) ]
@@ -490,42 +408,39 @@ if (needs_refresh | is.na(needs_refresh)) {
   fn <- file.path(data_dir, 'risk_rank_secondary.rdata')
   save('risk_rank_secondary', file = fn)
   
-  # 9. build/refresh school geocodes db --------------------------------------
+  # 8. build/refresh school geocodes db --------------------------------------
   
-  message('building geocodes db')
-  cached_geocodes <- data.frame(geo_query_str = NA, lon = NA, lat = NA)
-  if (file.exists(geocodes_cache_file)) base::load(file = geocodes_cache_file)
-  # create query strings
-  geo_query_str <- sprintf('%s,%s,Ontario,Canada',
-                           str_trim(covid19_schools_active$school),
-                           covid19_schools_active$municipality)
-  geo_query_str <- unique(geo_query_str)
-  message(sprintf('we have %s geocode queries to make', length(geo_query_str)))
-  idx <- which(geo_query_str %in% cached_geocodes$geo_query_str)
-  message(sprintf('we have %s cached geocode entries', length(idx)))
-  if (length(idx) > 0) geo_query_str <- geo_query_str[ -idx ]
-  if (length(geo_query_str) > 0) {
-    # we have queries to do
-    message('processing geocoding requests')
-    geo_query_str <- data.frame(geo_query_str, stringsAsFactors = FALSE)
-    register_google(google_api_key)
-    school_geocodes <- mutate_geocode(geo_query_str, geo_query_str)
-    school_geocodes <- rbind(school_geocodes, cached_geocodes)
-    # save known geocodes to local db to save api calls
-    idx <- which(!is.na(school_geocodes$lon))
-    cached_geocodes <- school_geocodes[ idx, ]
-    save('cached_geocodes', file = geocodes_cache_file)
-    school_geocodes <- cached_geocodes
-  } else {
-    # all of our data is already in cache
-    message('all geocodes already in cache!')
-    school_geocodes <- cached_geocodes
-  }
+  # message('building geocodes db')
+  # cached_geocodes <- data.frame(geo_query_str = NA, lon = NA, lat = NA)
+  # if (file.exists(geocodes_cache_file)) base::load(file = geocodes_cache_file)
+  # # create query strings
+  # geo_query_str <- sprintf('%s,%s,Ontario,Canada',
+  #                          str_trim(covid19_schools_active$school),
+  #                          covid19_schools_active$municipality)
+  # geo_query_str <- unique(geo_query_str)
+  # message(sprintf('we have %s geocode queries to make', length(geo_query_str)))
+  # idx <- which(geo_query_str %in% cached_geocodes$geo_query_str)
+  # message(sprintf('we have %s cached geocode entries', length(idx)))
+  # if (length(idx) > 0) geo_query_str <- geo_query_str[ -idx ]
+  # if (length(geo_query_str) > 0) {
+  #   # we have queries to do
+  #   message('processing geocoding requests')
+  #   geo_query_str <- data.frame(geo_query_str, stringsAsFactors = FALSE)
+  #   register_google(google_api_key)
+  #   school_geocodes <- mutate_geocode(geo_query_str, geo_query_str)
+  #   school_geocodes <- rbind(school_geocodes, cached_geocodes)
+  #   # save known geocodes to local db to save api calls
+  #   idx <- which(!is.na(school_geocodes$lon))
+  #   cached_geocodes <- school_geocodes[ idx, ]
+  #   save('cached_geocodes', file = geocodes_cache_file)
+  #   school_geocodes <- cached_geocodes
+  # } else {
+  #   # all of our data is already in cache
+  #   message('all geocodes already in cache!')
+  #   school_geocodes <- cached_geocodes
+  # }
   
-  # 10. combine active school cases with demographic data --------------------
-  
-  # all schools with active cases
-  # covid19_schools_active$school %>% unique %>% str_trim %>% sort
+  # 9. combine active school cases with demographic data --------------------
   
   # find all mismatched school names
   idx <- which(covid19_schools_active$school %in% school_demographics$`school name` == FALSE)
@@ -669,7 +584,7 @@ if (needs_refresh | is.na(needs_refresh)) {
   covid19_schools_active_with_demographics <- rbindlist(covid19_schools_active_with_demographics, use.names = TRUE, fill = TRUE)
   covid19_schools_active_with_demographics <- data.frame(covid19_schools_active_with_demographics)
   
-  # 11. clean covid19_schools_active_with_demographics -----------------------
+  # 10. clean covid19_schools_active_with_demographics -----------------------
   # str(covid19_schools_active_with_demographics)
   # 'data.frame':	1674 obs. of  62 variables:
   # 	$ collected_date                                                                          : chr  "2020-09-10" "2020-09-10" "2020-09-10" "2020-09-10" ...
@@ -793,7 +708,7 @@ if (needs_refresh | is.na(needs_refresh)) {
   fn <- file.path(data_dir, 'covid19_schools_active_with_demographics.rdata')
   save('covid19_schools_active_with_demographics', file = fn)
   
-  # 12. covid19_schools_active_with_demographics_most_recent -----------------
+  # 11. covid19_schools_active_with_demographics_most_recent -----------------
   idx <- sprintf('%s%s', 
                  clean_all_names(covid19_schools_active_with_demographics$school), 
                  clean_all_names(covid19_schools_active_with_demographics$school_board))
