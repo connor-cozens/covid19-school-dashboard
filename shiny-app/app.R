@@ -1106,22 +1106,17 @@ server <- function(input, output, session) {
                     lat = ~latitude, 
                     radius = 3, 
                     weight = 1, 
-                    color = '#0000B0',
+                    color = '#808080',
                     fillOpacity = 1, 
-                    label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Students receiving Special Education Services: %s%%<br/><strong>Zero Confirmed Cases</strong></div>', 
-                                    get_schools_no_cases()$`school name`, 
-                                    get_schools_no_cases()$city, 
-                                    get_schools_no_cases()$`school level`, 
-                                    get_schools_no_cases()$`board name`, 
-                                    get_schools_no_cases()$`school language`, 
-                                    get_schools_no_cases()$enrolment, 
-                                    get_schools_no_cases()$`percentage of school-aged children who live in low-income households`, 
-                                    get_schools_no_cases()$`percentage of students whose first language is not english`, 
-                                    get_schools_no_cases()$`percentage of students who are new to canada from a non-english speaking country`, 
-                                    get_schools_no_cases()$`percentage of students whose first language is not french`, 
-                                    get_schools_no_cases()$`percentage of students who are new to canada from a non-french speaking country`,
-                                    get_schools_no_cases()$`percentage of students receiving special education services`) %>% 
-                        lapply(htmltools::HTML), 
+                    label = sprintf('<div style = "background-color: gray; color:black;"><strong>%s</strong><br/>School Name: %s<br/>Date of Closure: %s<br/>Date of Reopening: %s<br/>Reason for Close: %s<br/>Board Number: %s<br/>Board_Name: %s%%<br/></div>', 
+                                    COVID_School_Closures_V2$School_Name, 
+                                    COVID_School_Closures_V2$Date_of_Closure, 
+                                    COVID_School_Closures_V2$Date_of_Reopening,
+                                    COVID_School_Closures_V2$Reason_for_Closure,
+                                    COVID_School_Closures_V2$Board_Number,
+                                    COVID_School_Closures_V2$Board_Name)%>% 
+                      lapply(htmltools::HTML), 
+                
                     labelOptions = labelOptions(
                         style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
                         textsize = '15px', direction = 'auto'))
@@ -1270,8 +1265,8 @@ server <- function(input, output, session) {
                     lng = ~lon, 
                     lat = ~lat, 
                     radius = 2,
-                    weight = 1, 
-                    color = '#b00000',
+                    weight = 1,
+                    color = '#808080',
                     fillOpacity = 1)
             leafletProxy('map_leaflet20_21') %>%
                 addCircleMarkers(
@@ -1280,25 +1275,16 @@ server <- function(input, output, session) {
                     lat = ~lat, 
                     radius = ~(cases_per_school_20_21$cases_per_school) * 2,
                     weight = 1, 
-                    color = '#d62728',
+                    color = '#808080',
                     fillOpacity = 0.3, 
-                    label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Parents have no university education: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/></div>', 
-                                    cases_per_school_20_21$school_name, 
-                                    cases_per_school_20_21$city, 
-                                    cases_per_school_20_21$school_level, 
-                                    cases_per_school_20_21$school_board, 
-                                    cases_per_school_20_21$school_language, 
-                                    cases_per_school_20_21$school_enrolment, 
-                                    cases_per_school_20_21$low_income, 
-                                    cases_per_school_20_21$non_english, 
-                                    cases_per_school_20_21$from_non_english, 
-                                    cases_per_school_20_21$non_french, 
-                                    cases_per_school_20_21$from_non_french, 
-                                    cases_per_school_20_21$some_university, 
-                                    cases_per_school_20_21$cases_per_school,
-                                    cases_per_school_20_21$cases_per_school_staff,
-                                    cases_per_school_20_21$cases_per_school_student,
-                                    cases_per_school_20_21$cases_per_school_unidentified) %>% lapply(htmltools::HTML), 
+                    label = sprintf('<div style = "background-color: gray; color:black;"><strong>%s</strong><br/>School Name: %s<br/>Date of Closure: %s<br/>Date of Reopening: %s<br/>Reason for Close: %s<br/>Board Number: %s<br/>Board_Name: %s%%<br/></div>', 
+                                    COVID_School_Closures_V2$School_Name, 
+                                    COVID_School_Closures_V2$Date_of_Closure, 
+                                    COVID_School_Closures_V2$Date_of_Reopening,
+                                    COVID_School_Closures_V2$Reason_for_Closure,
+                                    COVID_School_Closures_V2$Board_Number,
+                                    COVID_School_Closures_V2$Board_Name)%>% 
+                        lapply(htmltools::HTML),
                     labelOptions = labelOptions(
                         style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
                         textsize = '15px', direction = 'auto'))
@@ -1738,6 +1724,86 @@ server <- function(input, output, session) {
                      })
         
     })
+    
+    
+    #School Closure Data -------------------------------------------------------
+    closures_data <- data.frame(
+      board_number = c(1, 2, 3),
+      board_name = c("Board A", "Board B", "Board C"),
+      school_number = c(101, 102, 103),
+      school_name = c("School A", "School B", "School C"),
+      date_of_closure = as.Date(c("2021-01-15", "2021-02-20", "2021-03-10")),
+      date_of_reopening = as.Date(c("2021-02-01", "2021-03-05", "2021-04-01")),
+      reason_for_closure = c("COVID-19 outbreak", "Staff shortage", "Infrastructure issue")
+    )
+    output$map_leaflet20_21 <- renderLeaflet({
+      withProgress(max = 6, 
+                   value = 0, 
+                   message = 'please wait...', 
+                   expr = {
+                     incProgress(1, 'loading shapes')
+                     # regenerate the 20_21 map
+                     # https://geohub.lio.gov.on.ca/datasets/province/data
+                     ontario <- st_read(file.path('data/shapefiles', layer = 'PROVINCE.shp'))
+                     incProgress(1, 'generating map')
+                     map20_21 <- leaflet(ontario)
+                     incProgress(1, 'setting view')
+                     map20_21 <- setView(map20_21, lng = -79.7, lat = 44.39, zoom = 8) 
+                     incProgress(1, 'adding polygons')
+                     map20_21 <- addPolygons(map20_21, weight = 3, fillColor = '#696969', opacity = 0.5)
+                     incProgress(1, 'adding tiles')
+                     map20_21 <- addProviderTiles(map20_21, providers$Esri.NatGeoWorldMap)
+                     
+                     # add case data markers
+                     incProgress(1, 'adding markers')
+                     
+                     # Combine case data and closure data
+                     combined_data <- merge(cases_per_school_20_21, closures_data, by.x = "school_name", by.y = "school_name", all.x = TRUE)
+                     
+                     map20_21 <- addCircleMarkers(map20_21,
+                                                  data = combined_data, 
+                                                  lng = ~lon, 
+                                                  lat = ~lat, 
+                                                  radius = 2,
+                                                  weight = 1, 
+                                                  color = ~ifelse(Sys.Date() >= date_of_closure & Sys.Date() <= date_of_reopening, '#696969', '#b00000'),
+                                                  fillOpacity = 1)
+                     map20_21 <- addCircleMarkers(map20_21, 
+                                                  data = combined_data, 
+                                                  lng = ~lon, 
+                                                  lat = ~lat, 
+                                                  radius = ~(cases_per_school) * 2,
+                                                  weight = 1, 
+                                                  color = ~ifelse(Sys.Date() >= date_of_closure & Sys.Date() <= date_of_reopening, '#696969', '#d62728'),
+                                                  fillOpacity = 0.3, 
+                                                  label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Parents have no university education: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/>Date of Closure: %s<br/>Date of Reopening: %s<br/>Reason for Closure: %s</div>', 
+                                                                  school_name, 
+                                                                  city, 
+                                                                  school_level, 
+                                                                  school_board, 
+                                                                  school_language, 
+                                                                  school_enrolment, 
+                                                                  low_income, 
+                                                                  non_english, 
+                                                                  from_non_english, 
+                                                                  non_french, 
+                                                                  from_non_french, 
+                                                                  some_university, 
+                                                                  cases_per_school,
+                                                                  cases_per_school_staff,
+                                                                  cases_per_school_student,
+                                                                  cases_per_school_unidentified,
+                                                                  date_of_closure,
+                                                                  date_of_reopening,
+                                                                  reason_for_closure) %>% lapply(htmltools::HTML), 
+                                                  labelOptions = labelOptions(
+                                                    style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
+                                                    textsize = '15px', direction = 'auto'))
+                     
+                     map20_21
+                   })
+    })
+    
     
     # cumulative_plot ----------------------------------------------------------
     output$cumulative_plot <- renderPlotly({
