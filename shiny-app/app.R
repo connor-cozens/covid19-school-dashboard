@@ -1092,7 +1092,7 @@ server <- function(input, output, session) {
             })
         }
     })
-    
+    Merged_School_Data_20_21 <- merge(cases_per_school_20_21, COVID_School_Closures_V2, by = "school_name",all=TRUE)
     #Update Map Markers for the 2022-2021 map
     updateMarkers <- function () {
         leafletProxy('basemap_leaflet') %>%
@@ -1124,7 +1124,7 @@ server <- function(input, output, session) {
         if (input$visOp1){
             leafletProxy('basemap_leaflet') %>%
                 addCircleMarkers(
-                    data = cases_per_school, 
+                    data = Merged_School_Data_20_21, 
                     lng = ~lon, 
                     lat = ~lat, 
                     radius = 2,
@@ -1133,15 +1133,15 @@ server <- function(input, output, session) {
                     fillOpacity = 1)
             leafletProxy('basemap_leaflet') %>%
                 addCircleMarkers( 
-                    data = cases_per_school, 
+                    data = Merged_School_Data_20_21, 
                     lng = ~lon, 
                     lat = ~lat, 
-                    radius = ~(cases_per_school) * 2,
+                    radius = ~(Merged_School_Data_20_21) * 2,
                     weight = 1, 
                     color = '#d62728',
                     fillOpacity = 0.3, 
                     label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Students receiving Special Education Services: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/></div>', 
-                                    cases_per_school$school_name, 
+                                    Merged_School_Data_20_21$school_name, 
                                     cases_per_school$city, 
                                     cases_per_school$school_level, 
                                     cases_per_school$school_board, 
