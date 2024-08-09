@@ -1093,75 +1093,82 @@ server <- function(input, output, session) {
         }
     })
     Merged_School_Data_20_21 <- merge(cases_per_school_20_21, COVID_School_Closures_V2, by = "school_name",all=TRUE)
+    
     #Update Map Markers for the 2022-2021 map
     updateMarkers <- function () {
+      leafletProxy('basemap_leaflet') %>%
+        clearMarkers()
+      
+      if (input$visOp2){
+        leafletProxy(mapId = 'basemap_leaflet', session = session) %>%
+          addCircleMarkers( 
+            data = get_schools_no_cases(), 
+            lng = ~longitude, 
+            lat = ~latitude, 
+            radius = 3, 
+            weight = 1, 
+            color = '#0000B0',
+            fillOpacity = 1, 
+            label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Students receiving Special Education Services: %s%%<br/><strong>Zero Confirmed Cases</strong></div>', 
+                            get_schools_no_cases()$`school name`, 
+                            get_schools_no_cases()$city, 
+                            get_schools_no_cases()$`school level`, 
+                            get_schools_no_cases()$`board name`, 
+                            get_schools_no_cases()$`school language`, 
+                            get_schools_no_cases()$enrolment, 
+                            get_schools_no_cases()$`percentage of school-aged children who live in low-income households`, 
+                            get_schools_no_cases()$`percentage of students whose first language is not english`, 
+                            get_schools_no_cases()$`percentage of students who are new to canada from a non-english speaking country`, 
+                            get_schools_no_cases()$`percentage of students whose first language is not french`, 
+                            get_schools_no_cases()$`percentage of students who are new to canada from a non-french speaking country`,
+                            get_schools_no_cases()$`percentage of students receiving special education services`) %>% 
+              lapply(htmltools::HTML), 
+            labelOptions = labelOptions(
+              style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
+              textsize = '15px', direction = 'auto'))
+      }
+      if (input$visOp1){
         leafletProxy('basemap_leaflet') %>%
-            clearMarkers()
-        
-        if (input$visOp2){
-            leafletProxy(mapId = 'basemap_leaflet', session = session) %>%
-                addCircleMarkers( 
-                    data = get_schools_no_cases(), 
-                    lng = ~longitude, 
-                    lat = ~latitude, 
-                    radius = 3, 
-                    weight = 1, 
-                    color = '#808080',
-                    fillOpacity = 1, 
-                    label = sprintf('<div style = "background-color: gray; color:black;"><strong>%s</strong><br/>School Name: %s<br/>Date of Closure: %s<br/>Date of Reopening: %s<br/>Reason for Close: %s<br/>Board Number: %s<br/>Board_Name: %s%%<br/></div>', 
-                                    COVID_School_Closures_V2$School_Name, 
-                                    COVID_School_Closures_V2$Date_of_Closure, 
-                                    COVID_School_Closures_V2$Date_of_Reopening,
-                                    COVID_School_Closures_V2$Reason_for_Closure,
-                                    COVID_School_Closures_V2$Board_Number,
-                                    COVID_School_Closures_V2$Board_Name)%>% 
-                      lapply(htmltools::HTML), 
-                
-                    labelOptions = labelOptions(
-                        style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
-                        textsize = '15px', direction = 'auto'))
-        }
-        if (input$visOp1){
-            leafletProxy('basemap_leaflet') %>%
-                addCircleMarkers(
-                    data = Merged_School_Data_20_21, 
-                    lng = ~lon, 
-                    lat = ~lat, 
-                    radius = 2,
-                    weight = 1, 
-                    color = '#b00000',
-                    fillOpacity = 1)
-            leafletProxy('basemap_leaflet') %>%
-                addCircleMarkers( 
-                    data = Merged_School_Data_20_21, 
-                    lng = ~lon, 
-                    lat = ~lat, 
-                    radius = ~(Merged_School_Data_20_21) * 2,
-                    weight = 1, 
-                    color = '#d62728',
-                    fillOpacity = 0.3, 
-                    label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Students receiving Special Education Services: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/></div>', 
-                                    Merged_School_Data_20_21$school_name, 
-                                    cases_per_school$city, 
-                                    cases_per_school$school_level, 
-                                    cases_per_school$school_board, 
-                                    cases_per_school$school_language, 
-                                    cases_per_school$school_enrolment, 
-                                    cases_per_school$low_income, 
-                                    cases_per_school$non_english, 
-                                    cases_per_school$from_non_english, 
-                                    cases_per_school$non_french, 
-                                    cases_per_school$from_non_french, 
-                                    cases_per_school$special_education,
-                                    cases_per_school$cases_per_school,
-                                    cases_per_school$cases_per_school_staff,
-                                    cases_per_school$cases_per_school_student,
-                                    cases_per_school$cases_per_school_unidentified) %>% lapply(htmltools::HTML), 
-                    labelOptions = labelOptions(
-                        style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
-                        textsize = '15px', direction = 'auto'))
-        }
+          addCircleMarkers(
+            data = Merged_School_Data_20_21, 
+            lng = ~lon, 
+            lat = ~lat, 
+            radius = 2,
+            weight = 1, 
+            color = '#808080',
+            fillOpacity = 1)
+        leafletProxy('basemap_leaflet') %>%
+          addCircleMarkers( 
+            data = cases_per_school, 
+            lng = ~lon, 
+            lat = ~lat, 
+            radius = ~(cases_per_school) * 2,
+            weight = 1, 
+            color = '#808080',
+            fillOpacity = 0.3, 
+            label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Students receiving Special Education Services: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/></div>', 
+                            Merged_School_Data_20_21$school_name, 
+                            Merged_School_Data_20_21$city, 
+                            Merged_School_Data_20_21$school_level, 
+                            Merged_School_Data_20_21$school_board, 
+                            Merged_School_Data_20_21$school_language, 
+                            Merged_School_Data_20_21$school_enrolment, 
+                            Merged_School_Data_20_21$low_income, 
+                            Merged_School_Data_20_21$non_english, 
+                            Merged_School_Data_20_21$from_non_english, 
+                            Merged_School_Data_20_21$non_french, 
+                            Merged_School_Data_20_21$from_non_french, 
+                            Merged_School_Data_20_21$special_education,
+                            Merged_School_Data_20_21$cases_per_school,
+                            Merged_School_Data_20_21$cases_per_school_staff,
+                            Merged_School_Data_20_21$cases_per_school_student,
+                            Merged_School_Data_20_21$cases_per_school_unidentified) %>% lapply(htmltools::HTML), 
+            labelOptions = labelOptions(
+              style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
+              textsize = '15px', direction = 'auto'))
+      }
     }
+    
     
     #Observes the activity for Mapper2022-2021 "Schools With Cases" option
     observeEvent(input$visOp1,{
