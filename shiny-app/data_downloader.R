@@ -100,7 +100,7 @@ clean_all_names <- function(dirty_names) {
   
   # clean up 1: fix iconv transliterated characters and remove extraneous characters
   clean_names <- str_replace_all(dirty_names, '[0-9]+', ' ') %>%
-    iconv(., 'ASCII//TRANSLIT', sub = 'byte') %>%
+    # iconv(., 'ASCII//TRANSLIT', sub = 'byte') %>%
     tolower %>% 
     str_replace_all(., '<c2><a0>', ' ') %>%
     str_replace_all(., '\\s+', ' ') %>%
@@ -308,7 +308,7 @@ if (needs_refresh) {
   # 1. load school risk rank data --------------------------------------------
   
   fname_school_risk_rank <- file.path(data_dir, 'COVID19NeighbRiskRank_TCDSBElemSecond_2020-08-20.xlsx')
-  risk_rank_elementary <- read_xlsx(fname_school_risk_rank, sheet = 2, skip = 3, col_names = TRUE)
+  risk_rank_elementary <- read_excel(fname_school_risk_rank, sheet = 2, skip = 3, col_names = TRUE)
   risk_rank_secondary <- read_xlsx(fname_school_risk_rank, sheet = 4, skip = 3, col_names = TRUE)
   
   # 2. load neighborhood risk rank data --------------------------------------
