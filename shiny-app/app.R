@@ -1685,7 +1685,9 @@ server <- function(input, output, session) {
                          incProgress(1, 'loading shapes')
                          # regenerate the 20_21 map
                          # https://geohub.lio.gov.on.ca/datasets/province/data
-                         ontario <- st_read(file.path('data/shapefiles', layer = 'PROVINCE.shp'))
+                         ontario <- st_read(file.path('data/shapefiles', layer = 'PROVINCE.shp')) %>%
+                           st_transform(crs = 4326)
+                         
                          incProgress(1, 'generating map')
                          map20_21 <- leaflet(ontario)
                          incProgress(1, 'setting view')
@@ -1697,6 +1699,9 @@ server <- function(input, output, session) {
                          
                          # add case data markers
                          incProgress(1, 'adding markers')
+                         # ensure numeric lat long
+                         cases_per_school_20_21 <- cases_per_school_20_21 %>%
+                           dplyr::mutate(lon = as.numeric(lon), lat = as.numeric(lat))
                          map20_21 <- addCircleMarkers(map20_21,
                                                     data = cases_per_school_20_21, 
                                                     lng = ~lon, 

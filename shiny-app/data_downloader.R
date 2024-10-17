@@ -35,6 +35,7 @@ library(rvest)
 library(stringr)
 library(xts)
 library(stringdist)
+library(dplyr)
 
 # SETTINGS ---------------------------------------------------------------------
 
@@ -97,51 +98,21 @@ get_utf_table <- function() {
 #' View(df2)
 #' 
 clean_all_names <- function(dirty_names) {
-  
-  # clean up 1: fix iconv transliterated characters and remove extraneous characters
-  clean_names <- str_replace_all(dirty_names, '[0-9]+', ' ') %>%
-    # iconv(., 'ASCII//TRANSLIT', sub = 'byte') %>%
+  # Convert to UTF-8 and clean up
+  clean_names <- iconv(dirty_names, to = "UTF-8", sub = "byte") %>%
+    str_replace_all('[0-9]+', ' ') %>%
     tolower %>% 
-    str_replace_all(., '<c2><a0>', ' ') %>%
-    str_replace_all(., '\\s+', ' ') %>%
-    str_replace_all(., ',', ' ') %>%
-    str_replace_all(., '\\.', '') %>%
-    str_replace_all(., '\\(', ' ') %>%
-    str_replace_all(., '\\)', ' ') %>%
-    str_replace_all(., '/', ' ') %>%
-    str_replace_all(., '@', ' ') %>%
-    str_replace_all(., '\\+', ' ') %>%
-    str_replace_all(., '\\-', ' ') %>%
-    str_replace_all(., '&', ' ') %>%
-    str_replace_all(., '<e2><80><99>', '\'') %>%
-    str_replace_all(., '<c3><83><c2><ae>', ' ') %>%
-    str_replace_all(., '<c3><a2><e2><82><ac><e2><84><a2>', '\'') %>%
-    str_replace_all(., '<c3><82>', ' ') %>%
-    str_replace_all(., '<c3><a2>', 'a') %>%
-    str_replace_all(., '<c3><83><c2><a1>', 'a') %>%
-    str_replace_all(., '<c3><83><c2><a2>', 'a') %>%
-    str_replace_all(., '<c3><a1>', 'a') %>%
-    str_replace_all(., '<c3><83><c2><a7>', 'c') %>%
-    str_replace_all(., '<c3><a7>', 'c') %>%
-    str_replace_all(., '<c3><83><c2><a9>l<c3><83><c2><a9>', 'el') %>%
-    str_replace_all(., '<c3><83><e2><80><b0>', 'e') %>%
-    str_replace_all(., '<c3><83><e2><80><9c>', 'e') %>%	
-    str_replace_all(., '<c3><83><c2><ab>', 'e') %>%	
-    str_replace_all(., '<c3><83><c2><a9>', 'e') %>%
-    str_replace_all(., '<c3><83><c2><a8>', 'e') %>%
-    str_replace_all(., '<c3><89>', 'e') %>%
-    str_replace_all(., '<c3><a8>', 'e') %>%
-    str_replace_all(., '<c3><a9>', 'e') %>%
-    str_replace_all(., '<c3><aa>', 'e') %>%
-    str_replace_all(., '<c3><ab>', 'e') %>%
-    str_replace_all(., '<c3><83><c2><af>', 'i') %>%
-    str_replace_all(., '<c3><ae>', 'i') %>%
-    str_replace_all(., '<c3><af>', 'i') %>%
-    str_replace_all(., '<c5><93>', 'oe') %>%
-    str_replace_all(., '<c3><85><e2><80><9c>', 'oe') %>%
-    str_replace_all(., '<c3><83><c2><bb>', 'u') %>%
-    str_replace_all(., '<c3><bb>', 'u') %>%
-    str_replace_all(., '<c3><83>', 'a') %>%
+    str_replace_all('\\s+', ' ') %>%
+    str_replace_all(',', ' ') %>%
+    str_replace_all('\\.', '') %>%
+    str_replace_all('\\(', ' ') %>%
+    str_replace_all('\\)', ' ') %>%
+    str_replace_all('/', ' ') %>%
+    str_replace_all('@', ' ') %>%
+    str_replace_all('\\+', ' ') %>%
+    str_replace_all('\\-', ' ') %>%
+    str_replace_all('&', ' ') %>%
+    str_replace_all('’', '\'') %>%
     str_squish
   
   stopwords <- c('<c3><89><c3><89>c', 
@@ -243,18 +214,16 @@ clean_all_names <- function(dirty_names) {
                  'vocational',
                  'wellness')
   
-  # clean up 2: remove stopwords
+  # Clean up stopwords
   stopwords_regex <- paste0(stopwords, collapse = '|')
-  clean_names <- lapply(clean_names, str_replace_all, stopwords_regex, ' ')
-  clean_names <- lapply(clean_names, str_squish)
-  clean_names <- unlist(clean_names)
+  clean_names <- str_replace_all(clean_names, stopwords_regex, ' ')
+  clean_names <- str_squish(clean_names)
   
-  # clean up 3: consistent formatting for catholic school names
+  # Consistent formatting
   clean_names <- str_replace_all(clean_names, 'monsignor', 'msgr')
   clean_names <- str_replace_all(clean_names, 'monseigneur', 'msgr')
   clean_names <- str_replace_all(clean_names, 'saint([ |\\-])', 'st\\1')
   clean_names <- str_replace_all(clean_names, 'sainte([ |\\-])', 'ste\\1')
-  clean_names <- str_squish(clean_names)
   
   # clean up 4: hard-coded disambiguations
   clean_names <- str_replace_all(clean_names, 'banting memorial district', 'banting memorial')
@@ -305,72 +274,86 @@ clean_all_names <- function(dirty_names) {
 needs_refresh <- TRUE
 
 if (needs_refresh) {
-  # 1. load school risk rank data --------------------------------------------
   
+  # 1. load school risk rank data --------------------------------------------
   fname_school_risk_rank <- file.path(data_dir, 'COVID19NeighbRiskRank_TCDSBElemSecond_2020-08-20.xlsx')
-  risk_rank_elementary <- read_excel(fname_school_risk_rank, sheet = 2, skip = 3, col_names = TRUE)
-  risk_rank_secondary <- read_xlsx(fname_school_risk_rank, sheet = 4, skip = 3, col_names = TRUE)
+  if (file.exists("data/risk_rank_elementary.rds")) {
+    risk_rank_elementary <- readRDS("data/risk_rank_elementary.rds")  # Load from .rds if available
+  } else {
+    risk_rank_elementary <- read_excel(fname_school_risk_rank, sheet = 2, skip = 3, col_names = TRUE)
+    saveRDS(risk_rank_elementary, "data/risk_rank_elementary.rds")  # Save as .rds
+  }
+  
+  if (file.exists("data/risk_rank_secondary.rds")) {
+    risk_rank_secondary <- readRDS("data/risk_rank_secondary.rds")  # Load from .rds if available
+  } else {
+    risk_rank_secondary <- read_xlsx(fname_school_risk_rank, sheet = 4, skip = 3, col_names = TRUE)
+    saveRDS(risk_rank_secondary, "data/risk_rank_secondary.rds")  # Save as .rds
+  }
   
   # 2. load neighborhood risk rank data --------------------------------------
-  
   fname_neighborhood_risk_rank <- file.path(data_dir, '11042020 with Demographics WALLACE.xlsx')
-  risk_rank_neighborhood <- read_xlsx(fname_neighborhood_risk_rank, sheet = 1, skip = 2, col_names = FALSE)
-  risk_rank_neighborhood <- risk_rank_neighborhood[ , setdiff(1:29, c(21, 26))]
-  colnames(risk_rank_neighborhood) <- c('neighborhood_name',
-                                        'of_10',	
-                                        'of_15',	
-                                        'of_17',	
-                                        'of_19',	
-                                        'of_21',	
-                                        'of_23',	
-                                        'of_25',	
-                                        'of_30',	
-                                        'of_33',	
-                                        'of_50',	
-                                        'of_100',	
-                                        'of_250',	
-                                        'of_500',	
-                                        'of_750',	
-                                        'of_1000',	
-                                        'of_1250',
-                                        'of_1500',	
-                                        'of_1750',	
-                                        'of_2000',
-                                        'Population',
-                                        '7-Day Count',
-                                        'One Infection Per',
-                                        'Transmissible Cases before Isolation and Seroprevalence',
-                                        'Population Density Per Square Kilometre',
-                                        'Average Household Size',
-                                        'Prevalence of low income based on the Low-income cut-offs, after tax (LICO-AT) (%)')
-  risk_rank_neighborhood$neighborhood_name <- str_replace_all(risk_rank_neighborhood$neighborhood_name, 'St\\.', 'St\\. ') %>% str_squish
-  risk_rank_neighborhood$neighborhood_name <- str_replace(risk_rank_neighborhood$neighborhood_name, 'Mimico \\(includes Humber Bay Shores\\)', 'Mimico')
-  risk_rank_neighborhood$neighborhood_name <- str_replace(risk_rank_neighborhood$neighborhood_name, 'Weston-Pelham Park', 'Weston-Pellam Park')
-  fn <- file.path(data_dir, 'risk_rank_neighborhood.rdata')
-  save('risk_rank_neighborhood', file = fn)
+  if (file.exists("data/risk_rank_neighborhood.rds")) {
+    risk_rank_neighborhood <- readRDS("data/risk_rank_neighborhood.rds")  # Load from .rds if available
+  } else {
+    risk_rank_neighborhood <- read_xlsx(fname_neighborhood_risk_rank, sheet = 1, skip = 2, col_names = FALSE)[ , -c(21, 26)]
+    colnames(risk_rank_neighborhood) <- c('neighborhood_name', 'of_10', 'of_15', 'of_17', 'of_19', 'of_21', 'of_23', 'of_25', 'of_30', 'of_33', 'of_50', 'of_100', 'of_250', 'of_500', 'of_750', 'of_1000', 'of_1250', 'of_1500', 'of_1750', 'of_2000', 'Population', '7-Day Count', 'One Infection Per', 'Transmissible Cases before Isolation and Seroprevalence', 'Population Density Per Square Kilometre', 'Average Household Size', 'Prevalence of low income based on the Low-income cut-offs, after tax (LICO-AT) (%)')
+    risk_rank_neighborhood$neighborhood_name <- str_replace_all(risk_rank_neighborhood$neighborhood_name, 'St\\.', 'St\\. ') %>% str_squish()
+    risk_rank_neighborhood$neighborhood_name <- str_replace(risk_rank_neighborhood$neighborhood_name, 'Mimico \\(includes Humber Bay Shores\\)', 'Mimico')
+    risk_rank_neighborhood$neighborhood_name <- str_replace(risk_rank_neighborhood$neighborhood_name, 'Weston-Pelham Park', 'Weston-Pellam Park')
+    saveRDS(risk_rank_neighborhood, "data/risk_rank_neighborhood.rds")  # Save as .rds
+  }
   
   # 3. load school closure data ---------------------------------------------
   fname_school_closure <- file.path(data_dir, 'COVID_School_Closures_V2.xlsx')
-  school_closures_sept_april_20_21 <- read_xlsx(fname_school_closure, sheet = 1, col_names = TRUE)
-  school_closures_sept_dec_21_21 <- read_xlsx(fname_school_closure, sheet = 2, col_names = TRUE)
-  school_closures_jan_may_22_22 <- read_xlsx(fname_school_closure, sheet = 3, col_names = TRUE)
+  
+  if (file.exists("data/school_closures_sept_april_20_21.rds")) {
+    school_closures_sept_april_20_21 <- readRDS("data/school_closures_sept_april_20_21.rds")  # Load from .rds if available
+  } else {
+    school_closures_sept_april_20_21 <- read_xlsx(fname_school_closure, sheet = 1, col_names = TRUE)
+    saveRDS(school_closures_sept_april_20_21, "data/school_closures_sept_april_20_21.rds")  # Save as .rds
+  }
+  
+  if (file.exists("data/school_closures_sept_dec_21_21.rds")) {
+    school_closures_sept_dec_21_21 <- readRDS("data/school_closures_sept_dec_21_21.rds")  # Load from .rds if available
+  } else {
+    school_closures_sept_dec_21_21 <- read_xlsx(fname_school_closure, sheet = 2, col_names = TRUE)
+    saveRDS(school_closures_sept_dec_21_21, "data/school_closures_sept_dec_21_21.rds")  # Save as .rds
+  }
+  
+  if (file.exists("data/school_closures_jan_may_22_22.rds")) {
+    school_closures_jan_may_22_22 <- readRDS("data/school_closures_jan_may_22_22.rds")  # Load from .rds if available
+  } else {
+    school_closures_jan_may_22_22 <- read_xlsx(fname_school_closure, sheet = 3, col_names = TRUE)
+    saveRDS(school_closures_jan_may_22_22, "data/school_closures_jan_may_22_22.rds")  # Save as .rds
+  }
+  
   
   # 4. clean active cases data -----------------------------------------------
   
   message('cleaning active cases data')
-  colnames(covid19_schools_active) <- tolower(colnames(covid19_schools_active))
-  colnames(covid19_schools_active) <- str_replace_all(colnames(covid19_schools_active), '[^a-z_]', '')
-  covid19_schools_active$collected_date <- as.Date(covid19_schools_active$collected_date)
-  covid19_schools_active$reported_date <- as.Date(covid19_schools_active$reported_date)
-  covid19_schools_active$school <- str_squish(covid19_schools_active$school)
-  covid19_schools_active$school_board <- str_squish(covid19_schools_active$school_board)
-  covid19_schools_active$municipality <- str_squish(covid19_schools_active$municipality)
-  fn <- file.path(data_dir, 'covid19_schools_active.rdata')
-  save('covid19_schools_active', file = fn)
+  if (file.exists("data/covid19_schools_active.rds")) {
+    covid19_schools_active <- readRDS("data/covid19_schools_active.rds")  # Load from .rds if available
+  } else {
+    # Cleaning steps
+    colnames(covid19_schools_active) <- tolower(colnames(covid19_schools_active))
+    colnames(covid19_schools_active) <- str_replace_all(colnames(covid19_schools_active), '[^a-z_]', '')
+    covid19_schools_active$collected_date <- as.Date(covid19_schools_active$collected_date)
+    covid19_schools_active$reported_date <- as.Date(covid19_schools_active$reported_date)
+    covid19_schools_active$school <- str_squish(covid19_schools_active$school)
+    covid19_schools_active$school_board <- str_squish(covid19_schools_active$school_board)
+    covid19_schools_active$municipality <- str_squish(covid19_schools_active$municipality)
+    
+    saveRDS(covid19_schools_active, "data/covid19_schools_active.rds")  # Save as .rds
+  }
+  
   
   # 5. clean summary data ----------------------------------------------------
   
   message('cleaning summary data')
+  if (file.exists("data/covid19_schools_summary.rds")) {
+    covid19_schools_summary <- readRDS("data/covid19_schools_summary.rds")  # Load from .rds if available
+  } else {
   colnames(covid19_schools_summary) <- tolower(colnames(covid19_schools_summary))
   colnames(covid19_schools_summary) <- str_replace_all(colnames(covid19_schools_summary), '[^a-z_]', '')
   covid19_schools_summary$collected_date <- as.Date(covid19_schools_summary$collected_date)
@@ -381,208 +364,177 @@ if (needs_refresh) {
   colnames(covid19_schools_summary) <- str_replace(colnames(covid19_schools_summary), 'past_school_related_unspecified_cases', 'past_school_related_unidentified_cases')
   colnames(covid19_schools_summary) <- str_replace(colnames(covid19_schools_summary), 'cumulative_school_related_unspecified_cases', 'cumulative_school_related_unidentified_cases')
   fn <- file.path(data_dir, 'covid19_schools_summary.rdata')
-  save('covid19_schools_summary', file = fn)
+  
+  saveRDS(covid19_schools_summary, "data/covid19_schools_summary.rds")  # Save as .rds
+  }
   
   # 6. clean school demographics data ----------------------------------------
   
   message('cleaning demographic data')
-  colnames(school_demographics) <- tolower(colnames(school_demographics))
-  school_demographics$`board name` <- str_replace_all(school_demographics$`board name`, '’', '\'')
-  covid19_schools_active$school_board <- str_replace_all(covid19_schools_active$school_board, '’', '\'')
-  school_demographics$`board name` <- str_squish(school_demographics$`board name`)
-  school_demographics$`school name` <- str_squish(school_demographics$`school name`)
-  school_demographics$municipality <- str_squish(school_demographics$municipality)
-  fn <- file.path(data_dir, 'school_demographics.rdata')
-  save('school_demographics', file = fn)
+  if (file.exists("data/school_demographics.rds")) {
+    school_demographics <- readRDS("data/school_demographics.rds")  # Load from .rds if available
+  } else {
+    # Cleaning steps
+    colnames(school_demographics) <- tolower(colnames(school_demographics))
+    school_demographics$`board name` <- str_replace_all(school_demographics$`board name`, '’', '\'')
+    covid19_schools_active$school_board <- str_replace_all(covid19_schools_active$school_board, '’', '\'')
+    school_demographics$`board name` <- str_squish(school_demographics$`board name`)
+    school_demographics$`school name` <- str_squish(school_demographics$`school name`)
+    school_demographics$municipality <- str_squish(school_demographics$municipality)
+    
+    saveRDS(school_demographics, "data/school_demographics.rds")  # Save as .rds
+  }
   
   # 7. clean risk assessment data --------------------------------------------
   
   message('cleaning risk assessment data')
-  risk_rank_elementary <- risk_rank_elementary[ , c(1:9, 13) ]
-  colnames(risk_rank_elementary) <- tolower(colnames(risk_rank_elementary))
-  fn <- file.path(data_dir, 'risk_rank_elementary.rdata')
-  save('risk_rank_elementary', file = fn)
+  if (file.exists("data/risk_rank_elementary.rds")) {
+    risk_rank_elementary <- readRDS("data/risk_rank_elementary.rds")  # Load from .rds if available
+  } else {
+    risk_rank_elementary <- risk_rank_elementary[ , c(1:9, 13)]
+    colnames(risk_rank_elementary) <- tolower(colnames(risk_rank_elementary))
+    saveRDS(risk_rank_elementary, "data/risk_rank_elementary.rds")  # Save as .rds
+  }
   
-  risk_rank_secondary <- risk_rank_secondary[ , c(1:9, 13) ]
-  colnames(risk_rank_secondary) <- tolower(colnames(risk_rank_secondary))
-  fn <- file.path(data_dir, 'risk_rank_secondary.rdata')
-  save('risk_rank_secondary', file = fn)
+  if (file.exists("data/risk_rank_secondary.rds")) {
+    risk_rank_secondary <- readRDS("data/risk_rank_secondary.rds")  # Load from .rds if available
+  } else {
+    risk_rank_secondary <- risk_rank_secondary[ , c(1:9, 13)]
+    colnames(risk_rank_secondary) <- tolower(colnames(risk_rank_secondary))
+    saveRDS(risk_rank_secondary, "data/risk_rank_secondary.rds")  # Save as .rds
+  }
   
   # 8. build/refresh school geocodes db --------------------------------------
   
-  # message('building geocodes db')
-  # cached_geocodes <- data.frame(geo_query_str = NA, lon = NA, lat = NA)
-  # if (file.exists(geocodes_cache_file)) base::load(file = geocodes_cache_file)
-  # # create query strings
-  # geo_query_str <- sprintf('%s,%s,Ontario,Canada',
-  #                          str_trim(covid19_schools_active$school),
-  #                          covid19_schools_active$municipality)
-  # geo_query_str <- unique(geo_query_str)
-  # message(sprintf('we have %s geocode queries to make', length(geo_query_str)))
-  # idx <- which(geo_query_str %in% cached_geocodes$geo_query_str)
-  # message(sprintf('we have %s cached geocode entries', length(idx)))
-  # if (length(idx) > 0) geo_query_str <- geo_query_str[ -idx ]
-  # if (length(geo_query_str) > 0) {
-  #   # we have queries to do
-  #   message('processing geocoding requests')
-  #   geo_query_str <- data.frame(geo_query_str, stringsAsFactors = FALSE)
-  #   register_google(google_api_key)
-  #   school_geocodes <- mutate_geocode(geo_query_str, geo_query_str)
-  #   school_geocodes <- rbind(school_geocodes, cached_geocodes)
-  #   # save known geocodes to local db to save api calls
-  #   idx <- which(!is.na(school_geocodes$lon))
-  #   cached_geocodes <- school_geocodes[ idx, ]
-  #   save('cached_geocodes', file = geocodes_cache_file)
-  #   school_geocodes <- cached_geocodes
-  # } else {
-  #   # all of our data is already in cache
-  #   message('all geocodes already in cache!')
-  #   school_geocodes <- cached_geocodes
-  # }
+  message('building geocodes db')
   
-  # 9. combine active school cases with demographic data --------------------
-  
-  # find all mismatched school names
-  idx <- which(covid19_schools_active$school %in% school_demographics$`school name` == FALSE)
-  covid19_schools_active$school[ idx ] %>% unique %>% str_trim %>% sort
-  
-  # clean school names in demographic dataset
-  sn1 <- clean_all_names(school_demographics$`school name`)
-  
-  # clean school names in active cases dataset
-  sn2 <- clean_all_names(covid19_schools_active$school)
-  
-  # let's see how well our cleaning function does...
-  idx <- which(sn2 %in% sn1 == FALSE)
-  mismatched_school_names <- sn2[ idx ] %>% unique %>% str_trim %>% sort
-  # (mismatched_school_names)
-  # cat(mismatched_school_names, sep = '\n')
-  # (length(mismatched_school_names))
-  
-  # use stringdist fuzzy matching to resolve mismatched names
-  sdm <- stringdistmatrix(mismatched_school_names, sn1)
-  
-  # visually inspect the quality of our fuzzy matches
-  message(sprintf('fuzzy matching based on minimum string distance yields the following matches between names in cases and demographics datasets:'))
-  sprintf('%s --> %s', mismatched_school_names, sn1[ apply(sdm, 1, which.min) ]) %>% cat(., sep = '\n')
-  
-  # use this code for string matching diagnostics
-  # View(data.frame(sn1 %>% sort))
-  # View(data.frame(sn2 %>% sort))
-  # View(data.frame(covid19_schools_active$school))
-  # View(data.frame(school_demographics$`school name`))
-  
-  # add cleaned names to school demographics and school active cases datasets
-  covid19_schools_active$school_clean <- sn2
-  school_demographics$school_clean <- sn1
-  
-  # combine school demographics and school active cases datasets
-  ambiguous_school_names <- character(0)
-  
-  covid19_schools_active_with_demographics <- apply(covid19_schools_active, 1, function(x) {
-    # match on cleaned school name
-    idx <- which(school_demographics$school_clean == x[ 'school_clean' ])
-    if (length(idx) > 1) {
-      disambiguation_df <- data.frame(x[ 'school' ] %>% as.character,
-                                      school_demographics[ idx, c('school name', 'board name') ],
-                                      x[ 'school_board' ] %>% as.character,
-                                      stringsAsFactors = FALSE)
-      # if all school boards are the same it is a question of whether this is an elementary or a high school
-      if (length(unique(disambiguation_df[ , 3 ])) == 1) {
-        # are we looking at the high school or the elementary school?
-        # message('disambiguated by school type')
-        # browser()
-        idx <- stringdistmatrix(disambiguation_df[ 1, 1 ], disambiguation_df[ , 2 ])
-        idx <- which.min(idx)
-        idx2 <- which(school_demographics$`school name` == disambiguation_df[ idx, 'school.name' ] & 
-                        school_demographics$`board name` == disambiguation_df[ idx, 'board.name' ])
-        result <- data.frame(t(x), school_demographics[ idx2, ])
-      } else {
-        # fuzzy match the board names
-        # message('disambiguated by school board name')
-        bn <- disambiguation_df[ 1, 4 ]
-        bn <- str_replace(bn, 'Conseil des écoles catholiques', 'CSDC')
-        bn <- str_replace(bn, '\\(.*\\)', '')
-        bn <- str_trim(bn)
-        idx <- stringdistmatrix(bn, disambiguation_df[ , 3 ])
-        idx <- which.min(idx)
-        idx2 <- which(school_demographics$`school name` == disambiguation_df[ idx, 'school.name' ] & 
-                        school_demographics$`board name` == disambiguation_df[ idx, 'board.name' ])
-        # message(sprintf('chose entry %s', idx))
-        result <- data.frame(t(x), school_demographics[ idx2, ])
-        # browser()
-      }
-    } else if (length(idx) == 1) {
-      # we have a perfect match
-      result <- data.frame(t(x), school_demographics[ idx, ])
-    } else if (length(idx) == 0) {
-      # this is one of the cleaned school names that is mismatched
-      # browser()
-      # before we give up let's see if we have any fuzzy matches...
-      sdm <- stringdistmatrix(x[ 'school_clean'], school_demographics$school_clean)
-      sdm <- as.integer(sdm)
-      idx1 <- which(sdm < 3)
-      if (length(idx1) > 0) {
-        if (length(idx1) > 1) {
-          # break ties 
-          # disambiguate by school board
-          sdm2 <- stringdistmatrix(x[ 'school_board' ], school_demographics[ idx1, 'board name'])
-          sdm2 <- as.integer(sdm2)
-          idx2 <- which.min(sdm2)
-          idx1 <- idx1[ idx2 ]
-          result <- data.frame(t(x), school_demographics[ idx1, ])	
-          # browser()
-        } else {
-          # message(sprintf('found fuzzy match for school name "%s"', x[ 'school_clean' ]))
-          result <- data.frame(t(x), school_demographics[ idx1, ])	
-        }
-      } else {
-        # if (debug) message(sprintf('no corresponding school name found for "%s" using dummy data', x[ 'school_clean' ]))
-        ambiguous_school_names <- get('ambiguous_school_names', envir = .GlobalEnv)
-        ambiguous_school_names <- c(ambiguous_school_names, x[ 'school_clean' ])
-        ambiguous_school_names <- unique(ambiguous_school_names)
-        ambiguous_school_names <- sort(ambiguous_school_names)
-        assign('ambiguous_school_names', ambiguous_school_names, envir = .GlobalEnv)
-        dummy_df <- data.frame(t(rep('', 52)))
-        colnames(dummy_df) <- colnames(school_demographics)
-        result <- data.frame(t(x))	
-      }
-    }
-    if (nrow(result) > 1) { 
-      # use municipality to disambiguate
-      idx <- which(tolower(str_trim(result$municipality)) == tolower(str_trim(result$municipality.1)))
-      if (length(idx) == 1) {
-        # if (debug) message(sprintf('disambiguated by municipality for %s!', x[ 'school_clean' ]))
-        result <- result[ idx, ]
-      } else {
-        # if (debug) message(sprintf('sloppy disambiguation for %s!', x[ 'school_clean' ]))
-        result <- result[ 1, ]
-      }
-    }
-    return(result)
-  })
-  
-  # use this to update the clean_all_names function so that it can properly match
-  # entries in active cases dataset with corresponding entries in school demographics 
-  # dataset
-  if (debug) { 
-    message(sprintf('no corresponding school name found for: %s', paste0(ambiguous_school_names, collapse = ', ')))
-    df1 <- covid19_schools_active[ , c('school', 'municipality', 'school_board') ]
-    df1 <- unique(df1)
-    df1$clean_name <- clean_all_names(df1$school)
-    idx <- order(df1$school)
-    df1 <- df1[ idx, ]
-    View(df1)
-    df2 <- school_demographics[ , c('school name', 'municipality', 'board name') ]
-    df2 <- unique(df2)
-    df2$clean_name <- clean_all_names(df2$`school name`)
-    idx <- order(df2$school)
-    df2 <- df2[ idx, ]
-    View(df2)
+  # Check if the original cached geocodes file exists
+  if (file.exists(geocodes_cache_file)) {
+    # Load the original cached geocodes file
+    load(geocodes_cache_file)  # Assuming this creates a variable `cached_geocodes`
+    
+    # Save it as an .rds file for future use
+    saveRDS(cached_geocodes, "data/cached_geocodes.rds")
+    
+    message("Original cached geocodes file found and converted to .rds format.")
+  } else if (file.exists("data/cached_geocodes.rds")) {
+    # Load from .rds if already exists
+    cached_geocodes <- readRDS("data/cached_geocodes.rds") 
+  } else {
+    cached_geocodes <- data.frame(geo_query_str = NA, lon = NA, lat = NA)
   }
   
-  covid19_schools_active_with_demographics <- rbindlist(covid19_schools_active_with_demographics, use.names = TRUE, fill = TRUE)
-  covid19_schools_active_with_demographics <- data.frame(covid19_schools_active_with_demographics)
+  # Create query strings
+  geo_query_str <- sprintf('%s,%s,Ontario,Canada',
+                           str_trim(covid19_schools_active$school),
+                           covid19_schools_active$municipality)
+  geo_query_str <- unique(geo_query_str)
+  message(sprintf('We have %s geocode queries to make', length(geo_query_str)))
+  idx <- which(geo_query_str %in% cached_geocodes$geo_query_str)
+  message(sprintf('We have %s cached geocode entries', length(idx)))
+  if (length(idx) > 0) geo_query_str <- geo_query_str[-idx]
+  
+  if (length(geo_query_str) > 0) {
+    # We have queries to do
+    message('Processing geocoding requests')
+    geo_query_str <- data.frame(geo_query_str, stringsAsFactors = FALSE)
+    register_google(google_api_key)
+    school_geocodes <- mutate_geocode(geo_query_str, geo_query_str)
+    school_geocodes <- rbind(school_geocodes, cached_geocodes)
+    
+    # Save known geocodes to local db to save API calls
+    idx <- which(!is.na(school_geocodes$lon))
+    cached_geocodes <- school_geocodes[idx, ]
+    saveRDS(cached_geocodes, "data/cached_geocodes.rds")  # Save as .rds
+    message("New geocodes have been saved to cached_geocodes.rds.")
+  } else {
+    message('All geocodes already in cache!')
+    school_geocodes <- cached_geocodes
+  }
+  
+  
+  # 9. combine active school cases with demographic data --------------------
+  if (file.exists("data/covid19_schools_active_with_demographics.rds")) {
+    covid19_schools_active_with_demographics <- readRDS("data/covid19_schools_active_with_demographics.rds")  # Load from .rds if available
+  } else {
+    # Find all mismatched school names
+    idx <- which(covid19_schools_active$school %in% school_demographics$`school name` == FALSE)
+    mismatched_school_names <- unique(str_trim(covid19_schools_active$school[idx])) %>% sort
+    
+    # Clean school names in demographic dataset
+    sn1 <- clean_all_names(school_demographics$`school name`)
+    
+    # Clean school names in active cases dataset
+    sn2 <- clean_all_names(covid19_schools_active$school)
+    
+    # Let's see how well our cleaning function does...
+    idx <- which(sn2 %in% sn1 == FALSE)
+    mismatched_school_names <- unique(str_trim(sn2[idx])) %>% sort
+    message(sprintf('Found %s mismatched school names.', length(mismatched_school_names)))
+    
+    # Use stringdist fuzzy matching to resolve mismatched names
+    sdm <- stringdistmatrix(mismatched_school_names, sn1)
+    
+    # Visually inspect the quality of our fuzzy matches
+    message(sprintf('Fuzzy matching yields the following matches:'))
+    matches <- sprintf('%s --> %s', mismatched_school_names, sn1[apply(sdm, 1, which.min)])
+    cat(matches, sep = '\n')
+    
+    # Add cleaned names to school demographics and school active cases datasets
+    covid19_schools_active$school_clean <- sn2
+    school_demographics$school_clean <- sn1
+    
+    # Combine school demographics and school active cases datasets
+    ambiguous_school_names <- character(0)
+    
+    covid19_schools_active_with_demographics <- apply(covid19_schools_active, 1, function(x) {
+      # Attempt to match first
+      idx <- which(school_demographics$school_clean == x['school_clean'])
+      
+      # If no match found, try using a fuzzy match or log a warning
+      if (length(idx) == 0) {
+        # Fuzzy matching here (optional) or log the unmatched name
+        message(sprintf('No matching school found for: %s', x['school_clean']))
+        idx <- which.min(stringdistmatrix(x['school_clean'], school_demographics$school_clean))
+        if (idx) {
+          message(sprintf('Fuzzy match found for: %s', school_demographics$school_clean[idx]))
+        } else {
+          return(NULL) # Return NULL or handle as necessary
+        }
+      }
+      
+      if (length(idx) > 1) {
+        disambiguation_df <- data.frame(
+          x['school'] %>% as.character,
+          school_demographics[idx, c('school name', 'board name')],
+          x['school_board'] %>% as.character,
+          stringsAsFactors = FALSE
+        )
+        # If all school boards are the same, disambiguate by school type
+        if (length(unique(disambiguation_df[, 3])) == 1) {
+          idx <- stringdistmatrix(disambiguation_df[1, 1], disambiguation_df[, 2])
+          idx <- which.min(idx)
+          idx2 <- which(school_demographics$`school name` == disambiguation_df[idx, 'school.name'] &
+                          school_demographics$`board name` == disambiguation_df[idx, 'board.name'])
+          result <- data.frame(t(x), school_demographics[idx2, ])
+        } else {
+          # Fuzzy match the board names
+          bn <- stringdistmatrix(disambiguation_df[, 3], disambiguation_df[, 2])
+          idx <- apply(bn, 1, which.min)
+          result <- data.frame(t(x), school_demographics[idx, ])
+        }
+        ambiguous_school_names <- c(ambiguous_school_names, x['school'])
+      } else {
+        result <- data.frame(t(x), school_demographics[idx, ])
+      }
+      
+      return(result)
+    })
+    
+    # Convert the combined dataset back to a dataframe and clean up variable names
+    covid19_schools_active_with_demographics <- do.call(rbind, covid19_schools_active_with_demographics) %>% as.data.frame()
+    saveRDS(covid19_schools_active_with_demographics, "data/covid19_schools_active_with_demographics.rds")  # Save combined data as .rds
+  }
   
   # 10. clean covid19_schools_active_with_demographics -----------------------
   # str(covid19_schools_active_with_demographics)
