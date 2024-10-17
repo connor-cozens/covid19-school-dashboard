@@ -305,27 +305,56 @@ if (needs_refresh) {
   }
   
   # 3. load school closure data ---------------------------------------------
-  fname_school_closure <- file.path(data_dir, 'COVID_School_Closures_V2.xlsx')
+  fname_school_closure <- file.path(data_dir, 'COVID School Closures_V2.xlsx')
   
   if (file.exists("data/school_closures_sept_april_20_21.rds")) {
     school_closures_sept_april_20_21 <- readRDS("data/school_closures_sept_april_20_21.rds")  # Load from .rds if available
   } else {
     school_closures_sept_april_20_21 <- read_xlsx(fname_school_closure, sheet = 1, col_names = TRUE)
-    saveRDS(school_closures_sept_april_20_21, "data/school_closures_sept_april_20_21.rds")  # Save as .rds
+    # Properly Format Closure as Date
+    school_closures_sept_april_20_21 <- school_closures_sept_april_20_21 %>%
+      mutate(`Date of Closure` = as.Date(`Date of Closure`, format = "%Y-%m-%d"))
+    # Fill any NA Reopening Values as +14 Days
+    school_closures_sept_april_20_21 <- school_closures_sept_april_20_21 %>%
+      mutate(`Date of Reopening` = coalesce(`Date of Reopening`, `Date of Closure` + 14))
+    # Properly Format Reopening as Date
+    school_closures_sept_april_20_21 <- school_closures_sept_april_20_21 %>%
+      mutate(`Date of Reopening` = as.Date(`Date of Reopening`, format = "%Y-%m-%d"))
+    # saveRDS(school_closures_sept_april_20_21, "data/school_closures_sept_april_20_21.rds")  # Save as .rds
   }
   
   if (file.exists("data/school_closures_sept_dec_21_21.rds")) {
     school_closures_sept_dec_21_21 <- readRDS("data/school_closures_sept_dec_21_21.rds")  # Load from .rds if available
   } else {
-    school_closures_sept_dec_21_21 <- read_xlsx(fname_school_closure, sheet = 2, col_names = TRUE)
-    saveRDS(school_closures_sept_dec_21_21, "data/school_closures_sept_dec_21_21.rds")  # Save as .rds
+    school_closures_sept_dec_21_21 <- read_xlsx(fname_school_closure, sheet = 2, skip = 1, col_names = TRUE)
+    # Properly Format Closure as Date
+    school_closures_sept_dec_21_21 <- school_closures_sept_dec_21_21 %>%
+      mutate(`Date of Closure` = as.Date(`Date of Closure`, format = "%Y-%m-%d"))
+    # Fill any NA Reopening Values as +14 Days
+    school_closures_sept_dec_21_21 <- school_closures_sept_dec_21_21 %>%
+      mutate(`Date of Reopening` = coalesce(`Date of Reopening`, `Date of Closure` + 14))
+    # Properly Format Reopening as Date
+    school_closures_sept_dec_21_21 <- school_closures_sept_dec_21_21 %>%
+      mutate(`Date of Reopening` = as.Date(`Date of Reopening`, format = "%Y-%m-%d"))
+    # saveRDS(school_closures_sept_dec_21_21, "data/school_closures_sept_dec_21_21.rds")  # Save as .rds
   }
   
   if (file.exists("data/school_closures_jan_may_22_22.rds")) {
     school_closures_jan_may_22_22 <- readRDS("data/school_closures_jan_may_22_22.rds")  # Load from .rds if available
   } else {
-    school_closures_jan_may_22_22 <- read_xlsx(fname_school_closure, sheet = 3, col_names = TRUE)
-    saveRDS(school_closures_jan_may_22_22, "data/school_closures_jan_may_22_22.rds")  # Save as .rds
+    school_closures_jan_may_22_22 <- read_xlsx(fname_school_closure, sheet = 3, skip = 1, col_names = TRUE)
+    # Rename to Match Other Data
+    names(school_closures_jan_may_22_22)[names(school_closures_jan_may_22_22) == "Posting Date"] <- "Date of Closure"
+    # Properly Format as Date
+    school_closures_jan_may_22_22 <- school_closures_jan_may_22_22 %>%
+      mutate(`Date of Closure` = as.Date(`Date of Closure`, format = "%Y-%m-%d"))
+    # Add Reopening Date 14 Days from Closure
+    school_closures_jan_may_22_22 <- school_closures_jan_may_22_22 %>%
+      mutate(`Date of Reopening` = school_closures_jan_may_22_22$`Date of Closure` + days(14))
+    # Add Empty Reasoning Column
+    school_closures_jan_may_22_22$`Reason for Closure` <- NA
+    # school_closures_jan_may_22_22$`Date of Reopening` <- as.Date(school_closures_jan_may_22_22$`Date of Closure` + lubridate::days(14))
+    # saveRDS(school_closures_jan_may_22_22, "data/school_closures_jan_may_22_22.rds")  # Save as .rds
   }
   
   

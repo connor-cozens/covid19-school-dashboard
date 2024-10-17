@@ -246,7 +246,7 @@ year_date_range <- as.Date(
 year_format <- format(year_date_range, '%Y')
 year_df <- data.frame(year_date_range, year_format)
 
-#### PLOT ####
+# PLOT ---------
 
 timeline_plot<-ggplot(df,aes(x=date,y=0, col=status, label=milestone))
 timeline_plot<-timeline_plot+labs(col="Milestones")
@@ -341,14 +341,14 @@ ui <- bootstrapPage(
                'COVID-19 School Dashboard', 
                id = 'nav',
                
-               # TAB: COVID-19 Mapper 2021-22 ----------------------------------
+               ## TAB: COVID-19 Mapper 2021-22 ----------------------------------
                tabPanel('Map - 2021-22',
                         div(class='outer',
                             
-                            # tag: stylesheet ----------------------------------
+                            # tag: stylesheet
                             tags$head(includeCSS('styles.css')),
                             
-                            # leaflet: basemap  --------------------------------
+                            # leaflet: basemap
                             leafletOutput('basemap_leaflet', width = '100%', height = '100%'),
                             
                             # panel: button: viewOptions
@@ -368,7 +368,7 @@ ui <- bootstrapPage(
                             
                             
                             
-                            # panel: controls ----------------------------------
+                            # panel: controls
                             absolutePanel(id = 'controls', 
                                           class = 'panel panel-default',
                                           top = "5%", 
@@ -386,13 +386,13 @@ ui <- bootstrapPage(
                                                        
                                                        h2('Daily Summary', align = 'right', style="font-size:150%;"),
                                                        
-                                                       # cumulative_case_count_text ---------
+                                                       # cumulative_case_count_text
                                                        h3(textOutput('cumulative_case_count_text'), align = 'right'),
                                                        
-                                                       # clean_date_reactive_text -----------
+                                                       # clean_date_reactive_text
                                                        h6(div('Data reported on'), textOutput('clean_date_reactive_text'), align = 'right'),
                                                        
-                                                       # daily_summary_1_dt -----------------
+                                                       # daily_summary_1_dt
                                                        div(tableOutput('daily_summary_1_dt'), style = 'font-size: small; width: 100%'),
                                                        
                                                        h6('Drag this box to move it', align = 'right')
@@ -401,7 +401,7 @@ ui <- bootstrapPage(
                                                        
                                                        h2('Weekly Summary', align = 'right', style="font-size:150%;"),
                                                        
-                                                       # weeklyRadio -----------
+                                                       # weeklyRadio
                                                        div(
                                                            radioButtons(
                                                                inputId = "weeklyRadio",
@@ -410,7 +410,7 @@ ui <- bootstrapPage(
                                                                inline = TRUE
                                                            ), align = "right"),
                                                        
-                                                       #whichWeekView ----------
+                                                       #whichWeekView
                                                        uiOutput("whichWeekView")
                                                        
                                               )
@@ -424,21 +424,21 @@ ui <- bootstrapPage(
                         ),
                         
                         tags$style(HTML(".js-irs-0 .irs-single, .js-irs-0 .irs-bar-edge, .js-irs-0 .irs-bar {background: teal}")),
-                        # TIMESLIDER -------------------------------------------
+                        ### TIMESLIDER -------------------------------------------
                         uiOutput('timesliderViewer')
                         
                ),
-               # TAB: COVID-19 Mapper 2020-21 ----------------------------------
+               ## TAB: COVID-19 Mapper 2020-21 ----------------------------------
                tabPanel('Map - 2020-21',
                         div(class='outer',
                             
-                            # tag: stylesheet ----------------------------------
+                            # tag: stylesheet
                             tags$head(includeCSS('styles.css')),
                             
-                            # leaflet: map20_21  ---------------------------------
+                            # leaflet: map20_21
                             leafletOutput('map_leaflet20_21', width = '100%', height = '100%'),
                             
-                            # panel: button: viewOptions20_21 --------------------
+                            # panel: button: viewOptions20_21
                             absolutePanel(id = 'viewOptions20_21',
                                           class = 'panel panel-default',
                                           top = "0%", 
@@ -451,7 +451,7 @@ ui <- bootstrapPage(
                             
                             uiOutput('mapperViewOptions20_21'),
                             
-                            # panel: controls ----------------------------------
+                            # panel: controls
                             absolutePanel(id = 'controls', 
                                           class = 'panel panel-default',
                                           top = "5%", 
@@ -465,32 +465,34 @@ ui <- bootstrapPage(
                                           tags$style(HTML(".tabbable > .nav > li > a {color:#777777;}")),
                                           h2('Year Summary', align = 'center', style="font-size:200%;"),
                                           
-                                          # cumulative_case_count_text_20_21 ---
+                                          # cumulative_case_count_text_20_21
                                           h3(textOutput('cumulative_case_count_text_20_21'), align = 'right'),
                                           
-                                          # clean_date_reactive_text -----------
+                                          # clean_date_reactive_text
                                           h6(div('Data last reported on'), textOutput('clean_date_reactive_text_20_21'), align = 'right'),
                                           
                                           h6('Drag this box to move it', align = 'right')
                             )
                         ),
                         tags$style(HTML(".js-irs-0 .irs-single, .js-irs-0 .irs-bar-edge, .js-irs-0 .irs-bar {background: teal}")),
-                        # TIMESLIDER -------------------------------------------
+                        ### TIMESLIDER -------------------------------------------
                         uiOutput('timesliderViewer20_21')
                ),
-               # TAB: Overview and Search --------------------------------------
+               ## TAB: Overview and Search --------------------------------------
                tabPanel('Overview & Search',
                         tabsetPanel(
                             tabPanel('2021-2022',
-                                     # cumulative_plot -------------------------
+                                     # cumulative_plot
                                      h3('Cumulative Case Chart'),
                                      plotlyOutput('cumulative_plot', width = '100%'),
                                      hr(),
-                                     # daily_summary_2_dt ----------------------
+                                     
+                                     # daily_summary_2_dt
                                      h3('Daily Summary', align = 'left'),
                                      div(tableOutput('daily_summary_2_dt'), style = 'font-size: small; width: 100%'),
                                      hr(),
-                                     # weeklyRadio2 ----------------------------
+                                     
+                                     # weeklyRadio2
                                      h3('Weekly Summary', align = 'left'),
                                      div(
                                          radioButtons(
@@ -500,21 +502,21 @@ ui <- bootstrapPage(
                                              inline = TRUE
                                          ), align = "right"),
                                      
-                                     #whichWeekView2 ---------------------------
+                                     #whichWeekView2
                                      uiOutput("whichWeekView2"),
                                      hr(),
-                                     # school_details_dt -----------------------
+                                     # school_details_dt
                                      h3('Search Function and Table', align = 'left'),
                                      div('Search schools, boards, municipalities for confirmed cases of COVID-19.', width = '100%', align = 'left'),
                                      br(),
                                      div(DTOutput('school_details_dt'), style = 'font-size: small; width: 100%')
                             ),
                             tabPanel('2020-2021',
-                                     # cumulative_plot_20_21 -------------------
+                                     # cumulative_plot_20_21
                                      h3('Cumulative Case Chart'),
                                      plotlyOutput('cumulative_plot_20_21', width = '100%'),
                                      hr(),
-                                     # school_details_dt_20_21 -----------------
+                                     # school_details_dt_20_21
                                      h3('Search Function and Table', align = 'left'),
                                      div('Search schools, boards, municipalities for confirmed cases of COVID-19.', width = '100%', align = 'left'),
                                      br(),
@@ -525,7 +527,7 @@ ui <- bootstrapPage(
                         
                ),
                
-               # TAB: Data Tables & Data Dictionary ----------------------------
+               ## TAB: Data Tables & Data Dictionary ----------------------------
                tabPanel('Data Tables & Data Dictionary',
                         tabsetPanel(
                             tabPanel('2021-2022',
@@ -610,7 +612,7 @@ ui <- bootstrapPage(
                         
                ),
                
-               # TAB: Data Sources and Source Code -----------------------------
+               ## TAB: Data Sources and Source Code -----------------------------
                tabPanel('Data Sources & Code',
                         h3('Data Sources 2021-22'),
                         tags$ul(
@@ -630,7 +632,7 @@ ui <- bootstrapPage(
                         p('The archival material, code for the site can be found ', a(href = 'https://doi.org/10.5683/SP3/Z9SNP0', 'here', target = '_blank'), 'and the integrated dataset can be found ', a(href = 'https://doi.org/10.5683/SP3/D0QXGQ', 'here.', target = '_blank'))
                ),
                
-               # TAB: About this site ------------------------------------------
+               ## TAB: About this site ------------------------------------------
                tabPanel('About This Site',
                         absolutePanel(id = 'contents', 
                                       class = 'panel panel-default',
@@ -663,7 +665,7 @@ ui <- bootstrapPage(
                                       )
                         ),
                         tags$div(),
-                        # Overview ---------------------------------------------
+                        ### Overview ---------------------------------------------
                         div(
                             h3(id = "Top of Page", 'COVID-19 SCHOOL DASHBOARD KEY AIMS & INFORMATION'),
                             p(a(href = 'http://covid19schooldashboard.com', 'covid19schooldashboard.com', target = '_blank'), ' reports and maps confirmed school-related cases of COVID-19 in publicly funded elementary and secondary schools in Ontario, Canada, and connects this to data on school social background characteristics (school-level demographic data). The site covers the period September 2020 to June 2021 and September 2021 to December 2021, the last date for which school infection data for Ontario are publicly available.'),
@@ -694,7 +696,7 @@ ui <- bootstrapPage(
                             p('There may be some discrepancies in school demographic data if they are in the official dataset.'),
                             hr()
                         ),
-                        # Policy -----------------------------------------------
+                        ### Policy -----------------------------------------------
                         div(
                             h3(id = "Policy Context", 'POLICY CONTEXT'),
                             p('Pandemic-related school closures in Ontario affected over 2 million elementary and secondary school students. The situation for students and schools evolved rapidly.'),
@@ -717,7 +719,7 @@ ui <- bootstrapPage(
                             p(id = "subnote", 'https://news.ontario.ca/en/release/61106/ontario-moves-schools-to-remote-learning-following-spring-break'),
                             br()
                         ),
-                        # News by Year -----------------------------------------
+                        ### News by Year -----------------------------------------
                         div(
                             h4(id = "2021-2022", '2021-22 School Year'),
                             p('Schools operating on a modified/balanced calendar opened as early as 4 August 2021. The majority of schools opened according to regular board-level conventions from 7 to 10 September 2021. All schools should have been opened as on 13 September 2021 for the regular school year.. On 3 January 2022, it was announced schools would not reopen for in-person instruction until 17 January 2022. This was the only systems-wide closure in the 2021-22 school year.'),
@@ -745,7 +747,7 @@ ui <- bootstrapPage(
                             p('The first school closure announcement in Ontario was issued on 12 March 2020 for an initial period from 14 March to 4 April 2020. This compelled all publicly funded elementary and secondary schools to close. Public school closures were extended another three times – first until 4 May, then 31 May, and finally until the end of June 2020.'),
                             hr()
                         ),
-                        # Site Navigation --------------------------------------
+                        ### Site Navigation --------------------------------------
                         div(
                             h3(id = "Site Navigation", 'HOW TO NAVIGATE THE SITE'),
                             h4('Map 2021-22 - Affected Ontario Schools Tab'),
@@ -829,7 +831,7 @@ ui <- bootstrapPage(
                             br(),
                             hr()
                         ),
-                        # Authorship -------------------------------------------
+                        ### Authorship -------------------------------------------
                         div(
                             h3(id = "Authorship", 'AUTHORSHIP, ATTRIBUTIONS, CITATION'),
                             h4('Cite the COVID-19 School Dashboard as:'),
@@ -856,7 +858,7 @@ ui <- bootstrapPage(
                         )
                ),
                
-               # TAB: Media Section --------------------------------------------
+               ## TAB: Media Section --------------------------------------------
                tabPanel
                ('Media & Research',
                    tags$div(),
@@ -964,7 +966,7 @@ ui <- bootstrapPage(
                    
                ),
                
-               # TAB: Our Team -------------------------------------------------
+               ## TAB: Our Team -------------------------------------------------
                tabPanel('Our Team',
                         tags$div(),
                         h3('THE TEAM AND CONTACT'),
@@ -1092,7 +1094,7 @@ server <- function(input, output, session) {
             })
         }
     })
-    Merged_School_Data_20_21 <- merge(cases_per_school_20_21, COVID_School_Closures_V2, by = "school_name",all=TRUE)
+    Merged_School_Data_20_21 <- merge(cases_per_school_20_21, COVID_School_Closures_V2, by.x = "school_name", by.y = "School Name", all=TRUE)
     
     #Update Map Markers for the 2022-2021 map
     updateMarkers <- function () {
@@ -1439,6 +1441,8 @@ server <- function(input, output, session) {
         }
     })
     
+    # TIME SLIDER 2021-2022 -------------
+    ## Activity Monitor --------
     #Observes activity (movement) on the timeslider and adjusts data being viewed accordingly (2022-2021)
     observeEvent(input$obs,{
         geo_query_str <- sprintf('%s,%s,Ontario,Canada', 
@@ -1448,17 +1452,17 @@ server <- function(input, output, session) {
         selected_date <- input$obs
         
         #Update daily summary tab when timeslider input changes
-        # cumulative_case_count_text -----------------------------------------------
+        # cumulative_case_count_text
         output$cumulative_case_count_text <- renderText({
             idx <- max(which(covid19_schools_summary$collected_date <= as.Date(selected_date)))
             count <- last(covid19_schools_summary[ idx, 'cumulative_school_related_cases' ])
             paste0(prettyNum(count, big.mark = ','), ' cumulative cases')
         })
-        # daily_summary_1_dt -------------------------------------------------------
+        # daily_summary_1_dt
         output$daily_summary_1_dt <- renderTable({
             get_summary_table(selected_date)
         }, align = 'r', striped = TRUE, width = '100%')
-        # clean_date_reactive_text -------------------------------------------------
+        # clean_date_reactive_text
         output$clean_date_reactive_text <- renderText({
             #Changed from covid19_schools_active to covid19_schools_summary, which has the correct latest date matching with the case count given
             format(selected_date, '%d %B %Y')
@@ -1468,7 +1472,7 @@ server <- function(input, output, session) {
         output$weekly_summary_1_dt <- renderTable({
             get_weekly_summary_table(TRUE, selected_date)
         }, align = 'r', striped = TRUE, width = '100%')
-        # clean_week_old_date_text -------------------------------------------------
+        # clean_week_old_date_text
         output $clean_week_old_date_text <- renderText ({
             dates <- last_week_obtain(selected_date)
             #Cheating on the dates a little bit, but the data is only updated / reported Monday-Friday anyway
@@ -1479,7 +1483,7 @@ server <- function(input, output, session) {
         output$weekly_summary_3_dt <- renderTable({
             get_weekly_summary_table(FALSE, selected_date)
         }, align = 'r', striped = TRUE, width = '100%')
-        # clean_two_weeks_old_date_text -------------------------------------------------
+        # clean_two_weeks_old_date_text
         output $clean_two_weeks_old_date_text <- renderText ({
             dates <- last_two_weeks_obtain(selected_date)
             #Cheating on the dates a little bit, but the data is only updated / reported Monday-Friday anyway
@@ -1503,41 +1507,67 @@ server <- function(input, output, session) {
                                                  cases_pst$municipality[i])
         }
         
+        school_closures_merged <- rbind(school_closures_sept_dec_21_21, school_closures_jan_may_22_22)
+        cases_pst <- merge(cases_pst, school_closures_merged, by.x = "school", by.y = "School Name", all.x = TRUE)
+        print(cases_pst)
+        
         leafletProxy('basemap_leaflet') %>%
             clearMarkers()
-    
-        leafletProxy(mapId = 'basemap_leaflet', session = session) %>%
-            addCircleMarkers( 
-                data = cases_pst, 
-                lng = cases_pst$longitude, 
-                lat = cases_pst$latitude, 
-                radius = cases_pst$total_confirmed_cases * 2,
-                weight = 1, 
-                color = '#d62728',
-                fillOpacity = 0.3,
-                label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Students receiving Special Education Services: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/></div>', 
-                                cases_pst$school.name, 
-                                cases_pst$city, 
-                                cases_pst$school.level, 
-                                cases_pst$board.name, 
-                                cases_pst$school.language, 
-                                cases_pst$enrolment, 
-                                cases_pst$percentage.of.school.aged.children.who.live.in.low.income.households, 
-                                cases_pst$percentage.of.students.whose.first.language.is.not.english, 
-                                cases_pst$percentage.of.students.who.are.new.to.canada.from.a.non.english.speaking.country, 
-                                cases_pst$percentage.of.students.whose.first.language.is.not.french, 
-                                cases_pst$percentage.of.students.who.are.new.to.canada.from.a.non.french.speaking.country,
-                                cases_pst$percentage.of.students.receiving.special.education.services,
-                                cases_pst$total_confirmed_cases,
-                                cases_pst$confirmed_staff_cases,
-                                cases_pst$confirmed_student_cases,
-                                cases_pst$confirmed_unidentified_cases) %>% 
-                    lapply(htmltools::HTML), 
-                labelOptions = labelOptions(
-                    style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
-                    textsize = '15px', direction = 'auto'))
-    
         
+        ## Circle Creation -------
+        leafletProxy(mapId = 'basemap_leaflet', session = session) %>%
+          addCircleMarkers( 
+            data = cases_pst, 
+            lng = cases_pst$longitude, 
+            lat = cases_pst$latitude, 
+            radius = cases_pst$total_confirmed_cases * 2,
+            weight = 1, 
+            color = ifelse(
+              !is.na(selected_date) & 
+                (selected_date >= cases_pst$`Date of Closure` & selected_date <= cases_pst$`Date of Reopening`),
+              '#8A2BE2',  # Bright purple if the date is within the range
+              '#d62728'   # Default color
+            ),
+            fillOpacity = 0.3,
+            label = cases_pst %>%
+              rowwise() %>%
+              mutate(
+                closure_date_formatted = format(as.Date(`Date of Closure`), "%Y-%m-%d"),
+                reopening_date_formatted = format(as.Date(`Date of Reopening`), "%Y-%m-%d"),
+                label_text = sprintf(
+                  '<div style="background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Students receiving Special Education Services: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/>',
+                  school.name, city, school.level, board.name, school.language, enrolment,
+                  percentage.of.school.aged.children.who.live.in.low.income.households, 
+                  percentage.of.students.whose.first.language.is.not.english, 
+                  percentage.of.students.who.are.new.to.canada.from.a.non.english.speaking.country, 
+                  percentage.of.students.whose.first.language.is.not.french, 
+                  percentage.of.students.who.are.new.to.canada.from.a.non.french.speaking.country,
+                  percentage.of.students.receiving.special.education.services,
+                  total_confirmed_cases,
+                  confirmed_staff_cases,
+                  confirmed_student_cases,
+                  confirmed_unidentified_cases
+                )
+              ) %>%
+              # Conditionally append closure and reopening dates
+              mutate(label_text = ifelse(
+                !is.na(`Date of Closure`) && 
+                  !is.na(selected_date) && 
+                  (selected_date >= `Date of Closure`) && 
+                  (selected_date <= `Date of Reopening`),
+                paste0(label_text, sprintf("Closure Date: %s<br/>Reopening Date: %s<br/></div>",
+                                           closure_date_formatted, reopening_date_formatted)),
+                paste0(label_text, "</div>")
+              )) %>%
+              pull(label_text) %>% 
+              lapply(htmltools::HTML),
+            labelOptions = labelOptions(
+              style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
+              textsize = '15px', direction = 'auto'
+            )
+          )
+        
+  
     })
     
     #Observes activity (movement) on the timeslider and adjusts data being viewed accordingly (2021-2020)
@@ -1735,85 +1765,6 @@ server <- function(input, output, session) {
                          map20_21
                      })
         
-    })
-    
-    
-    #School Closure Data -------------------------------------------------------
-    closures_data <- data.frame(
-      board_number = c(1, 2, 3),
-      board_name = c("Board A", "Board B", "Board C"),
-      school_number = c(101, 102, 103),
-      school_name = c("School A", "School B", "School C"),
-      date_of_closure = as.Date(c("2021-01-15", "2021-02-20", "2021-03-10")),
-      date_of_reopening = as.Date(c("2021-02-01", "2021-03-05", "2021-04-01")),
-      reason_for_closure = c("COVID-19 outbreak", "Staff shortage", "Infrastructure issue")
-    )
-    output$map_leaflet20_21 <- renderLeaflet({
-      withProgress(max = 6, 
-                   value = 0, 
-                   message = 'please wait...', 
-                   expr = {
-                     incProgress(1, 'loading shapes')
-                     # regenerate the 20_21 map
-                     # https://geohub.lio.gov.on.ca/datasets/province/data
-                     ontario <- st_read(file.path('data/shapefiles', layer = 'PROVINCE.shp'))
-                     incProgress(1, 'generating map')
-                     map20_21 <- leaflet(ontario)
-                     incProgress(1, 'setting view')
-                     map20_21 <- setView(map20_21, lng = -79.7, lat = 44.39, zoom = 8) 
-                     incProgress(1, 'adding polygons')
-                     map20_21 <- addPolygons(map20_21, weight = 3, fillColor = '#696969', opacity = 0.5)
-                     incProgress(1, 'adding tiles')
-                     map20_21 <- addProviderTiles(map20_21, providers$Esri.NatGeoWorldMap)
-                     
-                     # add case data markers
-                     incProgress(1, 'adding markers')
-                     
-                     # Combine case data and closure data
-                     combined_data <- merge(cases_per_school_20_21, closures_data, by.x = "school_name", by.y = "school_name", all.x = TRUE)
-                     
-                     map20_21 <- addCircleMarkers(map20_21,
-                                                  data = combined_data, 
-                                                  lng = ~lon, 
-                                                  lat = ~lat, 
-                                                  radius = 2,
-                                                  weight = 1, 
-                                                  color = ~ifelse(Sys.Date() >= date_of_closure & Sys.Date() <= date_of_reopening, '#696969', '#b00000'),
-                                                  fillOpacity = 1)
-                     map20_21 <- addCircleMarkers(map20_21, 
-                                                  data = combined_data, 
-                                                  lng = ~lon, 
-                                                  lat = ~lat, 
-                                                  radius = ~(cases_per_school) * 2,
-                                                  weight = 1, 
-                                                  color = ~ifelse(Sys.Date() >= date_of_closure & Sys.Date() <= date_of_reopening, '#696969', '#d62728'),
-                                                  fillOpacity = 0.3, 
-                                                  label = sprintf('<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Parents have no university education: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/>Date of Closure: %s<br/>Date of Reopening: %s<br/>Reason for Closure: %s</div>', 
-                                                                  school_name, 
-                                                                  city, 
-                                                                  school_level, 
-                                                                  school_board, 
-                                                                  school_language, 
-                                                                  school_enrolment, 
-                                                                  low_income, 
-                                                                  non_english, 
-                                                                  from_non_english, 
-                                                                  non_french, 
-                                                                  from_non_french, 
-                                                                  some_university, 
-                                                                  cases_per_school,
-                                                                  cases_per_school_staff,
-                                                                  cases_per_school_student,
-                                                                  cases_per_school_unidentified,
-                                                                  date_of_closure,
-                                                                  date_of_reopening,
-                                                                  reason_for_closure) %>% lapply(htmltools::HTML), 
-                                                  labelOptions = labelOptions(
-                                                    style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
-                                                    textsize = '15px', direction = 'auto'))
-                     
-                     map20_21
-                   })
     })
     
     
