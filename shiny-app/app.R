@@ -73,7 +73,7 @@ timeline_plot <- timeline_plot + theme(
   axis.text.x = element_blank(),
   axis.ticks.x = element_blank(),
   axis.line.x = element_blank(),
-                                   legend.position = "bottom"
+  legend.position = "bottom"
 )
 
 # Show text for each month
@@ -197,38 +197,38 @@ server <- function(input, output, session) {
   suppressFirstResponse2_closures <- TRUE
   suppressFirstResponse3_closures <- TRUE
   
+  selected_date_closures <- as.Date("2021-09-13")
   
-  selected_date_closures <- as.Date("2021-12-22")
-  cases_pst <-  subset(covid19_schools_active_with_demographics, collected_date == selected_date_closures)
-  increment <- 1 #If we don't have any data from this date, then move forward until we get some
-  while(nrow(cases_pst) == 0){
-    if (selected_date_closures >= as.Date("2021-12-22")){
-      increment = -1 #If we reach the furthest possible date and have no data to see, go backwards until we do
-    }
-    selected_date_closures = selected_date_closures + increment
-    cases_pst <-  subset(covid19_schools_active_with_demographics, collected_date == selected_date_closures)
-  }
-  cases_pst[,"geo_query_str"] <- NA
-  for(i in 0:nrow(cases_pst) - 1){
-    cases_pst$geo_query_str[i] = sprintf('%s,%s,Ontario,Canada', 
-                                         str_trim(cases_pst$school[i]), 
-                                         cases_pst$municipality[i])
-  }
-  
-  school_closures_merged_closures <- rbind(school_closures_sept_dec_21_21, school_closures_jan_may_22_22)
-  cases_pst <- merge(cases_pst, school_closures_merged_closures, by.x = "school", by.y = "School Name", all.x = TRUE)
-  # print(cases_pst)
+  #print("Updating Markers, Current School Closure Date is: ")
+  #print(selected_date_closures)
   
   leafletProxy('basemap_leaflet_closures') %>%
     clearMarkers()
   
-  filtered_cases_pst <- cases_pst %>%
-    filter(
-      !is.na(`Date of Closure`) &
-        !is.na(`Date of Reopening`) &
-        selected_date_closures >= `Date of Closure` &
-        selected_date_closures <= `Date of Reopening`
-    )
+  school_closures_merged <- rbind(school_closures_sept_dec_21_21,
+                                  school_closures_jan_may_22_22)
+  
+  school_closures_merged_with_demographics <- merge(
+    school_closures_merged,
+    school_demographics,
+    by.x = "School Name",
+    by.y = "school name",
+    all.x = TRUE
+  )
+  
+  # print("School Closures Merged With Demographics: ")
+  # print(school_closures_merged_with_demographics[0])
+  # print(head(school_closures_merged_with_demographics, 1))
+  
+  closures_merged <- subset(
+    school_closures_merged_with_demographics,
+    `Date of Closure` <= selected_date_closures & selected_date_closures <= `Date of Reopening`
+  )
+  
+  # print("MAIN SECTION - Closures Merged: ")
+  # print(closures_merged[0])
+  # print(head(closures_merged))
+  
   ## closures Leaflet Map ----
   output$basemap_leaflet_closures <- renderLeaflet({
     withProgress(
@@ -261,37 +261,38 @@ server <- function(input, output, session) {
         incProgress(1, 'adding markers')
         basemap <- addCircleMarkers(
           basemap,
-          data = filtered_cases_pst,
-          lng = filtered_cases_pst$longitude,
-          lat = filtered_cases_pst$latitude,
-          radius = filtered_cases_pst$total_confirmed_cases * 2,
-          weight = 1,
-          color = '#8A2BE2',
+          data = closures_merged,
+          lng = closures_merged$longitude,
+          lat = closures_merged$latitude,
+          # radius = filtered_cases_pst$total_confirmed_cases * 2,
+          radius = 60,
+          weight = 3,
+          color = '#FF9900',
           # Use bright purple since we are only showing markers within the date range
           fillOpacity = 0.3,
-          label = filtered_cases_pst %>%
+          label = closures_merged %>%
             rowwise() %>%
             mutate(
               closure_date_formatted = format(as.Date(`Date of Closure`), "%Y-%m-%d"),
               reopening_date_formatted = format(as.Date(`Date of Reopening`), "%Y-%m-%d"),
               label_text = sprintf(
-                '<div style="background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Students receiving Special Education Services: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/>Closure Date: %s<br/>Reopening Date: %s<br/>Closing Authority: %s<br/></div>',
-                school.name,
+                '<div style="background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Students receiving Special Education Services: %s%%<br/>Closure Date: %s<br/>Reopening Date: %s<br/>Closing Authority: %s<br/></div>',
+                `School Name`,
                 city,
-                school.level,
-                board.name,
-                school.language,
+                `school level`,
+                `board name`,
+                `school language`,
                 enrolment,
-                percentage.of.school.aged.children.who.live.in.low.income.households,
-                percentage.of.students.whose.first.language.is.not.english,
-                percentage.of.students.who.are.new.to.canada.from.a.non.english.speaking.country,
-                percentage.of.students.whose.first.language.is.not.french,
-                percentage.of.students.who.are.new.to.canada.from.a.non.french.speaking.country,
-                percentage.of.students.receiving.special.education.services,
-                total_confirmed_cases,
-                confirmed_staff_cases,
-                confirmed_student_cases,
-                confirmed_unidentified_cases,
+                `percentage of school-aged children who live in low-income households`,
+                `percentage of students whose first language is not english`,
+                `percentage of students who are new to canada from a non-english speaking country`,
+                `percentage of students whose first language is not french`,
+                `percentage of students who are new to canada from a non-french speaking country`,
+                `percentage of students receiving special education services`,
+                # total_confirmed_cases,
+                # confirmed_staff_cases,
+                # confirmed_student_cases,
+                # confirmed_unidentified_cases,
                 closure_date_formatted,
                 reopening_date_formatted,
                 `Reason for Closure`
@@ -316,262 +317,297 @@ server <- function(input, output, session) {
     
   })
   
-  # Observes the button for getting the viewing options menu (closures)
-  observeEvent(input$getOptions_closures, {
-    viewOptionsOpen_closures <<- !viewOptionsOpen_closures #flip when button is pressed
-    if (!viewOptionsOpen_closures){
-      output$mapperViewOptions_closures <- renderUI({
-        #Render nothing in this spot
-      })
-    }
-    else{
-      output$mapperViewOptions_closures <- renderUI({
-        absolutePanel(id = 'options_closures',
-                      class = 'panel panel-default',
-                      top = "5%", 
-                      right = "0%", 
-                      width = 'auto', 
-                      #fixed = TRUE,
-                      draggable = FALSE, 
-                      height = 'auto',
-                      style = "padding-left: 1%;
+  # Render Options
+  output$mapperViewOptions_closures <- renderUI({
+    absolutePanel(
+      id = 'options_closures',
+      class = 'panel panel-default',
+      top = "5%",
+      right = "0%",
+      width = 'auto',
+      #fixed = TRUE,
+      draggable = FALSE,
+      height = 'auto',
+      style = "padding-left: 1%;
                               border-radius: 25px;",
-                      
-                      checkboxInput("visOp1_closures", "Schools with Cases", value = schoolsWithCases_closures),
-                      checkboxInput("visOp2_closures", "Schools without Cases", value = schoolsWithoutCases_closures),
-                      checkboxInput("visTS_closures", "View Timeslider, Case over time", value = vTimeSlider_closures)
-        )
-      })
-    }
+      
+      checkboxInput("visOp1_closures", "Schools with Cases", value = schoolsWithCases_closures),
+      checkboxInput("visOp2_closures", "Schools without Cases", value = schoolsWithoutCases_closures),
+      checkboxInput("visTS_closures", "View Timeslider, Case over time", value = showTimeslider_closures)
+    )
   })
+  
+  
+  # # Observes the button for getting the viewing options menu (closures)
+  # observeEvent(input$getOptions_closures, {
+  #   viewOptionsOpen_closures <<- !viewOptionsOpen_closures #flip when button is pressed
+  #   if (!viewOptionsOpen_closures) {
+  #     output$mapperViewOptions_closures <- renderUI({
+  #       #Render nothing in this spot
+  #     })
+  #   }
+  #   else{
+  #     output$mapperViewOptions_closures <- renderUI({
+  #       absolutePanel(
+  #         id = 'options_closures',
+  #         class = 'panel panel-default',
+  #         top = "5%",
+  #         right = "0%",
+  #         width = 'auto',
+  #         #fixed = TRUE,
+  #         draggable = FALSE,
+  #         height = 'auto',
+  #         style = "padding-left: 1%;
+  #                             border-radius: 25px;",
+  #         
+  #         checkboxInput("visOp1_closures", "Schools with Cases", value = schoolsWithCases_closures),
+  #         checkboxInput("visOp2_closures", "Schools without Cases", value = schoolsWithoutCases_closures),
+  #         checkboxInput("visTS_closures", "View Timeslider, Case over time", value = showTimeslider_closures)
+  #       )
+  #     })
+  #   }
+  # })
   
   ## Update School Closures Map Markers ------
   updateMarkers_closures <- function (selected_date_closures) {
+    #print("Updating Markers, Current School Closure Date is: ")
+    #print(selected_date_closures)
+    
     leafletProxy('basemap_leaflet_closures') %>%
       clearMarkers()
     
-    leafletProxy(mapId = 'basemap_leaflet_closures', session = session) %>%
-      addCircleMarkers(
-        data = filtered_cases_pst,
-        lng = filtered_cases_pst$longitude,
-        lat = filtered_cases_pst$latitude,
-        radius = filtered_cases_pst$total_confirmed_cases * 2,
-        weight = 1,
-        color = '#8A2BE2',
-        # Use bright purple since we are only showing markers within the date range
-        fillOpacity = 0.3,
-        label = filtered_cases_pst %>%
-          rowwise() %>%
-          mutate(
-            closure_date_formatted = format(as.Date(`Date of Closure`), "%Y-%m-%d"),
-            reopening_date_formatted = format(as.Date(`Date of Reopening`), "%Y-%m-%d"),
-            label_text = sprintf(
-              '<div style="background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Students receiving Special Education Services: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/>Closure Date: %s<br/>Reopening Date: %s<br/>Closing Authority: %s<br/></div>',
-              school.name,
-              city,
-              school.level,
-              board.name,
-              school.language,
-              enrolment,
-              percentage.of.school.aged.children.who.live.in.low.income.households,
-              percentage.of.students.whose.first.language.is.not.english,
-              percentage.of.students.who.are.new.to.canada.from.a.non.english.speaking.country,
-              percentage.of.students.whose.first.language.is.not.french,
-              percentage.of.students.who.are.new.to.canada.from.a.non.french.speaking.country,
-              percentage.of.students.receiving.special.education.services,
-              total_confirmed_cases,
-              confirmed_staff_cases,
-              confirmed_student_cases,
-              confirmed_unidentified_cases,
-              closure_date_formatted,
-              reopening_date_formatted,
-              `Reason for Closure`
-            )
-          ) %>%
-          pull(label_text) %>%
-          lapply(htmltools::HTML),
-        labelOptions = labelOptions(
-          style = list(
-            'font-weight' = 'normal',
-            padding = '3px 8px',
-            color = '#d62728'
-          ),
-          textsize = '15px',
-          direction = 'auto'
+    school_closures_merged <- rbind(school_closures_sept_dec_21_21,
+                                             school_closures_jan_may_22_22)
+
+    school_closures_merged_with_demographics <- merge(
+      school_closures_merged,
+      school_demographics,
+      by.x = "School Name",
+      by.y = "school name",
+      all.x = TRUE
+    )
+
+    # print("School Closures Merged With Demographics: ")
+    # print(school_closures_merged_with_demographics[0])
+    # print(head(school_closures_merged_with_demographics, 1))
+
+    closures_merged <- subset(
+      school_closures_merged_with_demographics,
+      `Date of Closure` <= selected_date_closures & selected_date_closures <= `Date of Reopening`
+    )
+
+    #print("UPDATE MARKERS FUNCTION - Closures Merged: ")
+    #print(closures_merged[0])
+    # print(head(closures_merged))
+
+    # closures_merged[, "geo_query_str"] <- NA
+    # for (i in 0:nrow(closures_merged) - 1) {
+    #   closures_merged$geo_query_str[i] = sprintf('%s,%s,Ontario,Canada',
+    #                                        str_trim(closures_merged$school[i]),
+    #                                        closures_merged$municipality[i])
+    # }
+    
+    if (nrow(closures_merged) > 0) {
+      leafletProxy('basemap_leaflet_closures') %>%
+        clearMarkers()
+      
+      leafletProxy(mapId = 'basemap_leaflet_closures', session = session) %>%
+        addCircleMarkers(
+          data = closures_merged,
+          lng = closures_merged$longitude,
+          lat = closures_merged$latitude,
+          # radius = filtered_cases_pst$total_confirmed_cases * 2,
+          radius = 20,
+          weight = 1,
+          color = '#00FFBB',
+          # Use bright purple since we are only showing markers within the date range
+          fillOpacity = 0.3,
+          label = closures_merged %>%
+            rowwise() %>%
+            mutate(
+              closure_date_formatted = format(as.Date(`Date of Closure`), "%Y-%m-%d"),
+              reopening_date_formatted = format(as.Date(`Date of Reopening`), "%Y-%m-%d"),
+              label_text = sprintf(
+                '<div style="background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Students receiving Special Education Services: %s%%<br/>Closure Date: %s<br/>Reopening Date: %s<br/>Closing Authority: %s<br/></div>',
+                `School Name`,
+                city,
+                `school level`,
+                `board name`,
+                `school language`,
+                enrolment,
+                `percentage of school-aged children who live in low-income households`,
+                `percentage of students whose first language is not english`,
+                `percentage of students who are new to canada from a non-english speaking country`,
+                `percentage of students whose first language is not french`,
+                `percentage of students who are new to canada from a non-french speaking country`,
+                `percentage of students receiving special education services`,
+                # total_confirmed_cases,
+                # confirmed_staff_cases,
+                # confirmed_student_cases,
+                # confirmed_unidentified_cases,
+                closure_date_formatted,
+                reopening_date_formatted,
+                `Reason for Closure`
+              )
+            ) %>%
+            pull(label_text) %>%
+            lapply(htmltools::HTML),
+          labelOptions = labelOptions(
+            style = list(
+              'font-weight' = 'normal',
+              padding = '3px 8px',
+              color = '#d62728'
+            ),
+            textsize = '15px',
+            direction = 'auto'
+          )
         )
-      )
+    }
   }
   
   ## Closures Activity Observers -----
   ### Schools With Cases ----
   # Observes the activity for Mapper Closures "Schools With Cases" option
   observeEvent(input$visOp1_closures, {
-    if (!suppressFirstResponse1_closures && !input$visTS_closures) {
+    # if (!suppressFirstResponse1_closures && !input$visTS_closures) {
       if (!input$visOp1_closures) {
         schoolsWithCases <<- FALSE
-        updateMarkers_closures()
+        updateMarkers_closures(selected_date_closures)
       }
       else {
         schoolsWithCases <<- TRUE
-        updateMarkers_closures()
+        updateMarkers_closures(selected_date_closures)
       }
-    }
-    else {
-      suppressFirstResponse1 <<- FALSE
-    }
+    # }
+    # else {
+    #   suppressFirstResponse1 <<- FALSE
+    # }
   }, ignoreInit = TRUE)
-
+  
   ### Schools Without Cases ----
-  observeEvent(input$visOp2,{
-    if (!suppressFirstResponse2 && !input$visTS) {
-      if (!input$visOp2) {
+  observeEvent(input$visOp2_closures, {
+    # if (!suppressFirstResponse2_closures && !input$visTS_closures) {
+      if (!input$visOp2_closures) {
         schoolsWithoutCases <<- FALSE
-        updateMarkers_closures()
+        updateMarkers_closures(selected_date_closures)
       }
       else {
         schoolsWithoutCases <<- TRUE
-        updateMarkers_closures()
+        updateMarkers_closures(selected_date_closures)
       }
-    }
-    else {
-      suppressFirstResponse2_closures <<- FALSE
-    }
+    # }
+    # else {
+    #   suppressFirstResponse2_closures <<- FALSE
+    # }
   }, ignoreInit = TRUE)
   
   ### View Timeslider ----
   observeEvent(input$visTS_closures, {
-    # if (suppressFirstResponse3_closures) {
-      if (!input$visTS_closures) {
-        vTimeSlider_closures <<- FALSE
-        #Remove timeslider
-        output$timesliderViewer_closures <- renderUI({
-          #Render nothing here
-        })
-        updateMarkers_closures()
-      }
-      else{
-        vTimeSlider_closures <<- TRUE
-        updateCheckboxInput(session, "visOp1_closures", value = FALSE)
-        updateCheckboxInput(session, "visOp2_closures", value = FALSE)
-        #Make timeslider appear
-        output$timesliderViewer_closures <- renderUI({
-          div(
-            p("Select a date to view data reported at that time:", style = "color:white;font:Helvetica;padding-left:10px;padding-top:15px;"),
-            sliderInput(
-              "obs",
-              label = NULL,
-              min = as.Date("2021-09-13", "%Y-%m-%d"),
-              max = as.Date("2021-12-22", "%Y-%m-%d"),
-              value = as.Date("2021-09-13"),
-              timeFormat = "%Y-%m-%d",
-              width = '95%'
-            ),
-            style = "position:absolute;bottom:0;left:0;right:0;background-color:#d34615;padding-left:3%"
-          )
-        })
-      }
-    # }
-    # else{
-    #   suppressFirstResponse3_closures <<- FALSE
-    # }
-    
+    if (!input$visTS_closures) {
+      showTimeslider_closures <<- FALSE
+      #Remove timeslider
+      output$timesliderViewer_closures <- renderUI({
+        #Render nothing here
+      })
+      updateMarkers_closures(selected_date_closures)
+    }
+    else{
+      showTimeslider_closures <<- TRUE
+      # updateCheckboxInput(session, "visOp1_closures", value = FALSE)
+      # updateCheckboxInput(session, "visOp2_closures", value = FALSE)
+      # Make timeslider appear
+      output$timesliderViewer_closures <- renderUI({
+        div(
+          p("Select a date to view data reported at that time:", style = "color:white;font:Helvetica;padding-left:10px;padding-top:15px;"),
+          sliderInput(
+            "obs",
+            label = NULL,
+            min = as.Date("2021-09-13", "%Y-%m-%d"),
+            max = as.Date("2022-06-30", "%Y-%m-%d"),
+            value = as.Date("2021-09-13"),
+            timeFormat = "%Y-%m-%d",
+            width = '95%'
+          ),
+          style = "position:absolute;bottom:0;left:0;right:0;background-color:#d34615;padding-left:3%"
+        )
+      })
+    }
   })
   
   # Panel: TIME SLIDER SCHOOL CLOSURES -------------
   ## Activity Monitors --------
   ### Timeslider Activity ----
   # Observes activity (movement) on the timeslider and adjusts data being viewed accordingly (2022-2021)
-  observeEvent(input$obs,{
-    
+  observeEvent(input$obs, {
     selected_date_closures <- input$obs
+    print("In observer, selected date from the timeslider is: ")
+    print(selected_date_closures)
     updateMarkers_closures(selected_date_closures)
     
-    geo_query_str <- sprintf('%s,%s,Ontario,Canada',
-                             str_trim(covid19_schools_active_with_demographics$school.name),
-                             covid19_schools_active_with_demographics$municipality)
-
-    cases_pst <-  subset(covid19_schools_active_with_demographics, collected_date == selected_date_closures)
-    increment <- 1 #If we don't have any data from this date, then move forward until we get some
-    while(nrow(cases_pst) == 0){
-      if (selected_date_closures >= as.Date("2021-12-22")){
-        increment = -1 #If we reach the furthest possible date and have no data to see, go backwards until we do
-      }
-      selected_date_closures = selected_date_closures + increment
-      cases_pst <-  subset(covid19_schools_active_with_demographics, collected_date == selected_date_closures)
-    }
-    cases_pst[,"geo_query_str"] <- NA
-    for(i in 0:nrow(cases_pst) - 1){
-      cases_pst$geo_query_str[i] = sprintf('%s,%s,Ontario,Canada',
-                                           str_trim(cases_pst$school[i]),
-                                           cases_pst$municipality[i])
-    }
-
-    school_closures_merged <- rbind(school_closures_sept_dec_21_21, school_closures_jan_may_22_22)
-    cases_pst <- merge(cases_pst, school_closures_merged, by.x = "school", by.y = "School Name", all.x = TRUE)
-    # print(cases_pst)
-
-    leafletProxy('basemap_leaflet_closures') %>%
-      clearMarkers()
+    closures_merged <- subset(
+      school_closures_merged_with_demographics,
+      `Date of Closure` <= selected_date_closures & selected_date_closures <= `Date of Reopening`
+    )
     
-    filtered_cases_pst <- cases_pst %>%
-      filter(
-        !is.na(`Date of Closure`) &
-          !is.na(`Date of Reopening`) &
-          selected_date_closures >= `Date of Closure` &
-          selected_date_closures <= `Date of Reopening`
-      )
-
+    #print("ACTIVITY MONITOR - Closures Merged: ")
+    #print(closures_merged[0])
+    # print(head(closures_merged))
+    
     ### Circle Creation -------
-    leafletProxy(mapId = 'basemap_leaflet_closures', session = session) %>%
-      addCircleMarkers(
-        data = filtered_cases_pst,
-        lng = filtered_cases_pst$longitude,
-        lat = filtered_cases_pst$latitude,
-        radius = filtered_cases_pst$total_confirmed_cases * 2,
-        weight = 1,
-        color = '#8A2BE2',
-        # Use bright purple since we are only showing markers within the date range
-        fillOpacity = 0.3,
-        label = filtered_cases_pst %>%
-          rowwise() %>%
-          mutate(
-            closure_date_formatted = format(as.Date(`Date of Closure`), "%Y-%m-%d"),
-            reopening_date_formatted = format(as.Date(`Date of Reopening`), "%Y-%m-%d"),
-            label_text = sprintf(
-              '<div style="background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Students receiving Special Education Services: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/>Closure Date: %s<br/>Reopening Date: %s<br/>Closing Authority: %s<br/></div>',
-              school.name,
-              city,
-              school.level,
-              board.name,
-              school.language,
-              enrolment,
-              percentage.of.school.aged.children.who.live.in.low.income.households,
-              percentage.of.students.whose.first.language.is.not.english,
-              percentage.of.students.who.are.new.to.canada.from.a.non.english.speaking.country,
-              percentage.of.students.whose.first.language.is.not.french,
-              percentage.of.students.who.are.new.to.canada.from.a.non.french.speaking.country,
-              percentage.of.students.receiving.special.education.services,
-              total_confirmed_cases,
-              confirmed_staff_cases,
-              confirmed_student_cases,
-              confirmed_unidentified_cases,
-              closure_date_formatted,
-              reopening_date_formatted,
-              `Reason for Closure`
-            )
-          ) %>%
-          pull(label_text) %>%
-          lapply(htmltools::HTML),
-        labelOptions = labelOptions(
-          style = list(
-            'font-weight' = 'normal',
-            padding = '3px 8px',
-            color = '#d62728'
-          ),
-          textsize = '15px',
-          direction = 'auto'
+    # CREATE SCHOOL CLOSURES DATA
+    if (nrow(closures_merged)) {
+      leafletProxy(mapId = 'basemap_leaflet_closures', session = session) %>%
+        addCircleMarkers(
+          data = closures_merged,
+          lng = closures_merged$longitude,
+          lat = closures_merged$latitude,
+          # radius = closures_merged$total_confirmed_cases * 2,
+          radius = 20,
+          weight = 1,
+          color = '#0000FF',
+          # Use bright purple since we are only showing markers within the date range
+          fillOpacity = 0.3,
+          label = closures_merged %>%
+            rowwise() %>%
+            mutate(
+              closure_date_formatted = format(as.Date(`Date of Closure`), "%Y-%m-%d"),
+              reopening_date_formatted = format(as.Date(`Date of Reopening`), "%Y-%m-%d"),
+              label_text = sprintf(
+                '<div style="background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Students receiving Special Education Services: %s%%<br/>Closure Date: %s<br/>Reopening Date: %s<br/>Closing Authority: %s<br/></div>',
+                `School Name`,
+                city,
+                `school level`,
+                `board name`,
+                `school language`,
+                enrolment,
+                `percentage of school-aged children who live in low-income households`,
+                `percentage of students whose first language is not english`,
+                `percentage of students who are new to canada from a non-english speaking country`,
+                `percentage of students whose first language is not french`,
+                `percentage of students who are new to canada from a non-french speaking country`,
+                `percentage of students receiving special education services`,
+                # total_confirmed_cases,
+                # confirmed_staff_cases,
+                # confirmed_student_cases,
+                # confirmed_unidentified_cases,
+                closure_date_formatted,
+                reopening_date_formatted,
+                `Reason for Closure`
+              )
+            ) %>%
+            pull(label_text) %>%
+            lapply(htmltools::HTML),
+          labelOptions = labelOptions(
+            style = list(
+              'font-weight' = 'normal',
+              padding = '3px 8px',
+              color = '#d62728'
+            ),
+            textsize = '15px',
+            direction = 'auto'
+          )
         )
-      )
+    }
   })
   
   # SECTION: 2021-2022 MAP ----
@@ -1054,7 +1090,7 @@ server <- function(input, output, session) {
       })
     }
   })
-  Merged_School_Data_20_21 <- merge(cases_per_school_20_21, COVID_School_Closures_V2, by.x = "school_name", by.y = "School Name", all=TRUE)
+  Merged_School_Data_20_21 <- merge(cases_per_school_20_21, school_closures_sept_april_20_21, by.x = "school_name", by.y = "School Name", all=TRUE)
   
   # 2020-2021 Activity Observer ----
   ## Schools Without Cases ----
