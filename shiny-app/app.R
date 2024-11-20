@@ -945,58 +945,44 @@ server <- function(input, output, session) {
     
     ### Circle Creation -------
     leafletProxy(mapId = 'basemap_leaflet', session = session) %>%
-      addCircleMarkers( 
-        data = cases_pst, 
-        lng = cases_pst$longitude, 
-        lat = cases_pst$latitude, 
+      addCircleMarkers(
+        data = cases_pst,
+        lng = cases_pst$longitude,
+        lat = cases_pst$latitude,
         radius = cases_pst$total_confirmed_cases * 2,
-        weight = 1, 
-        color = ifelse(
-          !is.na(selected_date) & 
-            (selected_date >= cases_pst$`Date of Closure` & selected_date <= cases_pst$`Date of Reopening`),
-          '#8A2BE2',  # Bright purple if the date is within the range
-          '#d62728'   # Default color
-        ),
+        weight = 1,
+        color = '#d62728',
         fillOpacity = 0.3,
-        label = cases_pst %>%
-          rowwise() %>%
-          mutate(
-            closure_date_formatted = format(as.Date(`Date of Closure`), "%Y-%m-%d"),
-            reopening_date_formatted = format(as.Date(`Date of Reopening`), "%Y-%m-%d"),
-            label_text = sprintf(
-              '<div style="background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Students receiving Special Education Services: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/>',
-              school.name, city, school.level, board.name, school.language, enrolment,
-              percentage.of.school.aged.children.who.live.in.low.income.households, 
-              percentage.of.students.whose.first.language.is.not.english, 
-              percentage.of.students.who.are.new.to.canada.from.a.non.english.speaking.country, 
-              percentage.of.students.whose.first.language.is.not.french, 
-              percentage.of.students.who.are.new.to.canada.from.a.non.french.speaking.country,
-              percentage.of.students.receiving.special.education.services,
-              total_confirmed_cases,
-              confirmed_staff_cases,
-              confirmed_student_cases,
-              confirmed_unidentified_cases
-            )
-          ) %>%
-          # Conditionally append closure and reopening dates
-          mutate(label_text = ifelse(
-            !is.na(`Date of Closure`) && 
-              !is.na(selected_date) && 
-              (selected_date >= `Date of Closure`) && 
-              (selected_date <= `Date of Reopening`),
-            paste0(label_text, sprintf("Closure Date: %s<br/>Reopening Date: %s<br/>Closing Authority: %s<br/></div>",
-                                       closure_date_formatted, reopening_date_formatted, `Reason for Closure`)),
-            paste0(label_text, "</div>")
-          )) %>%
-          pull(label_text) %>% 
+        label = sprintf(
+          '<div style = "background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Students receiving Special Education Services: %s%%<br/>Confirmed cases (cumulative): %s<br/>Confirmed cases staff (cumulative): %s<br/>Confirmed cases student (cumulative): %s<br/>Confirmed cases unidentified (cumulative): %s<br/></div>',
+          cases_pst$school.name,
+          cases_pst$city,
+          cases_pst$school.level,
+          cases_pst$board.name,
+          cases_pst$school.language,
+          cases_pst$enrolment,
+          cases_pst$percentage.of.school.aged.children.who.live.in.low.income.households,
+          cases_pst$percentage.of.students.whose.first.language.is.not.english,
+          cases_pst$percentage.of.students.who.are.new.to.canada.from.a.non.english.speaking.country,
+          cases_pst$percentage.of.students.whose.first.language.is.not.french,
+          cases_pst$percentage.of.students.who.are.new.to.canada.from.a.non.french.speaking.country,
+          cases_pst$percentage.of.students.receiving.special.education.services,
+          cases_pst$total_confirmed_cases,
+          cases_pst$confirmed_staff_cases,
+          cases_pst$confirmed_student_cases,
+          cases_pst$confirmed_unidentified_cases
+        ) %>%
           lapply(htmltools::HTML),
         labelOptions = labelOptions(
-          style = list('font-weight' = 'normal', padding = '3px 8px', color = '#d62728'),
-          textsize = '15px', direction = 'auto'
+          style = list(
+            'font-weight' = 'normal',
+            padding = '3px 8px',
+            color = '#d62728'
+          ),
+          textsize = '15px',
+          direction = 'auto'
         )
       )
-    
-    
   })
   
   # Plots ----
