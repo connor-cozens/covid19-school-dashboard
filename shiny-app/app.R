@@ -192,6 +192,8 @@ server <- function(input, output, session) {
   schoolsWithoutCases_closures <- FALSE
   #Is the timeslider currently open for this tab
   showTimeslider_closures <- TRUE
+  #Do we want to currently show demographic data?
+  vDemographics_closures <- TRUE
   #Suppress the menu's opening for the first time counting as 'ticking' a checkbox in the menu
   suppressFirstResponse1_closures <- TRUE
   suppressFirstResponse2_closures <- TRUE
@@ -331,9 +333,10 @@ server <- function(input, output, session) {
       style = "padding-left: 1%;
                               border-radius: 25px;",
       
-      checkboxInput("visOp1_closures", "Schools with Cases", value = schoolsWithCases_closures),
-      checkboxInput("visOp2_closures", "Schools without Cases", value = schoolsWithoutCases_closures),
-      checkboxInput("visTS_closures", "View Timeslider, Case over time", value = showTimeslider_closures)
+      # checkboxInput("visOp1_closures", "Schools with Cases", value = schoolsWithCases_closures),
+      # checkboxInput("visOp2_closures", "Schools without Cases", value = schoolsWithoutCases_closures),
+      checkboxInput("visTS_closures", "View Timeslider, Case over time", value = showTimeslider_closures),
+      checkboxInput("visDemos_closures", "Show Demographic Data", value = vDemographics_closures)
     )
   })
   
@@ -534,11 +537,29 @@ server <- function(input, output, session) {
     }
   })
   
+  
+  ### Show Demographics Data Observer ----
+  observeEvent(input$visDemos_closures, {
+    if (!input$visDemos_closures) {
+      vDemographics_closures <<- FALSE
+      updateMarkers_closures(selected_date_closures)
+    } else {
+      vDemographics_closures <<- TRUE
+      updateMarkers_closures(selected_date_closures)
+    }
+  })
+  
   # Panel: TIME SLIDER SCHOOL CLOSURES -------------
   ## Activity Monitors --------
   ### Timeslider Activity ----
   # Observes activity (movement) on the timeslider and adjusts data being viewed accordingly (2022-2021)
-  observeEvent(input$obs, {
+  observeEvent(ignoreInit = TRUE, list(input$obs, input$visDemos_closures), {
+    if (!input$visDemos_closures) {
+      vDemographics_closures <<- FALSE
+    } else {
+      vDemographics_closures <<- TRUE
+    }
+    
     selected_date_closures <- input$obs
     print("In observer, selected date from the timeslider is: ")
     print(selected_date_closures)
@@ -546,7 +567,8 @@ server <- function(input, output, session) {
     
     closures_merged <- subset(
       school_closures_merged_with_demographics,
-      `Date of Closure` <= selected_date_closures & selected_date_closures <= `Date of Reopening`
+      `Date of Closure` <= selected_date_closures &
+        selected_date_closures <= `Date of Reopening`
     )
     
     #print("ACTIVITY MONITOR - Closures Merged: ")
@@ -561,39 +583,49 @@ server <- function(input, output, session) {
           data = closures_merged,
           lng = closures_merged$longitude,
           lat = closures_merged$latitude,
-          # radius = closures_merged$total_confirmed_cases * 2,
           radius = 20,
           weight = 1,
-          color = '#0000FF',
-          # Use bright purple since we are only showing markers within the date range
+          color = '#FF00FF',
+          # Use bright purple for markers
           fillOpacity = 0.3,
           label = closures_merged %>%
             rowwise() %>%
             mutate(
               closure_date_formatted = format(as.Date(`Date of Closure`), "%Y-%m-%d"),
               reopening_date_formatted = format(as.Date(`Date of Reopening`), "%Y-%m-%d"),
-              label_text = sprintf(
-                '<div style="background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Students receiving Special Education Services: %s%%<br/>Closure Date: %s<br/>Reopening Date: %s<br/>Closing Authority: %s<br/></div>',
-                `School Name`,
-                city,
-                `school level`,
-                `board name`,
-                `school language`,
-                enrolment,
-                `percentage of school-aged children who live in low-income households`,
-                `percentage of students whose first language is not english`,
-                `percentage of students who are new to canada from a non-english speaking country`,
-                `percentage of students whose first language is not french`,
-                `percentage of students who are new to canada from a non-french speaking country`,
-                `percentage of students receiving special education services`,
-                # total_confirmed_cases,
-                # confirmed_staff_cases,
-                # confirmed_student_cases,
-                # confirmed_unidentified_cases,
-                closure_date_formatted,
-                reopening_date_formatted,
-                `Reason for Closure`
-              )
+              label_text = if (!vDemographics_closures) {
+                # Basic label fields when vDemographics_closures is FALSE
+                sprintf(
+                  '<div style="background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Closure Date: %s<br/>Reopening Date: %s<br/>Closing Authority: %s</div>',
+                  `School Name`,
+                  city,
+                  `school level`,
+                  `board name`,
+                  closure_date_formatted,
+                  reopening_date_formatted,
+                  `Reason for Closure`
+                )
+              } else {
+                # Extended label fields when vDemographics_closures is TRUE
+                sprintf(
+                  '<div style="background-color: white; color:black;"><strong>%s</strong><br/>City: %s<br/>Level: %s<br/>Board: %s<br/>Language: %s<br/>Enrolment: %s<br/>Low-income households: %s%%<br/>First language not English: %s%%<br/>Immigrant from non-English country: %s%%<br/>First language not French: %s%%<br/>Immigrant from non-French country: %s%%<br/>Students receiving Special Education Services: %s%%<br/>Closure Date: %s<br/>Reopening Date: %s<br/>Closing Authority: %s</div>',
+                  `School Name`,
+                  city,
+                  `school level`,
+                  `board name`,
+                  `school language`,
+                  enrolment,
+                  `percentage of school-aged children who live in low-income households`,
+                  `percentage of students whose first language is not english`,
+                  `percentage of students who are new to canada from a non-english speaking country`,
+                  `percentage of students whose first language is not french`,
+                  `percentage of students who are new to canada from a non-french speaking country`,
+                  `percentage of students receiving special education services`,
+                  closure_date_formatted,
+                  reopening_date_formatted,
+                  `Reason for Closure`
+                )
+              }
             ) %>%
             pull(label_text) %>%
             lapply(htmltools::HTML),
