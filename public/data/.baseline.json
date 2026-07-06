@@ -1,0 +1,12 @@
+{
+  "recordedAt": "2026-03-18T07:48:52.356Z",
+  "metrics": {
+    "totalRecords": 120352,
+    "uniqueSchools": 3815,
+    "uniqueBoards": 118,
+    "uniqueMunicipalities": 315,
+    "totalCases": 228058,
+    "recordsWithLatLng": 120352,
+    "recordsWithMunicipality": 120352
+  }
+}
