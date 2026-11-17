@@ -55,5 +55,8 @@
     "tailwindcss": "^4",
     "typescript": "^5",
     "xlsx": "^0.18.5"
+  },
+  "engines": {
+    "node": ">=22.12"
   }
 }
