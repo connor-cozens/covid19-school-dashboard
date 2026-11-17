@@ -71,8 +71,7 @@ jobs:
       - name: Build static site
         run: npm run build
 
-      - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+      - uses: ./.github/actions/setup-playwright
       # Serves out/ with a static file server, as GitHub Pages will
       - name: Browser tests
         run: npm run test:e2e

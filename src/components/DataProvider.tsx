@@ -17,7 +17,7 @@ export default function DataProvider({ children }: { children: React.ReactNode }
 
   if (status === 'error') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="flex items-center justify-center py-16">
         <div className="bg-white rounded-lg shadow-lg p-8 max-w-lg w-full mx-4">
           <h2 className="text-xl font-bold text-red-800 mb-2">Failed to load dashboard data</h2>
           <p className="text-red-600 text-sm mb-4">{error}</p>

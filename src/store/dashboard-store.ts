@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { SchoolCase, SchoolClosure, SchoolProfiles, SchoolSummary, Tab } from '@/types';
+import { SchoolCase, SchoolClosure, SchoolProfiles, SchoolSummary } from '@/types';
 import { DashboardData, loadDashboardData } from '@/lib/data-loader';
 
 // The store holds only loaded data and the user's choices. Everything shown that
@@ -39,7 +39,6 @@ interface DashboardState extends Filters {
   minDate: string | null;
   maxDate: string | null;
 
-  activeTab: Tab;
   isMapFullscreen: boolean;
 
   loadData: () => Promise<void>;
@@ -53,7 +52,6 @@ interface DashboardState extends Filters {
   setSelectedSchoolBoard: (board?: string) => void;
   setSelectedMunicipality: (municipality?: string) => void;
   setIsAnimating: (animating: boolean) => void;
-  setActiveTab: (tab: Tab) => void;
   setIsMapFullscreen: (fullscreen: boolean) => void;
   resetFilters: () => void;
 }
@@ -102,7 +100,6 @@ export const useDashboardStore = create<DashboardState>((set, get) => {
     maxDate: null,
     startDate: '',
     ...DEFAULT_FILTERS,
-    activeTab: 'map',
     isMapFullscreen: false,
 
     loadData: async () => {
@@ -149,7 +146,6 @@ export const useDashboardStore = create<DashboardState>((set, get) => {
     setSelectedSchoolBoard: (selectedSchoolBoard) => set({ selectedSchoolBoard }),
     setSelectedMunicipality: (selectedMunicipality) => set({ selectedMunicipality }),
     setIsAnimating: (isAnimating) => set({ isAnimating }),
-    setActiveTab: (activeTab) => set({ activeTab }),
     setIsMapFullscreen: (isMapFullscreen) => set({ isMapFullscreen }),
 
     resetFilters: () => set({ ...DEFAULT_FILTERS, startDate: get().minDate ?? '' }),

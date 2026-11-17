@@ -66,8 +66,7 @@ jobs:
 
       # Same browser tests as PR CI, but against the real data. No report is uploaded
       # on failure, so the real data never leaves the runner except via the site itself.
-      - name: Install Playwright browser
-        run: npx playwright install --with-deps chromium
+      - uses: ./.github/actions/setup-playwright
       - name: Browser tests
         run: npm run test:e2e
 
