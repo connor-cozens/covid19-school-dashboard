@@ -3,11 +3,11 @@
 import { useCallback, useEffect, useRef, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, CircleMarker, ZoomControl, useMap } from 'react-leaflet';
 import { useDashboardStore } from '@/store/dashboard-store';
-import { useDemographicsLookup } from '@/hooks/useDemographicsLookup';
-import { SchoolCase, SchoolClosure } from '@/types';
-import { getClosureDate, getReopeningDate, getClosureBoardName, getClosureSchoolName } from '@/lib/closure-fields';
+import { useFilteredCases, useFilteredClosures } from '@/store/derived';
+import { SchoolClosure } from '@/types';
 import { ONTARIO_BOUNDS, MAP_DEFAULT_CENTER, MAP_DEFAULT_ZOOM, MAP_MIN_ZOOM, MAP_MAX_ZOOM, CASE_COLOR_LOW, CASE_COLOR_HIGH, CASE_COLOR_CLOSURE } from '@/lib/constants';
 import { aggregateCases, getCaseMarkerColor, getCaseMarkerRadius, AggregatedSchoolCase } from '@/lib/map-aggregation';
+import { formatDate } from '@/lib/dates';
 import MapFullscreenButton from './MapFullscreenButton';
 import LazyPopup from './LazyPopup';
 import 'leaflet/dist/leaflet.css';
@@ -55,8 +55,11 @@ function MapEventHandler({ onBoundsChange }: { onBoundsChange: (bounds: L.LatLng
 }
 
 export default function InteractiveMap({ className, isFullscreen }: InteractiveMapProps) {
-  const { filteredCases, filteredClosures, showDemographics, isMapFullscreen } = useDashboardStore();
-  const { demographicsLookup, getDemographics } = useDemographicsLookup();
+  const filteredCases = useFilteredCases();
+  const filteredClosures = useFilteredClosures();
+  const showDemographics = useDashboardStore((s) => s.showDemographics);
+  const isMapFullscreen = useDashboardStore((s) => s.isMapFullscreen);
+  const demographicsLookup = useDashboardStore((s) => s.profiles);
   const [mapBounds, setMapBounds] = useState<L.LatLngBounds | null>(null);
   const handleBoundsChange = useCallback((bounds: L.LatLngBounds) => setMapBounds(bounds), []);
 
@@ -98,7 +101,7 @@ export default function InteractiveMap({ className, isFullscreen }: InteractiveM
     // Determine marker size based on case count
     const radius = getCaseMarkerRadius(totalCases);
 
-    const municipality = schoolCase.municipality || (schoolCase as SchoolCase & { city?: string }).city || '';
+    const municipality = schoolCase.municipality || schoolCase.city || '';
 
     return (
       <CircleMarker
@@ -132,7 +135,7 @@ export default function InteractiveMap({ className, isFullscreen }: InteractiveM
               </p>
             </div>
             <p className="text-xs text-gray-500 mt-2">
-              Latest report: {schoolCase.collected_date ? new Date(schoolCase.collected_date).toLocaleDateString() : 'N/A'}
+              Latest report: {formatDate(schoolCase.collected_date)}
             </p>
             {schoolCase._recordCount > 1 && (
               <p className="text-xs text-gray-400 mt-1">
@@ -178,13 +181,13 @@ export default function InteractiveMap({ className, isFullscreen }: InteractiveM
       return null; // Skip markers with missing coordinates
     }
 
-    const schoolName = getClosureSchoolName(closure) || 'Unknown School';
-    const boardName = getClosureBoardName(closure) || 'Unknown Board';
-    const closureDate = getClosureDate(closure);
-    const reopeningDate = getReopeningDate(closure);
-    const reason = closure['Reason for Closure'] || closure.reason_for_closure || 'N/A';
+    const schoolName = closure.school_name || 'Unknown School';
+    const boardName = closure.board_name || 'Unknown Board';
+    const closureDate = closure.date_of_closure;
+    const reopeningDate = closure.date_of_reopening;
+    const reason = closure.reason_for_closure || 'N/A';
     // Look up school info and demographics from the lookup — closure records only store lat/lng
-    const demo = getDemographics(closure.school_number as number);
+    const demo = closure.school_number ? demographicsLookup[closure.school_number] ?? null : null;
 
     return (
       <CircleMarker
@@ -205,10 +208,10 @@ export default function InteractiveMap({ className, isFullscreen }: InteractiveM
             <p className="text-sm text-gray-600">{closure.city || ''}</p>
             <div className="mt-2 space-y-1">
               <p className="text-sm">
-                <span className="font-medium">Closure Date:</span> {closureDate ? new Date(closureDate).toLocaleDateString() : 'N/A'}
+                <span className="font-medium">Closure Date:</span> {formatDate(closureDate)}
               </p>
               <p className="text-sm">
-                <span className="font-medium">Reopening Date:</span> {reopeningDate ? new Date(reopeningDate).toLocaleDateString() : 'N/A'}
+                <span className="font-medium">Reopening Date:</span> {formatDate(reopeningDate)}
               </p>
               <p className="text-sm">
                 <span className="font-medium">Reason:</span> {reason || 'N/A'}

@@ -60,7 +60,7 @@ jobs:
           node scripts/clean_school_closures.js > /dev/null 2>&1 || { echo "::error::clean_school_closures.js failed — run it locally to see why"; exit 1; }
           node -e 'console.log(`Generated ${require("./public/data/school_closures.json").length} closure records`)'
 
-      # prebuild: data regression checks; postbuild: fails if out/ contains private files
+      # postbuild: fails if out/ contains private files
       - name: Build static site
         run: npm run build
 

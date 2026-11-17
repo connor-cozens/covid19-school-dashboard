@@ -54,8 +54,6 @@ public/data/*.xlsx
 public/data/closure_corrections_log.json
 public/data/*.numbers
 
-# Stale _copy duplicates from old data pipeline (not needed for runtime)
-public/data/*_copy.csv
 # playwright
 /playwright-report/
 /test-results/

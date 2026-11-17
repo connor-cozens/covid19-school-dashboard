@@ -1,42 +1,21 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useDashboardStore } from '@/store/dashboard-store';
-import { loadSchoolData, loadCombinedSchoolCases } from '@/lib/csv-loader';
+import { useUrlState } from '@/hooks/useUrlState';
 
 export default function DataProvider({ children }: { children: React.ReactNode }) {
-  const { setData, setLoading, setError, setSchoolCasesWithDemographics, error } = useDashboardStore();
-  const [retryCount, setRetryCount] = useState(0);
+  const status = useDashboardStore((s) => s.status);
+  const error = useDashboardStore((s) => s.error);
+  const loadData = useDashboardStore((s) => s.loadData);
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const [data, combinedCases] = await Promise.all([
-          loadSchoolData(),
-          loadCombinedSchoolCases()
-        ]);
-        // ORDER MATTERS: setData must run before setSchoolCasesWithDemographics so that
-        // schoolClosures is populated in the store. We pass data.schoolClosures explicitly
-        // as the second argument so setSchoolCasesWithDemographics can merge closure dates
-        // into availableDates without reading from a potentially-empty store slice.
-        setData(data);
-        setSchoolCasesWithDemographics(combinedCases, data.schoolClosures);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : String(err));
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadData();
-  }, [setData, setLoading, setError, setSchoolCasesWithDemographics, retryCount]);
+    if (useDashboardStore.getState().status === 'idle') loadData();
+  }, [loadData]);
 
-  // Render a retry button when there's a load error
-  // (Dashboard.tsx renders the full error UI, but we expose a retry trigger via a hidden button
-  //  that Dashboard can detect via the store error state + this retry mechanism)
-  // Actually: render the error UI here since DataProvider wraps everything
-  if (error) {
+  useUrlState();
+
+  if (status === 'error') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="bg-white rounded-lg shadow-lg p-8 max-w-lg w-full mx-4">
@@ -46,7 +25,7 @@ export default function DataProvider({ children }: { children: React.ReactNode }
             This may be a temporary network issue. Check the browser console for details.
           </p>
           <button
-            onClick={() => setRetryCount(c => c + 1)}
+            onClick={() => loadData()}
             className="w-full bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             Retry

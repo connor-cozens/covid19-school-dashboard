@@ -2,6 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { useDashboardStore } from '@/store/dashboard-store';
+import { useDashboardStats } from '@/store/derived';
 import FilterPanel from '../ui/FilterPanel';
 import FullscreenMapOverlay from './FullscreenMapOverlay';
 import { CASE_COLOR_LOW, CASE_COLOR_HIGH, CASE_COLOR_CLOSURE } from '@/lib/constants';
@@ -10,7 +11,10 @@ import { CASE_COLOR_LOW, CASE_COLOR_HIGH, CASE_COLOR_CLOSURE } from '@/lib/const
 const InteractiveMap = dynamic(() => import('./InteractiveMap'), { ssr: false });
 
 export default function MapView() {
-  const { dashboardStats, startDate, endDate, isMapFullscreen } = useDashboardStore();
+  const dashboardStats = useDashboardStats();
+  const startDate = useDashboardStore((s) => s.startDate);
+  const endDate = useDashboardStore((s) => s.endDate);
+  const isMapFullscreen = useDashboardStore((s) => s.isMapFullscreen);
 
   return (
     <div>
@@ -29,7 +33,7 @@ export default function MapView() {
         <div className="flex flex-wrap items-center justify-between text-sm">
           <div className="flex items-center gap-4">
             <span className="font-medium">Selected Date:</span>
-            <span className="text-blue-700">{startDate.toISOString().slice(0, 10)}</span>
+            <span className="text-blue-700">{startDate}</span>
           </div>
           <div className="flex items-center gap-4">
             <span className="font-medium">Schools with Cases:</span>
@@ -57,9 +61,9 @@ export default function MapView() {
         <div className="bg-white rounded-lg shadow p-4">
           <h3 className="font-semibold text-lg mb-2">Data Summary</h3>
           <p className="text-xs text-gray-500 mb-2">
-            {endDate && endDate.getTime() !== startDate.getTime()
-              ? `Data showing ${startDate.toISOString().slice(0, 10)} – ${endDate.toISOString().slice(0, 10)}`
-              : `Data showing as of ${startDate.toISOString().slice(0, 10)}`}
+            {endDate && endDate !== startDate
+              ? `Data showing ${startDate} – ${endDate}`
+              : `Data showing as of ${startDate}`}
           </p>
           <div className="text-sm text-black space-y-2">
             <p>

@@ -1,5 +1,4 @@
-import { SchoolCase } from '@/types';
-import { DemographicsData } from '@/hooks/useDemographicsLookup';
+import { SchoolCase, SchoolProfile, SchoolProfiles } from '@/types';
 import {
   CASE_COLOR_LOW,
   CASE_COLOR_HIGH,
@@ -11,7 +10,7 @@ import {
 
 export type AggregatedSchoolCase = SchoolCase & {
   _recordCount: number;
-  _demo: DemographicsData | null;
+  _demo: SchoolProfile | null;
 };
 
 /**
@@ -26,7 +25,7 @@ export type AggregatedSchoolCase = SchoolCase & {
  */
 export function aggregateCases(
   filteredCases: SchoolCase[],
-  demographicsLookup: Record<number, DemographicsData>
+  demographicsLookup: SchoolProfiles
 ): AggregatedSchoolCase[] {
   const bySchool = new Map<string | number, AggregatedSchoolCase>();
 
@@ -50,7 +49,7 @@ export function aggregateCases(
     const existing = bySchool.get(key)!;
     existing.confirmed_student_cases += c.confirmed_student_cases || 0;
     existing.confirmed_staff_cases += c.confirmed_staff_cases || 0;
-    existing.confirmed_unspecified_cases += c.confirmed_unspecified_cases || 0;
+    existing.confirmed_unspecified_cases = (existing.confirmed_unspecified_cases ?? 0) + (c.confirmed_unspecified_cases ?? 0);
     existing.total_confirmed_cases += c.total_confirmed_cases || 0;
     existing._recordCount += 1;
     // Use the most recent date for display

@@ -1,7 +1,7 @@
 'use client';
 
 import { BarChart as RechartsBarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { useDashboardStore } from '@/store/dashboard-store';
+import { useFilteredCases } from '@/store/derived';
 import { useMemo } from 'react';
 
 interface BarChartProps {
@@ -10,7 +10,7 @@ interface BarChartProps {
 }
 
 export default function BarChart({ title, className = '' }: BarChartProps) {
-  const { filteredCases } = useDashboardStore();
+  const filteredCases = useFilteredCases();
 
   // Process data for the chart - group by school board
   const chartData = useMemo(() => {

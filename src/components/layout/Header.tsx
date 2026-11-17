@@ -3,8 +3,9 @@
 import { useDashboardStore } from '@/store/dashboard-store';
 import { MapIcon, ChartBarIcon, InformationCircleIcon, UserGroupIcon, NewspaperIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
+import { Tab } from '@/types';
 
-const navigation = [
+const navigation: { name: string; href: Tab; icon: typeof MapIcon }[] = [
   { name: 'Interactive Map', href: 'map', icon: MapIcon },
   { name: 'Summary & Analytics', href: 'summary', icon: ChartBarIcon },
   { name: 'Data Sources', href: 'data-sources', icon: InformationCircleIcon },
@@ -14,7 +15,8 @@ const navigation = [
 ];
 
 export default function Header() {
-  const { activeTab, setActiveTab } = useDashboardStore();
+  const activeTab = useDashboardStore((s) => s.activeTab);
+  const setActiveTab = useDashboardStore((s) => s.setActiveTab);
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200">
@@ -30,7 +32,7 @@ export default function Header() {
             {navigation.map((item) => (
               <button
                 key={item.name}
-                onClick={() => setActiveTab(item.href as 'map' | 'summary' | 'about' | 'team' | 'media' | 'data-sources')}
+                onClick={() => setActiveTab(item.href)}
                 className={clsx(
                   'flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors',
                   activeTab === item.href

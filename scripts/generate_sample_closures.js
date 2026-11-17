@@ -12,7 +12,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const CASES_PATH = path.join(__dirname, '../public/data/covid19_schools_active_with_demographics_combined.json');
+const CASES_PATH = path.join(__dirname, '../public/data/cases.json');
 const OUTPUT_PATH = path.join(__dirname, '../tests/fixtures/school_closures.sample.json');
 const RECORD_COUNT = 60;
 
@@ -37,9 +37,10 @@ function main() {
   const pick = (arr) => arr[Math.floor(rand() * arr.length)];
 
   // One location per board/city pair from the public case data
-  const cases = JSON.parse(fs.readFileSync(CASES_PATH, 'utf8'));
+  const { placeFields, places } = JSON.parse(fs.readFileSync(CASES_PATH, 'utf8'));
   const locations = new Map();
-  for (const c of cases) {
+  for (const place of places) {
+    const c = Object.fromEntries(placeFields.map((f, i) => [f, place[i]]));
     if (!c.school_board || !c.city || c.latitude == null) continue;
     const key = `${c.school_board}|${c.city}`;
     if (!locations.has(key)) locations.set(key, { board: c.school_board, city: c.city, lat: c.latitude, lng: c.longitude });

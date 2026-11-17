@@ -1,11 +1,13 @@
 'use client';
 
-import { useDashboardStore } from '@/store/dashboard-store';
+import { useEffect, useState } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { CalendarIcon, FunnelIcon } from '@heroicons/react/24/outline';
-import { useRef, useState } from 'react';
 import { PlayIcon, PauseIcon } from '@heroicons/react/24/solid';
-import React from 'react';
-import { useFilterOptions } from '@/hooks/useFilterOptions';
+import { useDashboardStore } from '@/store/dashboard-store';
+import { useFilterOptions } from '@/store/derived';
+import { usePlayback } from '@/hooks/usePlayback';
+import { addDays } from '@/lib/dates';
 import TimeSlider from './TimeSlider';
 
 export default function FilterPanel({ compact = false }: { compact?: boolean }) {
@@ -30,79 +32,75 @@ export default function FilterPanel({ compact = false }: { compact?: boolean }) 
     setShowDemographics,
     showTimeslider,
     setShowTimeslider,
-  } = useDashboardStore();
+  } = useDashboardStore(useShallow((s) => ({
+    startDate: s.startDate,
+    endDate: s.endDate,
+    setStartDate: s.setStartDate,
+    setEndDate: s.setEndDate,
+    setIsAnimating: s.setIsAnimating,
+    showCases: s.showCases,
+    setShowCases: s.setShowCases,
+    showClosures: s.showClosures,
+    setShowClosures: s.setShowClosures,
+    selectedSchoolBoard: s.selectedSchoolBoard,
+    setSelectedSchoolBoard: s.setSelectedSchoolBoard,
+    selectedMunicipality: s.selectedMunicipality,
+    setSelectedMunicipality: s.setSelectedMunicipality,
+    resetFilters: s.resetFilters,
+    minDate: s.minDate,
+    maxDate: s.maxDate,
+    showDemographics: s.showDemographics,
+    setShowDemographics: s.setShowDemographics,
+    showTimeslider: s.showTimeslider,
+    setShowTimeslider: s.setShowTimeslider,
+  })));
 
-  const { schoolBoards, municipalities, isLoading: filterOptionsLoading, error: filterOptionsError } = useFilterOptions();
+  const { schoolBoards, municipalities } = useFilterOptions();
 
-  // Animation state (only used in date-input mode)
-  const [isPlaying, setIsPlaying] = useState(false);
+  // Date-range animation: startDate stays put and endDate advances one day per tick,
+  // with closures shown as of endDate (see closure-filter.ts).
   const [speed, setSpeed] = useState<'normal' | 'fast'>('normal');
-  const animationRef = useRef<number | null>(null);
+  const playback = usePlayback(() => {
+    const { endDate: current, startDate: start, maxDate: max } = useDashboardStore.getState();
+    const next = addDays(current ?? start, 1);
+    if (max && next > max) {
+      setIsAnimating(false);
+      return false;
+    }
+    setEndDate(next);
+    return true;
+  }, speed === 'fast' ? 100 : 300);
+  const isPlaying = playback.isPlaying;
 
-  const speedMs = speed === 'fast' ? 100 : 300;
-
-  const addDays = (date: Date, days: number) => {
-    const result = new Date(date);
-    result.setDate(result.getDate() + days);
-    return result;
+  const stopAnimation = () => {
+    playback.pause();
+    setIsAnimating(false);
   };
 
   const handlePlayPause = () => {
     if (isPlaying) {
-      setIsPlaying(false);
-      setIsAnimating(false);
-      if (animationRef.current) cancelAnimationFrame(animationRef.current);
+      stopAnimation();
     } else {
-      setIsPlaying(true);
+      setEndDate(startDate);
       setIsAnimating(true);
-      let current = startDate;
-      let lastFrameTime = 0;
-      setEndDate(current);
-
-      const tick = (timestamp: number) => {
-        if (timestamp - lastFrameTime >= speedMs) {
-          const next = addDays(current, 1);
-          if (maxDate && next > new Date(maxDate)) {
-            setIsPlaying(false);
-            setIsAnimating(false);
-            return;
-          }
-          setEndDate(next);
-          current = next;
-          lastFrameTime = timestamp;
-        }
-        animationRef.current = requestAnimationFrame(tick);
-      };
-
-      animationRef.current = requestAnimationFrame(tick);
+      playback.play();
     }
   };
 
   const handleReset = () => {
-    setIsPlaying(false);
-    setIsAnimating(false);
-    if (animationRef.current) cancelAnimationFrame(animationRef.current);
-    setEndDate(startDate);
+    stopAnimation();
+    setEndDate(null);
   };
 
   const handleToggleTimeslider = (checked: boolean) => {
-    // Cancel any running date-input animation before switching modes
-    if (isPlaying) {
-      setIsPlaying(false);
-      if (animationRef.current) cancelAnimationFrame(animationRef.current);
-    }
+    stopAnimation();
     setShowTimeslider(checked);
-    if (!checked) {
-      // Restore point-in-time: endDate = startDate
-      setEndDate(startDate);
-    }
+    // Back to a single day
+    setEndDate(null);
   };
 
-  React.useEffect(() => {
-    return () => {
-      if (animationRef.current) cancelAnimationFrame(animationRef.current);
-    };
-  }, []);
+  // Stop the animation flag if this panel unmounts mid-play
+  useEffect(() => () => useDashboardStore.getState().setIsAnimating(false), []);
 
   return (
     <div className="bg-white rounded-lg shadow p-4 mb-6">
@@ -112,20 +110,12 @@ export default function FilterPanel({ compact = false }: { compact?: boolean }) 
           Filters
         </h3>
         <button
-          onClick={resetFilters}
+          onClick={() => { stopAnimation(); resetFilters(); }}
           className="text-sm text-blue-600 hover:text-blue-800"
         >
           Reset All
         </button>
       </div>
-
-      {filterOptionsError && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-          <p className="text-sm text-red-600">
-            Error loading filter options: {filterOptionsError}
-          </p>
-        </div>
-      )}
 
       <div className={compact ? 'grid grid-cols-1 gap-4' : 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'}>
         {/* Date Controls */}
@@ -147,10 +137,10 @@ export default function FilterPanel({ compact = false }: { compact?: boolean }) 
               <div className="flex flex-wrap items-center gap-2">
                 <input
                   type="date"
-                  value={startDate.toISOString().split('T')[0]}
-                  onChange={(e) => { const d = new Date(e.target.value); if (!isNaN(d.getTime())) setStartDate(d); }}
+                  value={startDate}
+                  onChange={(e) => { if (e.target.value) setStartDate(e.target.value); }}
                   min={minDate || undefined}
-                  max={endDate ? endDate.toISOString().split('T')[0] : maxDate || undefined}
+                  max={endDate || maxDate || undefined}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   disabled={isPlaying}
                 />
@@ -190,9 +180,9 @@ export default function FilterPanel({ compact = false }: { compact?: boolean }) 
               </label>
               <input
                 type="date"
-                value={endDate ? endDate.toISOString().split('T')[0] : ''}
-                onChange={(e) => { const d = new Date(e.target.value); if (!isNaN(d.getTime())) setEndDate(d); }}
-                min={startDate ? startDate.toISOString().split('T')[0] : minDate || undefined}
+                value={endDate ?? ''}
+                onChange={(e) => setEndDate(e.target.value || null)}
+                min={startDate || minDate || undefined}
                 max={maxDate || undefined}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 disabled={isPlaying}
@@ -210,11 +200,8 @@ export default function FilterPanel({ compact = false }: { compact?: boolean }) 
             value={selectedSchoolBoard || ''}
             onChange={(e) => setSelectedSchoolBoard(e.target.value || undefined)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            disabled={filterOptionsLoading}
           >
-            <option value="">
-              {filterOptionsLoading ? 'Loading...' : 'All School Boards'}
-            </option>
+            <option value="">All School Boards</option>
             {schoolBoards.map((board) => (
               <option key={board} value={board}>{board}</option>
             ))}
@@ -230,11 +217,8 @@ export default function FilterPanel({ compact = false }: { compact?: boolean }) 
             value={selectedMunicipality || ''}
             onChange={(e) => setSelectedMunicipality(e.target.value || undefined)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            disabled={filterOptionsLoading}
           >
-            <option value="">
-              {filterOptionsLoading ? 'Loading...' : 'All Municipalities'}
-            </option>
+            <option value="">All Municipalities</option>
             {municipalities.map((municipality) => (
               <option key={municipality} value={municipality}>{municipality}</option>
             ))}

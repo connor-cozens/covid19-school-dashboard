@@ -1,7 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import { useDashboardStore } from '@/store/dashboard-store';
-import { useRef, useState, useEffect, useCallback } from 'react';
+import { usePlayback } from '@/hooks/usePlayback';
 import { PlayIcon, PauseIcon } from '@heroicons/react/24/solid';
 
 /**
@@ -9,67 +10,38 @@ import { PlayIcon, PauseIcon } from '@heroicons/react/24/solid';
  *
  * Maps a range input index to the availableDates array so the slider
  * skips weekends and summer gaps (only real data dates are reachable).
- * Sets startDate = endDate = selectedDate for point-in-time filtering.
+ * Sets startDate (with no endDate) for point-in-time filtering.
  */
 export default function TimeSlider() {
-  const {
-    availableDates,
-    startDate,
-    setStartDate,
-    setEndDate,
-  } = useDashboardStore();
+  const availableDates = useDashboardStore((s) => s.availableDates);
+  const startDate = useDashboardStore((s) => s.startDate);
+  const setStartDate = useDashboardStore((s) => s.setStartDate);
+  const setEndDate = useDashboardStore((s) => s.setEndDate);
 
-  const [isPlaying, setIsPlaying] = useState(false);
   const [speed, setSpeed] = useState<'normal' | 'fast'>('normal');
-  const animationRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const speedMs = speed === 'fast' ? 150 : 400;
 
-  // Derive current slider index from startDate
-  const currentDateStr = startDate.toISOString().split('T')[0];
-  const currentIndex = availableDates.indexOf(currentDateStr);
+  const currentDateStr = startDate;
+  const currentIndex = availableDates.indexOf(startDate);
   const sliderIndex = currentIndex >= 0 ? currentIndex : 0;
 
-  const setDateByIndex = useCallback((index: number) => {
+  const setDateByIndex = (index: number) => {
     if (availableDates.length === 0) return;
-    const clamped = Math.max(0, Math.min(index, availableDates.length - 1));
-    const date = new Date(availableDates[clamped]);
+    const date = availableDates[Math.max(0, Math.min(index, availableDates.length - 1))];
     setStartDate(date);
-    setEndDate(date);
-  }, [availableDates, setStartDate, setEndDate]);
-
-  const stopAnimation = useCallback(() => {
-    setIsPlaying(false);
-    if (animationRef.current !== null) {
-      clearTimeout(animationRef.current);
-      animationRef.current = null;
-    }
-  }, []);
-
-  const tick = useCallback((index: number) => {
-    const next = index + 1;
-    if (next >= availableDates.length) {
-      setIsPlaying(false);
-      return;
-    }
-    setDateByIndex(next);
-    animationRef.current = setTimeout(() => tick(next), speedMs);
-  }, [availableDates.length, setDateByIndex, speedMs]);
-
-  const handlePlayPause = () => {
-    if (isPlaying) {
-      stopAnimation();
-    } else {
-      setIsPlaying(true);
-      animationRef.current = setTimeout(() => tick(sliderIndex), speedMs);
-    }
+    setEndDate(null);
   };
 
-  // Stop on unmount
-  useEffect(() => {
-    return () => {
-      if (animationRef.current !== null) clearTimeout(animationRef.current);
-    };
-  }, []);
+  const playback = usePlayback(() => {
+    const { availableDates: dates, startDate: current } = useDashboardStore.getState();
+    const next = dates.indexOf(current) + 1;
+    if (next <= 0 || next >= dates.length) return false;
+    setStartDate(dates[next]);
+    setEndDate(null);
+    return true;
+  }, speed === 'fast' ? 150 : 400);
+  const isPlaying = playback.isPlaying;
+  const stopAnimation = playback.pause;
+  const handlePlayPause = () => (isPlaying ? playback.pause() : playback.play());
 
   if (availableDates.length === 0) {
     return <p className="text-sm text-gray-500">Loading dates…</p>;

@@ -1,4 +1,6 @@
 import { useDashboardStore } from '@/store/dashboard-store';
+import { filterCases, filterClosures, computeStats, computeFilterOptions } from '@/store/derived';
+import { DashboardData } from '@/lib/data-loader';
 import { SchoolCase, SchoolClosure, SchoolSummary } from '@/types';
 
 // ---------------------------------------------------------------------------
@@ -8,10 +10,10 @@ import { SchoolCase, SchoolClosure, SchoolSummary } from '@/types';
 function makeCase(overrides: Partial<SchoolCase> = {}): SchoolCase {
   return {
     collected_date: '2020-09-15',
-    reported_date: '2020-09-15',
     school_board: 'Toronto DSB',
     school_number: 123456,
     school_name: 'Test School',
+    city: 'Toronto',
     municipality: 'Toronto',
     confirmed_student_cases: 2,
     confirmed_staff_cases: 1,
@@ -43,18 +45,6 @@ function makeSummary(date: string, cumulative: number): SchoolSummary {
     current_schools_w_cases: 5,
     current_schools_closed: 2,
     current_total_number_schools: 3800,
-    new_total_school_related_cases: 10,
-    new_school_related_student_cases: 7,
-    new_school_related_staff_cases: 3,
-    new_school_related_unspecified_cases: 0,
-    recent_total_school_related_cases: 50,
-    recent_school_related_student_cases: 35,
-    recent_school_related_staff_cases: 15,
-    recent_school_related_unspecified_cases: 0,
-    past_total_school_related_cases: 100,
-    past_school_related_student_cases: 70,
-    past_school_related_staff_cases: 30,
-    past_school_related_unspecified_cases: 0,
     cumulative_school_related_cases: cumulative,
     cumulative_school_related_student_cases: Math.round(cumulative * 0.7),
     cumulative_school_related_staff_cases: Math.round(cumulative * 0.3),
@@ -62,337 +52,231 @@ function makeSummary(date: string, cumulative: number): SchoolSummary {
   };
 }
 
-// ---------------------------------------------------------------------------
-// Reset store before each test
-// ---------------------------------------------------------------------------
+function byDate(cases: SchoolCase[]) {
+  const map = new Map<string, SchoolCase[]>();
+  for (const c of cases) map.set(c.collected_date, [...(map.get(c.collected_date) ?? []), c]);
+  return { casesByDate: map, caseDates: Array.from(map.keys()).sort() };
+}
+
+/** filterCases with the store's defaults, overridable per test. */
+function runFilterCases(
+  cases: SchoolCase[],
+  opts: { start?: string; end?: string | null; show?: boolean; board?: string; municipality?: string } = {},
+) {
+  const { casesByDate, caseDates } = byDate(cases);
+  return filterCases(
+    casesByDate, caseDates, opts.start ?? '2020-09-15', opts.end ?? null,
+    opts.show ?? true, opts.board, opts.municipality,
+  );
+}
+
+function makeData(overrides: Partial<DashboardData> = {}): DashboardData {
+  return { cases: [], closures: [], summaries: [], profiles: {}, ...overrides };
+}
 
 beforeEach(() => {
-  useDashboardStore.setState({
-    schoolCases: [],
-    schoolCasesWithDemographics: [],
-    schoolClosures: [],
-    schoolSummaries: [],
-    filteredCases: [],
-    filteredClosures: [],
-    isLoading: false,
-    error: null,
-    availableDates: [],
-    minDate: null,
-    maxDate: null,
-    selectedDate: new Date('2020-09-15'),
-    showCases: true,
-    showClosures: true,
-    showDemographics: true,
-    selectedSchoolBoard: undefined,
-    selectedMunicipality: undefined,
-    activeTab: 'map',
-    isMapFullscreen: false,
-    isAnimating: false,
-    startDate: new Date('2020-09-15'),
-    endDate: null,
-    showTimeslider: false,
-    dashboardStats: {
-      totalSchools: null,
-      schoolsWithCases: 0,
-      schoolsClosed: 0,
-      totalCases: 0,
-      studentCases: 0,
-      staffCases: 0,
-      percentageSchoolsWithCases: null,
-      percentageSchoolsClosed: null,
-    },
-  });
+  useDashboardStore.getState().setData(makeData());
+  useDashboardStore.getState().resetFilters();
 });
 
 // ---------------------------------------------------------------------------
-// updateFilteredData — cases
+// filterCases
 // ---------------------------------------------------------------------------
 
-describe('updateFilteredData — cases', () => {
+describe('filterCases', () => {
   test('1. single-day: only records matching startDate are returned', () => {
-    useDashboardStore.setState({
-      schoolCasesWithDemographics: [
-        makeCase({ collected_date: '2020-09-15' }),
-        makeCase({ collected_date: '2020-09-16' }),
-        makeCase({ collected_date: '2020-09-14' }),
-      ],
-      startDate: new Date('2020-09-15'),
-      endDate: null,
-    });
-    useDashboardStore.getState().updateFilteredData();
-    const { filteredCases } = useDashboardStore.getState();
-    expect(filteredCases).toHaveLength(1);
-    expect(filteredCases[0].collected_date).toBe('2020-09-15');
+    const result = runFilterCases([
+      makeCase({ collected_date: '2020-09-15' }),
+      makeCase({ collected_date: '2020-09-16' }),
+      makeCase({ collected_date: '2020-09-14' }),
+    ]);
+    expect(result).toHaveLength(1);
+    expect(result[0].collected_date).toBe('2020-09-15');
   });
 
   test('2. range: records on boundary dates (startDate AND endDate) are both included', () => {
-    useDashboardStore.setState({
-      schoolCasesWithDemographics: [
-        makeCase({ collected_date: '2020-09-10' }), // exactly startDate
-        makeCase({ collected_date: '2020-09-12' }), // mid-range
-        makeCase({ collected_date: '2020-09-20' }), // exactly endDate
-        makeCase({ collected_date: '2020-09-21' }), // after endDate — excluded
-        makeCase({ collected_date: '2020-09-09' }), // before startDate — excluded
-      ],
-      startDate: new Date('2020-09-10'),
-      endDate: new Date('2020-09-20'),
-    });
-    useDashboardStore.getState().updateFilteredData();
-    const { filteredCases } = useDashboardStore.getState();
-    expect(filteredCases).toHaveLength(3);
+    const result = runFilterCases([
+      makeCase({ collected_date: '2020-09-10' }), // exactly startDate
+      makeCase({ collected_date: '2020-09-12' }), // mid-range
+      makeCase({ collected_date: '2020-09-20' }), // exactly endDate
+      makeCase({ collected_date: '2020-09-21' }), // after endDate: excluded
+      makeCase({ collected_date: '2020-09-09' }), // before startDate: excluded
+    ], { start: '2020-09-10', end: '2020-09-20' });
+    expect(result).toHaveLength(3);
   });
 
-  test('3. invalid collected_date ("not-a-date") is skipped without crashing', () => {
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-    useDashboardStore.setState({
-      schoolCasesWithDemographics: [
-        makeCase({ collected_date: 'not-a-date' }),
-        makeCase({ collected_date: '2020-09-15' }),
-      ],
-      startDate: new Date('2020-09-15'),
-      endDate: null,
-    });
-    expect(() => useDashboardStore.getState().updateFilteredData()).not.toThrow();
-    const { filteredCases } = useDashboardStore.getState();
-    expect(filteredCases).toHaveLength(1);
-    expect(warnSpy).toHaveBeenCalled();
-    warnSpy.mockRestore();
+  test('3. startDate equal to endDate is a single day', () => {
+    const result = runFilterCases([
+      makeCase({ collected_date: '2020-09-15' }),
+      makeCase({ collected_date: '2020-09-16' }),
+    ], { start: '2020-09-15', end: '2020-09-15' });
+    expect(result).toHaveLength(1);
   });
 
-  test('4. empty string collected_date is skipped', () => {
-    useDashboardStore.setState({
-      schoolCasesWithDemographics: [
-        makeCase({ collected_date: '' }),
-        makeCase({ collected_date: '2020-09-15' }),
-      ],
-      startDate: new Date('2020-09-15'),
-      endDate: null,
-    });
-    useDashboardStore.getState().updateFilteredData();
-    const { filteredCases } = useDashboardStore.getState();
-    expect(filteredCases).toHaveLength(1);
+  test('4. invalid or empty collected_date never matches', () => {
+    const result = runFilterCases([
+      makeCase({ collected_date: 'not-a-date' }),
+      makeCase({ collected_date: '' }),
+      makeCase({ collected_date: '2020-09-15' }),
+    ], { start: '2020-09-01', end: '2020-12-31' });
+    expect(result).toHaveLength(1);
   });
 
   test('5. selectedSchoolBoard filter works (only matching board returned)', () => {
-    useDashboardStore.setState({
-      schoolCasesWithDemographics: [
-        makeCase({ school_board: 'Toronto DSB' }),
-        makeCase({ school_board: 'Ottawa DSB' }),
-        makeCase({ school_board: 'Toronto DSB' }),
-      ],
-      startDate: new Date('2020-09-15'),
-      endDate: null,
-      selectedSchoolBoard: 'Toronto DSB',
-    });
-    useDashboardStore.getState().updateFilteredData();
-    const { filteredCases } = useDashboardStore.getState();
-    expect(filteredCases).toHaveLength(2);
-    expect(filteredCases.every(c => c.school_board === 'Toronto DSB')).toBe(true);
+    const result = runFilterCases([
+      makeCase({ school_board: 'Toronto DSB' }),
+      makeCase({ school_board: 'Ottawa DSB' }),
+      makeCase({ school_board: 'Toronto DSB' }),
+    ], { board: 'Toronto DSB' });
+    expect(result).toHaveLength(2);
+    expect(result.every((c) => c.school_board === 'Toronto DSB')).toBe(true);
   });
 
-  test('6. selectedMunicipality filter uses case_.municipality field (not city)', () => {
-    useDashboardStore.setState({
-      schoolCasesWithDemographics: [
-        makeCase({ municipality: 'Toronto' }),
-        makeCase({ municipality: 'Ottawa' }),
-      ],
-      startDate: new Date('2020-09-15'),
-      endDate: null,
-      selectedMunicipality: 'Toronto',
-    });
-    useDashboardStore.getState().updateFilteredData();
-    const { filteredCases } = useDashboardStore.getState();
-    expect(filteredCases).toHaveLength(1);
-    expect(filteredCases[0].municipality).toBe('Toronto');
+  test('6. selectedMunicipality filter uses the municipality field (not city)', () => {
+    const result = runFilterCases([
+      makeCase({ municipality: 'Toronto', city: 'Ottawa' }),
+      makeCase({ municipality: 'Ottawa', city: 'Toronto' }),
+    ], { municipality: 'Toronto' });
+    expect(result).toHaveLength(1);
+    expect(result[0].municipality).toBe('Toronto');
   });
 
-  test('7. showCases = false → filteredCases is empty', () => {
-    useDashboardStore.setState({
-      schoolCasesWithDemographics: [
-        makeCase({ collected_date: '2020-09-15' }),
-        makeCase({ collected_date: '2020-09-15' }),
-      ],
-      startDate: new Date('2020-09-15'),
-      endDate: null,
-      showCases: false,
-    });
-    useDashboardStore.getState().updateFilteredData();
-    const { filteredCases } = useDashboardStore.getState();
-    expect(filteredCases).toHaveLength(0);
+  test('7. showCases = false → no cases', () => {
+    expect(runFilterCases([makeCase(), makeCase()], { show: false })).toHaveLength(0);
   });
 });
 
 // ---------------------------------------------------------------------------
-// updateFilteredData — closures
+// filterClosures
 // ---------------------------------------------------------------------------
 
-describe('updateFilteredData — closures', () => {
+describe('filterClosures', () => {
   test('8. single-day: closure spanning the selected day is included', () => {
-    useDashboardStore.setState({
-      schoolClosures: [
-        makeClosure({ date_of_closure: '2020-09-16', date_of_reopening: '2020-09-30' }),
-      ],
-      startDate: new Date('2020-09-20'),
-      endDate: null,
-      showClosures: true,
-    });
-    useDashboardStore.getState().updateFilteredData();
-    const { filteredClosures } = useDashboardStore.getState();
-    expect(filteredClosures).toHaveLength(1);
+    const closures = [makeClosure({ date_of_closure: '2020-09-16', date_of_reopening: '2020-09-30' })];
+    expect(filterClosures(closures, '2020-09-20', null, false, true, undefined, undefined)).toHaveLength(1);
   });
 
   test('9. single-day: closure that ended before the day is excluded', () => {
-    useDashboardStore.setState({
-      schoolClosures: [
-        makeClosure({ date_of_closure: '2020-09-01', date_of_reopening: '2020-09-14' }),
-      ],
-      startDate: new Date('2020-09-20'),
-      endDate: null,
-      showClosures: true,
-    });
-    useDashboardStore.getState().updateFilteredData();
-    const { filteredClosures } = useDashboardStore.getState();
-    expect(filteredClosures).toHaveLength(0);
+    const closures = [makeClosure({ date_of_closure: '2020-09-01', date_of_reopening: '2020-09-14' })];
+    expect(filterClosures(closures, '2020-09-20', null, false, true, undefined, undefined)).toHaveLength(0);
   });
 
-  test('10. board filter on closures works with board_name field', () => {
-    useDashboardStore.setState({
-      schoolClosures: [
-        makeClosure({ board_name: 'Toronto DSB' }),
-        makeClosure({ board_name: 'Ottawa DSB' }),
-      ],
-      startDate: new Date('2020-09-20'),
-      endDate: null,
-      showClosures: true,
-      selectedSchoolBoard: 'Toronto DSB',
-    });
-    useDashboardStore.getState().updateFilteredData();
-    const { filteredClosures } = useDashboardStore.getState();
-    expect(filteredClosures).toHaveLength(1);
-    expect(filteredClosures[0].board_name).toBe('Toronto DSB');
+  test('10. board filter uses board_name, municipality filter uses city', () => {
+    const closures = [
+      makeClosure({ board_name: 'Toronto DSB', city: 'Toronto' }),
+      makeClosure({ board_name: 'Ottawa DSB', city: 'Ottawa' }),
+    ];
+    const byBoard = filterClosures(closures, '2020-09-20', null, false, true, 'Toronto DSB', undefined);
+    expect(byBoard.map((c) => c.board_name)).toEqual(['Toronto DSB']);
+    const byCity = filterClosures(closures, '2020-09-20', null, false, true, undefined, 'Ottawa');
+    expect(byCity.map((c) => c.city)).toEqual(['Ottawa']);
+  });
+
+  test('showClosures = false → no closures', () => {
+    expect(filterClosures([makeClosure()], '2020-09-20', null, false, false, undefined, undefined)).toHaveLength(0);
   });
 });
 
 // ---------------------------------------------------------------------------
-// updateDashboardStats
+// computeStats
 // ---------------------------------------------------------------------------
 
-describe('updateDashboardStats', () => {
-  test('11. totalSchools = null when schoolSummaries is empty', () => {
-    useDashboardStore.setState({
-      schoolSummaries: [],
-      filteredCases: [],
-      filteredClosures: [],
-      startDate: new Date('2020-09-15'),
-      endDate: null,
-    });
-    useDashboardStore.getState().updateDashboardStats();
-    expect(useDashboardStore.getState().dashboardStats.totalSchools).toBeNull();
+describe('computeStats', () => {
+  test('11. totalSchools = null when there are no summaries', () => {
+    expect(computeStats([], [], [], '2020-09-15', null).totalSchools).toBeNull();
   });
 
-  test('12. percentageSchoolsWithCases = null when totalSchools = null', () => {
-    useDashboardStore.setState({
-      schoolSummaries: [],
-      filteredCases: [makeCase()],
-      filteredClosures: [],
-      startDate: new Date('2020-09-15'),
-      endDate: null,
-    });
-    useDashboardStore.getState().updateDashboardStats();
-    expect(useDashboardStore.getState().dashboardStats.percentageSchoolsWithCases).toBeNull();
-    expect(useDashboardStore.getState().dashboardStats.percentageSchoolsClosed).toBeNull();
+  test('12. percentages are null when totalSchools = null', () => {
+    const stats = computeStats([], [makeCase()], [], '2020-09-15', null);
+    expect(stats.percentageSchoolsWithCases).toBeNull();
+    expect(stats.percentageSchoolsClosed).toBeNull();
   });
 
-  test('13. year1 only: date before boundary uses only year1 summary row', () => {
-    // year1 row: 2020-09-15 (< 2021-07-01), cumulative = 500
-    // year2 row: 2021-08-25 (>= 2021-07-01), cumulative = 200
-    // startDate is before the boundary → year1 included; year2 lookup date also before boundary so no year2 row
-    useDashboardStore.setState({
-      schoolSummaries: [
-        makeSummary('2020-09-15', 500),
-        makeSummary('2021-08-25', 200),
-      ],
-      filteredCases: [],
-      filteredClosures: [],
-      startDate: new Date('2020-09-15'),
-      endDate: null,
-    });
-    useDashboardStore.getState().updateDashboardStats();
-    const stats = useDashboardStore.getState().dashboardStats;
-    // lookupDate = '2020-09-15': year1 row matches (2020-09-15 <= 2020-09-15);
-    // year2 row '2021-08-25' > '2020-09-15' so no year2 contribution
-    expect(stats.totalCases).toBe(500);
+  test('13. year1 only: a date before the boundary uses only the year1 summary row', () => {
+    const summaries = [makeSummary('2020-09-15', 500), makeSummary('2021-08-25', 200)];
+    expect(computeStats(summaries, [], [], '2020-09-15', null).totalCases).toBe(500);
   });
 
-  test('14. year2 only: startDate after boundary uses only year2 summary row', () => {
-    useDashboardStore.setState({
-      schoolSummaries: [
-        makeSummary('2020-09-15', 500),
-        makeSummary('2021-08-25', 200),
-      ],
-      filteredCases: [],
-      filteredClosures: [],
-      startDate: new Date('2021-08-25'),
-      endDate: null,
-    });
-    useDashboardStore.getState().updateDashboardStats();
-    const stats = useDashboardStore.getState().dashboardStats;
-    // startDate '2021-08-25' >= YEAR_BOUNDARY '2021-07-01' → year1 contribution is null (0)
-    // year2Row lookup: year2 row '2021-08-25' <= '2021-08-25' → cumulative = 200
-    expect(stats.totalCases).toBe(200);
+  test('14. year2 only: a startDate after the boundary uses only the year2 summary row', () => {
+    const summaries = [makeSummary('2020-09-15', 500), makeSummary('2021-08-25', 200)];
+    expect(computeStats(summaries, [], [], '2021-08-25', null).totalCases).toBe(200);
   });
 
-  test('15. schoolsWithCases counts unique school_number values (two records same school → 1)', () => {
-    useDashboardStore.setState({
-      schoolSummaries: [],
-      filteredCases: [
-        makeCase({ school_number: 1001 }),
-        makeCase({ school_number: 1001 }), // duplicate
-        makeCase({ school_number: 1002 }),
-      ],
-      filteredClosures: [],
-      startDate: new Date('2020-09-15'),
-      endDate: null,
-    });
-    useDashboardStore.getState().updateDashboardStats();
-    expect(useDashboardStore.getState().dashboardStats.schoolsWithCases).toBe(2);
+  test('a range across the boundary adds both years', () => {
+    const summaries = [makeSummary('2020-09-15', 500), makeSummary('2021-08-25', 200)];
+    expect(computeStats(summaries, [], [], '2020-09-15', '2021-09-01').totalCases).toBe(700);
+  });
+
+  test('15. schoolsWithCases counts unique school_number values', () => {
+    const cases = [makeCase({ school_number: 1001 }), makeCase({ school_number: 1001 }), makeCase({ school_number: 1002 })];
+    expect(computeStats([], cases, [], '2020-09-15', null).schoolsWithCases).toBe(2);
+  });
+
+  test('percentages use the largest school count in the summaries', () => {
+    const stats = computeStats([makeSummary('2020-09-15', 10)], [makeCase()], [makeClosure()], '2020-09-15', null);
+    expect(stats.totalSchools).toBe(3800);
+    expect(stats.percentageSchoolsWithCases).toBeCloseTo(100 / 3800);
+    expect(stats.percentageSchoolsClosed).toBeCloseTo(100 / 3800);
   });
 });
 
 // ---------------------------------------------------------------------------
-// setSelectedDate clamping
+// computeFilterOptions
 // ---------------------------------------------------------------------------
 
-describe('setSelectedDate clamping', () => {
-  test('16. date before minDate is clamped to minDate', () => {
-    useDashboardStore.setState({
-      minDate: '2020-09-10',
-      maxDate: '2021-06-30',
-    });
-    useDashboardStore.getState().setSelectedDate(new Date('2020-01-01'));
-    expect(useDashboardStore.getState().selectedDate).toEqual(new Date('2020-09-10'));
-  });
-
-  test('17. date after maxDate is clamped to maxDate', () => {
-    useDashboardStore.setState({
-      minDate: '2020-09-10',
-      maxDate: '2021-06-30',
-    });
-    useDashboardStore.getState().setSelectedDate(new Date('2022-12-31'));
-    expect(useDashboardStore.getState().selectedDate).toEqual(new Date('2021-06-30'));
+describe('computeFilterOptions', () => {
+  test('boards and municipalities from cases and closures, sorted and unique', () => {
+    const options = computeFilterOptions(
+      [makeCase({ school_board: 'B Board', municipality: 'Toronto' }), makeCase({ school_board: 'A Board', municipality: 'Toronto' })],
+      [makeClosure({ board_name: 'C Board', city: 'Ajax' })],
+    );
+    expect(options.schoolBoards).toEqual(['A Board', 'B Board', 'C Board']);
+    expect(options.municipalities).toEqual(['Ajax', 'Toronto']);
   });
 });
 
 // ---------------------------------------------------------------------------
-// resetFilters
+// Store actions
 // ---------------------------------------------------------------------------
+
+describe('setData', () => {
+  test('timeline spans case dates and closure/reopening dates; startDate starts at the first', () => {
+    useDashboardStore.getState().setData(makeData({
+      cases: [makeCase({ collected_date: '2020-09-15' }), makeCase({ collected_date: '2020-09-10' })],
+      closures: [makeClosure({ date_of_closure: '2020-09-12', date_of_reopening: '2020-10-01' })],
+    }));
+    const s = useDashboardStore.getState();
+    expect(s.status).toBe('ready');
+    expect(s.availableDates).toEqual(['2020-09-10', '2020-09-12', '2020-09-15', '2020-10-01']);
+    expect(s.caseDates).toEqual(['2020-09-10', '2020-09-15']);
+    expect(s.minDate).toBe('2020-09-10');
+    expect(s.maxDate).toBe('2020-10-01');
+    expect(s.startDate).toBe('2020-09-10');
+    expect(s.endDate).toBeNull();
+  });
+});
+
+describe('date clamping', () => {
+  beforeEach(() => {
+    useDashboardStore.getState().setData(makeData({
+      cases: [makeCase({ collected_date: '2020-09-10' }), makeCase({ collected_date: '2021-06-30' })],
+    }));
+  });
+
+  test('16. a date before minDate is clamped to minDate', () => {
+    useDashboardStore.getState().setStartDate('2020-01-01');
+    expect(useDashboardStore.getState().startDate).toBe('2020-09-10');
+  });
+
+  test('17. a date after maxDate is clamped to maxDate', () => {
+    useDashboardStore.getState().setEndDate('2022-12-31');
+    expect(useDashboardStore.getState().endDate).toBe('2021-06-30');
+  });
+});
 
 describe('resetFilters', () => {
   test('18. after reset, selectedSchoolBoard and selectedMunicipality are undefined', () => {
-    useDashboardStore.setState({
-      selectedSchoolBoard: 'Toronto DSB',
-      selectedMunicipality: 'Toronto',
-    });
+    useDashboardStore.setState({ selectedSchoolBoard: 'Toronto DSB', selectedMunicipality: 'Toronto' });
     useDashboardStore.getState().resetFilters();
     const state = useDashboardStore.getState();
     expect(state.selectedSchoolBoard).toBeUndefined();
@@ -400,11 +284,7 @@ describe('resetFilters', () => {
   });
 
   test('19. after reset, showCases, showClosures, showDemographics are all true', () => {
-    useDashboardStore.setState({
-      showCases: false,
-      showClosures: false,
-      showDemographics: false,
-    });
+    useDashboardStore.setState({ showCases: false, showClosures: false, showDemographics: false });
     useDashboardStore.getState().resetFilters();
     const state = useDashboardStore.getState();
     expect(state.showCases).toBe(true);
@@ -412,9 +292,11 @@ describe('resetFilters', () => {
     expect(state.showDemographics).toBe(true);
   });
 
-  test('after reset, showTimeslider is false', () => {
-    useDashboardStore.setState({ showTimeslider: true });
+  test('after reset, showTimeslider is false and the range is back to one day', () => {
+    useDashboardStore.setState({ showTimeslider: true, startDate: '2021-01-01', endDate: '2021-02-01' });
     useDashboardStore.getState().resetFilters();
-    expect(useDashboardStore.getState().showTimeslider).toBe(false);
+    const state = useDashboardStore.getState();
+    expect(state.showTimeslider).toBe(false);
+    expect(state.endDate).toBeNull();
   });
 });

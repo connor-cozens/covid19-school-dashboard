@@ -4,7 +4,8 @@ import { ArrowsPointingOutIcon, ArrowsPointingInIcon } from '@heroicons/react/24
 import { useDashboardStore } from '@/store/dashboard-store';
 
 export default function MapFullscreenButton() {
-  const { isMapFullscreen, setIsMapFullscreen } = useDashboardStore();
+  const isMapFullscreen = useDashboardStore((s) => s.isMapFullscreen);
+  const setIsMapFullscreen = useDashboardStore((s) => s.setIsMapFullscreen);
 
   return (
     <button

@@ -1,7 +1,7 @@
 'use client';
 
 import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { useDashboardStore } from '@/store/dashboard-store';
+import { useFilteredCases } from '@/store/derived';
 
 interface PieChartProps {
   title: string;
@@ -9,12 +9,12 @@ interface PieChartProps {
 }
 
 export default function PieChart({ title, className = '' }: PieChartProps) {
-  const { filteredCases } = useDashboardStore();
+  const filteredCases = useFilteredCases();
 
   // Calculate totals
   const totalStudentCases = filteredCases.reduce((sum, c) => sum + c.confirmed_student_cases, 0);
   const totalStaffCases = filteredCases.reduce((sum, c) => sum + c.confirmed_staff_cases, 0);
-  const totalUnspecifiedCases = filteredCases.reduce((sum, c) => sum + c.confirmed_unspecified_cases, 0);
+  const totalUnspecifiedCases = filteredCases.reduce((sum, c) => sum + (c.confirmed_unspecified_cases ?? 0), 0);
 
   const data = [
     { name: 'Student Cases', value: totalStudentCases, color: '#3b82f6' },

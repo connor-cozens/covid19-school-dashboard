@@ -5,17 +5,13 @@ import { SchoolClosure } from '@/types';
 // Helpers
 // ---------------------------------------------------------------------------
 
-/** Build a minimal SchoolClosure using camelCase fields. */
+/** Build a minimal SchoolClosure. */
 function makeClosure(closureDate: string, reopeningDate: string): SchoolClosure {
   return { date_of_closure: closureDate, date_of_reopening: reopeningDate };
 }
 
-/** Build a SchoolClosure using legacy Title-Case field names. */
-function makeClosureLegacy(closureDate: string, reopeningDate: string): SchoolClosure {
-  return { 'Date of Closure': closureDate, 'Date of Reopening': reopeningDate };
-}
-
-const d = (s: string) => new Date(s);
+// Dates are ISO strings; `d` keeps the test cases readable
+const d = (s: string) => s;
 
 // ---------------------------------------------------------------------------
 // Single-day mode (endDate === null or startDate === endDate)
@@ -132,22 +128,6 @@ describe('animation mode — asOf endDate', () => {
 
   test('closure stays hidden well past its reopening date', () => {
     expect(closureMatchesDateRange(closure, d('2020-09-10'), d('2021-01-01'), true)).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// Legacy field names
-// ---------------------------------------------------------------------------
-
-describe('legacy Title-Case field names', () => {
-  const closure = makeClosureLegacy('2020-09-16', '2020-09-30');
-
-  test('single-day: shows closure using legacy fields', () => {
-    expect(closureMatchesDateRange(closure, d('2020-09-20'), null, false)).toBe(true);
-  });
-
-  test('static range: hides closure using legacy fields when out of range', () => {
-    expect(closureMatchesDateRange(closure, d('2020-10-10'), d('2020-11-10'), false)).toBe(false);
   });
 });
 
