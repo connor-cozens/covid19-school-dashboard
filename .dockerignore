@@ -1,0 +1,15 @@
+# Keep the build context small and avoid host artifacts overriding the image's own
+node_modules
+.next
+.git
+.github
+e2e
+playwright-report
+test-results
+coverage
+shiny-app
+.RData
+.Rhistory
+.Rproj.user
+.env*
+!.env.example

@@ -70,6 +70,24 @@ src/
 
 > **Note on school closures data**: `school_closures.json` and the source Excel file are excluded from this repository. They must be added manually before running the app. All other data files are included.
 
+## Testing
+
+- **Unit tests**: `npm test`
+- **Browser tests** (Playwright): `npm run build`, then `npm run test:e2e` — starts the built app and checks every view renders with data. Run `npx playwright install chromium` once first. To test a running server or container instead, set `BASE_URL` (e.g. `BASE_URL=http://localhost:3000 npm run test:e2e`).
+- **Without the real closures data**: `npm run ci:sample-data` copies synthetic data from `tests/fixtures/school_closures.sample.json` into `public/data/` (this overwrites a real `school_closures.json` — regenerate it afterwards with `node scripts/clean_school_closures.js`). Regenerate the sample with `node scripts/generate_sample_closures.js`.
+
+### CI
+
+Every PR to `master` runs [`.github/workflows/ci.yml`](.github/workflows/ci.yml):
+
+| Check | What it does |
+|---|---|
+| Unit tests | `npm ci`, Jest, and lint (report only) |
+| Security audit | `npm audit` on production dependencies and GitHub dependency review — fails on high/critical |
+| Docker build & browser tests | Builds the production Docker image with sample closures data (running the data regression checks), smoke-tests the page and data files, then runs the Playwright tests against the container |
+
+Dependabot ([`.github/dependabot.yml`](.github/dependabot.yml)) opens weekly grouped PRs for npm, the Docker base image and GitHub Actions; security fixes arrive in their own group.
+
 ## Deployment
 
 Deploy to Google Cloud Run:
