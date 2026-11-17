@@ -1,17 +1,11 @@
 import { useEffect } from 'react';
 import { useDashboardStore } from '@/store/dashboard-store';
-import { Tab } from '@/types';
 
-// Keeps the active tab and the filters in the query string, so a refresh or a
-// shared link opens the same view: ?tab=summary&date=2020-11-10&end=2020-11-20&board=...
+// Keeps the filters in the query string of the map and summary pages, so a refresh
+// or a shared link opens the same view: /summary/?date=2020-11-10&end=2020-11-20&board=...
+// The filters live in the store, so they carry over when moving between the two pages.
 
-const TABS: Tab[] = ['map', 'summary', 'about', 'team', 'media', 'data-sources'];
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
-
-function applyTab(params: URLSearchParams) {
-  const tab = params.get('tab') as Tab | null;
-  if (tab && TABS.includes(tab)) useDashboardStore.getState().setActiveTab(tab);
-}
 
 /** Filters need the data's date range, so they're applied once it has loaded. */
 function applyFilters(params: URLSearchParams) {
@@ -29,7 +23,6 @@ function applyFilters(params: URLSearchParams) {
 function buildParams(): URLSearchParams {
   const s = useDashboardStore.getState();
   const params = new URLSearchParams();
-  if (s.activeTab !== 'map') params.set('tab', s.activeTab);
   if (s.startDate && s.startDate !== s.minDate) params.set('date', s.startDate);
   if (s.endDate && s.endDate !== s.startDate && !s.isAnimating) params.set('end', s.endDate);
   if (s.selectedSchoolBoard) params.set('board', s.selectedSchoolBoard);
@@ -39,10 +32,6 @@ function buildParams(): URLSearchParams {
 
 export function useUrlState() {
   const status = useDashboardStore((s) => s.status);
-
-  useEffect(() => {
-    applyTab(new URLSearchParams(window.location.search));
-  }, []);
 
   useEffect(() => {
     if (status !== 'ready') return;

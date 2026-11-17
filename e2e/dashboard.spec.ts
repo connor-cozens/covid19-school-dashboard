@@ -53,7 +53,8 @@ test('summary view renders statistics and charts', async ({ page }) => {
   const errors = trackPageErrors(page);
   await openDashboard(page);
 
-  await page.getByRole('button', { name: 'Summary & Analytics' }).click();
+  await page.getByRole('link', { name: 'Summary & Analytics' }).click();
+  await expect(page).toHaveURL(/\/summary\/$/);
   await expect(page.getByRole('heading', { name: 'Summary & Analytics' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Total Cases' })).toBeVisible();
   // Recharts renders each chart into an SVG surface
@@ -63,38 +64,47 @@ test('summary view renders statistics and charts', async ({ page }) => {
 });
 
 const staticViews = [
-  { tab: 'Data Sources', heading: 'Data Sources & Code' },
-  { tab: 'About', heading: 'About This Site' },
-  { tab: 'Media', heading: /Research applications and media coverage/ },
-  { tab: 'Team', heading: 'The Team and Contact' },
+  { tab: 'Data Sources', path: '/data-sources/', heading: 'Data Sources & Code' },
+  { tab: 'About', path: '/about/', heading: 'About This Site' },
+  { tab: 'Media', path: '/media/', heading: /Research applications and media coverage/ },
+  { tab: 'Team', path: '/team/', heading: 'The Team and Contact' },
 ];
 
-for (const { tab, heading } of staticViews) {
-  test(`${tab} view renders`, async ({ page }) => {
+for (const { tab, path, heading } of staticViews) {
+  test(`${tab} page renders from the nav and on its own`, async ({ page }) => {
     const errors = trackPageErrors(page);
     await openDashboard(page);
 
-    await page.getByRole('button', { name: tab, exact: true }).click();
+    await page.getByRole('link', { name: tab, exact: true }).click();
+    await expect(page).toHaveURL(new RegExp(`${path}$`));
     await expect(page.getByRole('heading', { name: heading })).toBeVisible();
     await expect(page.getByText('Something went wrong')).toHaveCount(0);
+
+    // Opened directly, the page is static HTML and doesn't download the case data
+    const dataRequests: string[] = [];
+    page.on('request', (req) => { if (req.url().includes('/data/')) dataRequests.push(req.url()); });
+    await page.goto(path);
+    await expect(page.getByRole('heading', { name: heading })).toBeVisible();
+    expect(dataRequests).toEqual([]);
 
     expect(errors).toEqual([]);
   });
 }
 
-test('the URL keeps the tab and filters', async ({ page }) => {
+test('the URL keeps the page and filters', async ({ page }) => {
   const errors = trackPageErrors(page);
   await openDashboard(page);
 
   await page.locator('input[type="date"]').first().fill('2020-11-16');
   await expect(page).toHaveURL(/date=2020-11-16/);
-  await page.getByRole('button', { name: 'Summary & Analytics' }).click();
-  await expect(page).toHaveURL(/tab=summary/);
+  // Filters carry over to the summary page
+  await page.getByRole('link', { name: 'Summary & Analytics' }).click();
+  await expect(page).toHaveURL(/\/summary\/\?date=2020-11-16/);
 
   // A reload (or a shared link) opens the same view
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Summary & Analytics' })).toBeVisible();
-  await page.getByRole('button', { name: 'Interactive Map' }).click();
+  await page.getByRole('link', { name: 'Interactive Map' }).click();
   await expect(statValue(page, 'Selected Date')).toHaveText('2020-11-16');
 
   expect(errors).toEqual([]);

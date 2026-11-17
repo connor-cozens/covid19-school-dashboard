@@ -85,5 +85,3 @@ export interface DashboardStats {
   percentageSchoolsWithCases: number | null;  // null when totalSchools is null
   percentageSchoolsClosed: number | null;     // null when totalSchools is null
 }
-
-export type Tab = 'map' | 'summary' | 'about' | 'team' | 'media' | 'data-sources';

@@ -1,10 +1,11 @@
-import Layout from '@/components/layout/Layout';
-import Dashboard from '@/components/Dashboard';
+import DataPage from '@/components/DataPage';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import MapView from '@/components/map/MapView';
 
-export default function Home() {
+export default function MapPage() {
   return (
-    <Layout>
-      <Dashboard />
-    </Layout>
+    <DataPage>
+      <ErrorBoundary><MapView /></ErrorBoundary>
+    </DataPage>
   );
 }

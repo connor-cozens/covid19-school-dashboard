@@ -1,5 +1,3 @@
-'use client';
-
 export default function MediaView() {
   return (
     <div className="bg-white rounded-lg shadow p-6 max-w-3xl mx-auto">
