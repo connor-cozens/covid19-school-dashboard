@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useDashboardStore } from '@/store/dashboard-store';
 import { SchoolCase, SchoolClosure } from '@/types';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
+import { getClosureSchoolName, getClosureBoardName, getClosureDate, getReopeningDate } from '@/lib/closure-fields';
 
 interface SchoolDataTableProps {
   className?: string;
@@ -27,8 +28,8 @@ export default function SchoolDataTable({ className = '' }: SchoolDataTableProps
     const closures = filteredClosures.map(c => ({
       ...c,
       type: 'closure' as const,
-      displayName: c['School Name'],
-      date: c['Date of Closure'],
+      displayName: getClosureSchoolName(c),
+      date: getClosureDate(c),
     }));
 
     return [...cases, ...closures];
@@ -39,7 +40,7 @@ export default function SchoolDataTable({ className = '' }: SchoolDataTableProps
     if (!searchTerm) return combinedData;
     return combinedData.filter(item =>
       (item.displayName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-      (item.type === 'case' ? item.school_board : item['board name'])?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.type === 'case' ? item.school_board : getClosureBoardName(item))?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (item.type === 'case' ? item.municipality : item.city)?.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [combinedData, searchTerm]);
@@ -75,11 +76,11 @@ export default function SchoolDataTable({ className = '' }: SchoolDataTableProps
   );
 
   const renderClosureRow = (item: SchoolClosure & { type: 'closure'; displayName: string | undefined; date: string | undefined }, index: number) => (
-    <tr key={`closure-${item['School Name'] ?? 'unknown'}-${item['Date of Closure'] ?? 'no-date'}-${index}`} className="border-b hover:bg-gray-50">
+    <tr key={`closure-${item.displayName || 'unknown'}-${item.date || 'no-date'}-${index}`} className="border-b hover:bg-gray-50">
       <td className="px-4 py-3 text-sm">
         <div>
           <div className="font-medium text-gray-900">{item.displayName || 'Unknown School'}</div>
-          <div className="text-gray-500">{item['board name'] || 'Unknown Board'}</div>
+          <div className="text-gray-500">{getClosureBoardName(item) || 'Unknown Board'}</div>
         </div>
       </td>
       <td className="px-4 py-3 text-sm text-gray-900">{item.city}</td>
@@ -92,7 +93,7 @@ export default function SchoolDataTable({ className = '' }: SchoolDataTableProps
       <td className="px-4 py-3 text-sm text-center">-</td>
       <td className="px-4 py-3 text-sm text-center">-</td>
       <td className="px-4 py-3 text-sm text-gray-500">
-        {item['Date of Closure'] ? new Date(item['Date of Closure']).toLocaleDateString() : 'N/A'} - {item['Date of Reopening'] ? new Date(item['Date of Reopening']).toLocaleDateString() : 'N/A'}
+        {item.date ? new Date(item.date).toLocaleDateString() : 'N/A'} - {getReopeningDate(item) ? new Date(getReopeningDate(item)).toLocaleDateString() : 'N/A'}
       </td>
     </tr>
   );

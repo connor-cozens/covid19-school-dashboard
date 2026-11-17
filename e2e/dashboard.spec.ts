@@ -4,7 +4,7 @@ import { test, expect, type Page } from '@playwright/test';
 // data, not exact numbers — CI runs against synthetic closures data
 // (tests/fixtures/school_closures.sample.json), so counts differ from production.
 
-// Errors from third-party hosts (OpenStreetMap tiles, cdnjs marker icons) are
+// Errors from third-party hosts (OpenStreetMap map tiles) are
 // ignored so a flaky external CDN can't fail a dependency PR.
 function trackPageErrors(page: Page): string[] {
   const errors: string[] = [];
