@@ -31,9 +31,9 @@ function excelDateToISO(val) {
 }
 
 async function main() {
-  const inputXlsx = path.join(__dirname, '../public/data/COVID School Closures_V2.xlsx');
+  const inputXlsx = path.join(__dirname, '../private-data/COVID School Closures_V2.xlsx');
   const outputJson = path.join(__dirname, '../public/data/school_closures.json');
-  const correctionsLog = path.join(__dirname, '../public/data/closure_corrections_log.json');
+  const correctionsLog = path.join(__dirname, '../private-data/closure_corrections_log.json');
   const demographicsJson = path.join(__dirname, '../public/data/school_demographics_lookup.json');
 
   const workbook = xlsx.readFile(inputXlsx);

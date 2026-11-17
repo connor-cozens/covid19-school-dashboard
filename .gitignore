@@ -35,9 +35,8 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files — all ignored except the committed example template
+# env files
 .env*
-!.env.example
 
 # vercel
 .vercel
@@ -46,9 +45,12 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# School closures data — add manually on deploy, do not check in
-public/data/COVID School Closures_V2.xlsx
+# School closures data — never check in. The source spreadsheet lives in the private
+# covid19-school-dashboard-data repo; locally it goes in private-data/ (outside public/,
+# so it can never be published with the site). school_closures.json is generated from it.
+/private-data/
 public/data/school_closures.json
+public/data/*.xlsx
 public/data/closure_corrections_log.json
 public/data/*.numbers
 

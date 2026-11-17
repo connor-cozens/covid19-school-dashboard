@@ -1,209 +1,107 @@
-# Deployment Guide — COVID-19 Ontario School Dashboard
+# Deployment Guide
 
-The application deploys to **Google Cloud Run** — a fully managed container platform that scales to zero when idle and handles SSL automatically. No server management required.
+The dashboard is a **fully static site**: `next build` exports plain HTML, JavaScript and data
+files to `out/`, and GitHub Actions publishes them to **GitHub Pages**. There is no server,
+container or cloud project to maintain.
 
----
+## How a deploy works
 
-## Prerequisites (one-time)
+[`.github/workflows/deploy.yml`](../.github/workflows/deploy.yml) runs on every push to `master`
+(i.e. every merged PR) and can be run manually from **Actions → Deploy → Run workflow**.
 
-### 1. Install gcloud CLI
+1. Checks out the private data repo
+   [`connor-cozens/covid19-school-dashboard-data`](https://github.com/connor-cozens/covid19-school-dashboard-data)
+   using the `DATA_REPO_TOKEN` secret.
+2. Copies the closures spreadsheet into `private-data/` and generates
+   `public/data/school_closures.json` with `scripts/clean_school_closures.js`.
+3. `npm run build`:
+   - **prebuild**: regenerates filter options and runs the data regression check
+   - **build**: static export to `out/`
+   - **postbuild**: `scripts/check_export.js` fails the build if `out/` contains the spreadsheet,
+     the corrections log, raw data files or env/key files
+4. Runs the Playwright browser tests against `out/` with the real data.
+5. Publishes `out/` to GitHub Pages. If any earlier step fails, the live site is left unchanged.
 
-```bash
-# macOS (Homebrew)
-brew install --cask google-cloud-sdk
+## Data privacy
 
-# Linux
-curl https://sdk.cloud.google.com | bash
-exec -l $SHELL
+| Data | Where it lives | Published? |
+|---|---|---|
+| Closures source spreadsheet | Private data repo; locally in `private-data/` (gitignored) | **Never** |
+| `closure_corrections_log.json` | `private-data/` (gitignored) | **Never** |
+| `school_closures.json` | Generated at build time into `public/data/` (gitignored) | Yes, served by the site |
+| All other data | Committed in `public/data/` | Yes |
 
-# Windows — download installer:
-# https://cloud.google.com/sdk/docs/install#windows
-```
+Everything in `public/` is published, so private files must never be placed there.
+`check_export.js` enforces this on every build.
 
-### 2. Authenticate
+## Updating the closures data
 
-```bash
-gcloud auth login
-gcloud auth configure-docker   # allows Docker to push to gcr.io
-```
+1. Replace `closures/COVID School Closures_V2.xlsx` in the private data repo (keep the filename).
+2. Run **Actions → Deploy → Run workflow** in this repo.
 
-### 3. Install Docker
+## One-time setup
 
-Download Docker Desktop: https://docs.docker.com/get-docker/
+### 1. Data repo token
 
----
+The deploy needs read access to the private data repo:
 
-## Deploy
+1. GitHub → **Settings → Developer settings → Personal access tokens → Fine-grained tokens →
+   Generate new token**
+   - **Repository access**: Only select repositories → `covid19-school-dashboard-data`
+   - **Permissions**: Repository permissions → **Contents: Read-only** (nothing else)
+   - **Expiration**: up to 1 year. Set a reminder to rotate it.
+2. In this repo: **Settings → Secrets and variables → Actions → New repository secret**,
+   name `DATA_REPO_TOKEN`, value = the token.
 
-### First deploy (new GCP project)
+When the token expires, deploys fail at "Check data repo token is configured" or
+"Fetch private closures data". Generate a new token and update the secret.
 
-**1. Set up your config file** (one-time):
+### 2. GitHub Pages
 
-```bash
-# Production
-cp .env.example .env.production
-# Edit .env.production and set PROJECT_ID=your-gcp-project-id
+**Settings → Pages → Build and deployment → Source: GitHub Actions.**
 
-# Dev/staging (optional — separate GCP project)
-cp .env.example .env.development
-# Edit .env.development and set PROJECT_ID=your-staging-project-id
-```
+### 3. Custom domain
 
-These are the same files Next.js uses for runtime config. Deployment vars (`PROJECT_ID`, `REGION`) live alongside any future `NEXT_PUBLIC_*` vars.
+1. **Settings → Pages → Custom domain**: `covid19schooldashboard.com`, then save.
+2. At the DNS provider, remove the old Google (Cloud Run) records and add:
 
-**2. Deploy**:
+   | Type | Name | Value |
+   |---|---|---|
+   | A | `@` | `185.199.108.153` |
+   | A | `@` | `185.199.109.153` |
+   | A | `@` | `185.199.110.153` |
+   | A | `@` | `185.199.111.153` |
+   | AAAA | `@` | `2606:50c0:8000::153` |
+   | AAAA | `@` | `2606:50c0:8001::153` |
+   | AAAA | `@` | `2606:50c0:8002::153` |
+   | AAAA | `@` | `2606:50c0:8003::153` |
+   | CNAME | `www` | `connor-cozens.github.io` |
 
-```bash
-npm run deploy         # reads .env.production
-npm run deploy -- --dev  # reads .env.development
-```
+3. Once the DNS check passes on the Pages settings page, tick **Enforce HTTPS**.
+4. Recommended: verify the domain under **GitHub profile Settings → Pages → Verified domains**
+   to prevent anyone else's repo from claiming it.
 
-The script will:
-1. Verify prerequisites (gcloud auth, Docker daemon)
-2. Enable required GCP APIs
-3. Build a Docker image tagged with the current git SHA
-4. Push to Google Container Registry (`gcr.io`)
-5. Deploy to Cloud Run in `us-central1` (configurable)
-6. Print the live URL
-
-### Redeploy (after code changes)
-
-```bash
-PROJECT_ID=your-gcp-project-id npm run deploy
-# or directly
-PROJECT_ID=your-gcp-project-id ./scripts/setup/deploy.sh
-```
-
-Each deploy creates a new revision tagged with the git commit SHA. Cloud Run keeps previous revisions available for instant rollback.
-
-### Deploy options
-
-```bash
-# Different region
-./scripts/setup/deploy.sh --project my-project --region northamerica-northeast1
-
-# Using environment variables
-export PROJECT_ID=my-project
-export REGION=northamerica-northeast1
-npm run deploy
-```
-
----
-
-## Rollback
+## Testing a production build locally
 
 ```bash
-# List revisions
-gcloud run revisions list --service covid-dashboard --region us-central1
-
-# Roll back to a specific revision
-gcloud run services update-traffic covid-dashboard \
-  --region us-central1 \
-  --to-revisions REVISION_NAME=100
+node scripts/clean_school_closures.js   # needs the spreadsheet in private-data/
+npm run build                           # static export to out/ (+ data and privacy checks)
+npm start                               # serves out/ at http://localhost:3000
+npm run test:e2e                        # browser tests against out/
 ```
 
----
+## Rolling back
 
-## Custom Domain (optional)
-
-```bash
-gcloud run domain-mappings create \
-  --service covid-dashboard \
-  --domain your-domain.com \
-  --region us-central1
-```
-
-Cloud Run provisions an SSL certificate automatically. Add the DNS records it shows you to your domain registrar.
-
----
-
-## CI/CD with Cloud Build (optional)
-
-`cloudbuild.yaml` is included for automated deployments on push. To activate:
-
-```bash
-# One-time setup — create a trigger on pushes to React-Overhaul
-gcloud builds triggers create github \
-  --repo-name=c19-beta-site \
-  --repo-owner=connor-cozens \
-  --branch-pattern="^React-Overhaul$" \
-  --build-config=cloudbuild.yaml \
-  --project=your-gcp-project-id
-```
-
-After this, every merge to `React-Overhaul` automatically builds and deploys. No manual script needed.
-
-**Note:** Grant the Cloud Build service account the Cloud Run Admin and Service Account User roles so it can deploy:
-```bash
-PROJECT_NUMBER=$(gcloud projects describe $PROJECT_ID --format="value(projectNumber)")
-CB_SA="$PROJECT_NUMBER@cloudbuild.gserviceaccount.com"
-
-gcloud projects add-iam-policy-binding $PROJECT_ID \
-  --member="serviceAccount:$CB_SA" \
-  --role="roles/run.admin"
-
-gcloud iam service-accounts add-iam-policy-binding \
-  $PROJECT_NUMBER-compute@developer.gserviceaccount.com \
-  --member="serviceAccount:$CB_SA" \
-  --role="roles/iam.serviceAccountUser"
-```
-
----
-
-## Monitoring
-
-```bash
-# Stream live logs
-gcloud run services logs tail covid-dashboard --region us-central1
-
-# Query recent errors
-gcloud logging read \
-  "resource.type=cloud_run_revision AND resource.labels.service_name=covid-dashboard AND severity>=ERROR" \
-  --limit 50
-
-# Get service status and URL
-gcloud run services describe covid-dashboard --region us-central1
-```
-
----
+Revert the offending commit on `master` (via a PR). The Deploy workflow then publishes the
+previous version. To redeploy without code changes, re-run the latest successful Deploy run.
 
 ## Troubleshooting
 
 | Problem | Likely cause | Fix |
 |---|---|---|
-| `permission denied` pushing to gcr.io | Docker not auth'd | `gcloud auth configure-docker` |
-| `API not enabled` error | First deploy, APIs not yet enabled | Script enables them automatically; wait 30s and retry |
-| Build fails inside Docker | `npm run build` error (regression check, TypeScript, etc.) | Run `npm run build` locally to see the error |
-| Service URL returns 503 | Container failing to start | Check logs: `gcloud run services logs tail covid-dashboard --region us-central1` |
-| Slow cold start | Min instances set to 0 | Set `--min-instances 1` in `scripts/setup/deploy.sh` if cold starts are a problem |
-
-### Test the build locally before deploying
-
-```bash
-# Run the full build (includes prebuild checks)
-npm install && npm run build
-
-# Test the Docker image locally
-docker build --platform linux/amd64 -t covid-dashboard-test .
-docker run --rm -p 3000:3000 covid-dashboard-test
-# Open http://localhost:3000
-```
-
----
-
-## Resource configuration
-
-Current Cloud Run settings (adjust in `scripts/setup/deploy.sh`):
-
-| Setting | Value | Notes |
-|---|---|---|
-| Memory | 1 Gi | Sufficient for Next.js + data files |
-| CPU | 1 vCPU | Adequate for typical traffic |
-| Min instances | 0 | Scales to zero — cold start ~2-3s |
-| Max instances | 10 | Caps runaway costs |
-| Concurrency | 80 | Requests per instance |
-
-Estimated cost (Cloud Run):
-- Idle: ~$0/month (scales to zero)
-- Light traffic: ~$5–20/month
-- Moderate traffic: ~$20–100/month
+| Deploy fails at "Check data repo token" | `DATA_REPO_TOKEN` secret missing | See *Data repo token* above |
+| Deploy fails at "Fetch private closures data" | Token expired or lacks access to the data repo | Generate a new token, update the secret |
+| `check_export: FAIL` | A private file ended up in `public/` | Move it to `private-data/` |
+| Data regression check fails | Committed case data changed unexpectedly | Run `npm run check-regression` locally; if the change is intended, `npm run update-baseline` |
+| Site shows "Failed to load dashboard data" | A data file is missing from `public/data/` | Check the build log; run the browser tests locally |
+| Custom domain shows a 404 or certificate error | DNS not yet propagated, or HTTPS not yet issued | Wait (up to 24h) and re-check the Pages settings page |
