@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "serve out -l 3000 --no-clipboard",
     "lint": "eslint .",
     "setup": "node scripts/generate_filter_options.js",
     "validate": "node scripts/validate_combined_data.js",
@@ -13,11 +13,11 @@
     "check-regression": "node scripts/check_regression.js",
     "update-baseline": "node scripts/update_baseline.js",
     "prebuild": "npm run setup && npm run check-regression",
-    "deploy": "./scripts/setup/deploy.sh",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:e2e": "playwright test",
-    "ci:sample-data": "cp tests/fixtures/school_closures.sample.json public/data/school_closures.json"
+    "ci:sample-data": "cp tests/fixtures/school_closures.sample.json public/data/school_closures.json",
+    "postbuild": "node scripts/check_export.js"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.4",
@@ -51,6 +51,7 @@
     "eslint-config-next": "16.4.6",
     "jest": "^30.3.0",
     "jest-environment-jsdom": "^30.3.0",
+    "serve": "14.2.8",
     "tailwindcss": "^4",
     "typescript": "^5",
     "xlsx": "^0.18.5"

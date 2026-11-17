@@ -36,7 +36,7 @@ async function printRawExcelDateSample() {
     return;
   }
 
-  const xlsxPath = path.join(__dirname, '../public/data/COVID School Closures_V2.xlsx');
+  const xlsxPath = path.join(__dirname, '../private-data/COVID School Closures_V2.xlsx');
   try {
     await fs.access(xlsxPath);
   } catch {
@@ -250,7 +250,7 @@ async function validateClosures() {
 // Section 3 — report auto-corrections from the audit log
 // ------------------------------------------------------------------
 async function reportCorrections() {
-  const logPath = path.join(__dirname, '../public/data/closure_corrections_log.json');
+  const logPath = path.join(__dirname, '../private-data/closure_corrections_log.json');
   let corrections;
   try {
     corrections = JSON.parse(await fs.readFile(logPath, 'utf8'));

@@ -1,9 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
 
-// Browser tests run against a running build of the site.
-// - CI sets BASE_URL to the Docker container started from the production image.
-// - Locally, with no BASE_URL, Playwright starts `next start` itself
-//   (run `npm run build` first; real or sample closures data must be in public/data).
+// Browser tests run against a built copy of the site.
+// - With no BASE_URL, Playwright serves the static export in out/ (`npm start`).
+//   Run `npm run build` first; real or sample closures data must be in public/data.
+// - Set BASE_URL to test an already-running site instead.
 const baseURL = process.env.BASE_URL ?? 'http://localhost:3000';
 
 export default defineConfig({
@@ -22,5 +22,5 @@ export default defineConfig({
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
   webServer: process.env.BASE_URL
     ? undefined
-    : { command: 'npx next start -p 3000', url: baseURL, reuseExistingServer: true, timeout: 120_000 },
+    : { command: 'npm start', url: baseURL, reuseExistingServer: true, timeout: 60_000 },
 });

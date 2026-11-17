@@ -12,7 +12,8 @@ An interactive dashboard for visualizing COVID-19 cases and school closures acro
 
 ## Tech Stack
 
-- **Framework**: Next.js 15 with App Router
+- **Framework**: Next.js 16 with App Router, exported as a static site
+- **Hosting**: GitHub Pages
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS
 - **State Management**: Zustand
@@ -47,9 +48,9 @@ src/
    npm install
    ```
 
-2. **Add school closures data** (not included in the repository — see note below):
+2. **Add school closures data** (not included in the repository — see note below). Copy the source spreadsheet from the private [data repo](https://github.com/connor-cozens/covid19-school-dashboard-data) to:
    ```
-   public/data/COVID School Closures_V2.xlsx
+   private-data/COVID School Closures_V2.xlsx
    ```
    Then regenerate the processed closure files:
    ```bash
@@ -68,12 +69,12 @@ src/
 
 5. **Open your browser** and navigate to `http://localhost:3000`
 
-> **Note on school closures data**: `school_closures.json` and the source Excel file are excluded from this repository. They must be added manually before running the app. All other data files are included.
+> **Note on school closures data**: the source spreadsheet is private and must never be committed or placed in `public/` (everything in `public/` is published). It lives in the private data repo and, locally, in the gitignored `private-data/` folder. `school_closures.json` is generated from it and is gitignored. All other data files are included. To work without it, use the sample data (see Testing).
 
 ## Testing
 
 - **Unit tests**: `npm test`
-- **Browser tests** (Playwright): `npm run build`, then `npm run test:e2e` — starts the built app and checks every view renders with data. Run `npx playwright install chromium` once first. To test a running server or container instead, set `BASE_URL` (e.g. `BASE_URL=http://localhost:3000 npm run test:e2e`).
+- **Browser tests** (Playwright): `npm run build`, then `npm run test:e2e` — serves the static export in `out/` and checks every view renders with data. Run `npx playwright install chromium` once first. To test an already-running site instead, set `BASE_URL`.
 - **Without the real closures data**: `npm run ci:sample-data` copies synthetic data from `tests/fixtures/school_closures.sample.json` into `public/data/` (this overwrites a real `school_closures.json` — regenerate it afterwards with `node scripts/clean_school_closures.js`). Regenerate the sample with `node scripts/generate_sample_closures.js`.
 
 ### CI
@@ -84,18 +85,18 @@ Every PR to `master` runs [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
 |---|---|
 | Unit tests | `npm ci`, Jest, and lint (report only) |
 | Security audit | `npm audit` on production dependencies and GitHub dependency review — fails on high/critical |
-| Docker build & browser tests | Builds the production Docker image with sample closures data (running the data regression checks), smoke-tests the page and data files, then runs the Playwright tests against the container |
+| Build & browser tests | Builds the static site with sample closures data (running the data regression and private-file checks), then runs the Playwright tests against it |
 
-Dependabot ([`.github/dependabot.yml`](.github/dependabot.yml)) opens weekly grouped PRs for npm, the Docker base image and GitHub Actions; security fixes arrive in their own group.
+Dependabot ([`.github/dependabot.yml`](.github/dependabot.yml)) opens weekly grouped PRs for npm and GitHub Actions; security fixes arrive in their own group.
 
 ## Deployment
 
-Deploy to Google Cloud Run:
-```bash
-PROJECT_ID=your-project-id ./scripts/setup/deploy.sh
-```
+Merging to `master` deploys automatically: [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) builds the static site with the real closures data, runs the browser tests, and publishes `out/` to GitHub Pages.
 
-See [docs/DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) for full deployment instructions.
+- **Build locally**: `npm run build` (static export to `out/`), then `npm start` to serve it
+- **Update closures data**: replace the spreadsheet in the private data repo, then run **Actions → Deploy → Run workflow**
+
+See [docs/DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) for setup (data repo token, Pages, custom domain) and troubleshooting.
 
 ## Data Sources
 

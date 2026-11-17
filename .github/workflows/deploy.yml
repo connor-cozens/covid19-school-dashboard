@@ -1,0 +1,92 @@
+name: Deploy
+
+# Builds the static site with the real closures data and publishes it to GitHub Pages.
+# Runs on every push to master, and manually (Actions → Deploy → Run workflow) after
+# the closures spreadsheet is updated in the private data repo.
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+# One deploy at a time; let an in-progress deploy finish rather than cancelling it
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  NEXT_TELEMETRY_DISABLED: 1
+
+jobs:
+  build:
+    name: Build with real data & test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: Check data repo token is configured
+        env:
+          DATA_REPO_TOKEN: ${{ secrets.DATA_REPO_TOKEN }}
+        run: |
+          if [ -z "$DATA_REPO_TOKEN" ]; then
+            echo "::error::DATA_REPO_TOKEN secret is not set — see docs/DEPLOYMENT_GUIDE.md"
+            exit 1
+          fi
+
+      # Private repo holding the source closures spreadsheet (never published)
+      - name: Fetch private closures data
+        uses: actions/checkout@v7
+        with:
+          repository: connor-cozens/covid19-school-dashboard-data
+          token: ${{ secrets.DATA_REPO_TOKEN }}
+          path: .private-data-src
+          persist-credentials: false
+
+      # Script output (record-level corrections) is suppressed: Actions logs are public
+      - name: Generate school_closures.json
+        run: |
+          mkdir -p private-data
+          cp ".private-data-src/closures/COVID School Closures_V2.xlsx" private-data/
+          rm -rf .private-data-src
+          node scripts/clean_school_closures.js > /dev/null 2>&1 || { echo "::error::clean_school_closures.js failed — run it locally to see why"; exit 1; }
+          node -e 'console.log(`Generated ${require("./public/data/school_closures.json").length} closure records`)'
+
+      # prebuild: data regression checks; postbuild: fails if out/ contains private files
+      - name: Build static site
+        run: npm run build
+
+      # Same browser tests as PR CI, but against the real data. No report is uploaded
+      # on failure, so the real data never leaves the runner except via the site itself.
+      - name: Install Playwright browser
+        run: npx playwright install --with-deps chromium
+      - name: Browser tests
+        run: npm run test:e2e
+
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: out
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
