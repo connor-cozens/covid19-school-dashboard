@@ -1,9 +1,8 @@
 name: CI
 
 on:
+  # Merges to master are built and tested by deploy.yml
   pull_request:
-    branches: [master]
-  push:
     branches: [master]
   workflow_dispatch:
 
