@@ -1,51 +1,41 @@
 import { SchoolClosure } from '@/types';
-import { getClosureDate, getReopeningDate } from '@/lib/closure-fields';
+
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 /**
  * Determines whether a school closure should be shown for a given date context.
+ * All dates are ISO 'YYYY-MM-DD' strings, compared as strings.
  *
  * Two filter modes:
  *
  * 1. Single-day or animation mode (`isSingleDay || isAnimating`):
  *    Show if the closure was active ON the asOf date.
  *    - asOf = startDate (single day) or endDate (animation frame)
- *    - Matches R app behaviour: `Date of Closure <= selected_date <= Date of Reopening`
+ *    - Matches the R app: `Date of Closure <= selected_date <= Date of Reopening`
  *    - During animation this makes closures appear and disappear as the frame advances.
  *
  * 2. Static range mode (!isSingleDay && !isAnimating):
  *    Show if the closure overlapped the [startDate, endDate] range at all.
  *    - Standard interval overlap: closureDate <= endDate && reopeningDate >= startDate
- *    - A closure disappears only when BOTH its dates are before startDate.
+ *
+ * A missing or invalid reopening date means the closure has no upper bound.
  */
 export function closureMatchesDateRange(
   closure: SchoolClosure,
-  startDate: Date,
-  endDate: Date | null,
+  startDate: string,
+  endDate: string | null,
   isAnimating: boolean,
 ): boolean {
-  const closureDateStr = getClosureDate(closure);
-  const reopeningDateStr = getReopeningDate(closure);
+  const closureDate = closure.date_of_closure ?? '';
+  if (!ISO_DATE.test(closureDate)) return false;
 
-  if (typeof closureDateStr !== 'string' || closureDateStr.trim() === '') return false;
-
-  const closureDate = new Date(closureDateStr);
-  const reopeningDate = new Date(reopeningDateStr);
-
-  if (isNaN(closureDate.getTime())) return false;
-
-  const isSingleDay = !endDate || startDate.getTime() === endDate.getTime();
+  const reopeningDate = ISO_DATE.test(closure.date_of_reopening ?? '') ? closure.date_of_reopening! : null;
+  const isSingleDay = !endDate || startDate === endDate;
 
   if (isSingleDay || isAnimating) {
-    const asOfDate = isSingleDay ? startDate : endDate!;
-    return (
-      closureDate <= asOfDate &&
-      (isNaN(reopeningDate.getTime()) || reopeningDate >= asOfDate)
-    );
+    const asOf = isSingleDay ? startDate : endDate!;
+    return closureDate <= asOf && (reopeningDate === null || reopeningDate >= asOf);
   }
 
-  // Static range: interval overlap
-  return (
-    closureDate <= endDate! &&
-    (isNaN(reopeningDate.getTime()) || reopeningDate >= startDate)
-  );
+  return closureDate <= endDate! && (reopeningDate === null || reopeningDate >= startDate);
 }

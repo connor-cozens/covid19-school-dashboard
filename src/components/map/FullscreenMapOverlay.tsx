@@ -10,7 +10,8 @@ import FloatingFilterPanel from './FloatingFilterPanel';
 const InteractiveMap = dynamic(() => import('./InteractiveMap'), { ssr: false });
 
 export default function FullscreenMapOverlay() {
-  const { isMapFullscreen, setIsMapFullscreen } = useDashboardStore();
+  const isMapFullscreen = useDashboardStore((s) => s.isMapFullscreen);
+  const setIsMapFullscreen = useDashboardStore((s) => s.setIsMapFullscreen);
 
   // Lock body scroll while overlay is open
   useEffect(() => {

@@ -29,10 +29,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
-      # Report-only until the existing react-hooks lint errors are fixed
-      - name: Lint (report only)
-        run: npm run lint
-        continue-on-error: true
+      - run: npm run lint
 
   audit:
     name: Security audit
@@ -69,8 +66,8 @@ jobs:
       - name: Use sample closures data
         run: npm run ci:sample-data
 
-      # Same build as the deploy: runs the data regression checks (prebuild),
-      # exports the static site to out/, and checks out/ for private files (postbuild)
+      # Same build as the deploy: exports the static site to out/ and checks out/
+      # for private files (postbuild)
       - name: Build static site
         run: npm run build
 

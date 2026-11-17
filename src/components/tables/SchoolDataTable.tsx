@@ -1,19 +1,19 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
-import { useDashboardStore } from '@/store/dashboard-store';
+import { useState, useMemo } from 'react';
+import { useFilteredCases, useFilteredClosures } from '@/store/derived';
 import { SchoolCase, SchoolClosure } from '@/types';
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
-import { getClosureSchoolName, getClosureBoardName, getClosureDate, getReopeningDate } from '@/lib/closure-fields';
+import { formatDate } from '@/lib/dates';
 
 interface SchoolDataTableProps {
   className?: string;
 }
 
 export default function SchoolDataTable({ className = '' }: SchoolDataTableProps) {
-  const { filteredCases, filteredClosures } = useDashboardStore();
+  const filteredCases = useFilteredCases();
+  const filteredClosures = useFilteredClosures();
   const [searchTerm, setSearchTerm] = useState('');
-  const [page, setPage] = useState(0);
   const PAGE_SIZE = 50;
 
   // Combine and process data
@@ -28,8 +28,8 @@ export default function SchoolDataTable({ className = '' }: SchoolDataTableProps
     const closures = filteredClosures.map(c => ({
       ...c,
       type: 'closure' as const,
-      displayName: getClosureSchoolName(c),
-      date: getClosureDate(c),
+      displayName: c.school_name,
+      date: c.date_of_closure,
     }));
 
     return [...cases, ...closures];
@@ -40,13 +40,15 @@ export default function SchoolDataTable({ className = '' }: SchoolDataTableProps
     if (!searchTerm) return combinedData;
     return combinedData.filter(item =>
       (item.displayName?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-      (item.type === 'case' ? item.school_board : getClosureBoardName(item))?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (item.type === 'case' ? item.school_board : item.board_name)?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (item.type === 'case' ? item.municipality : item.city)?.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [combinedData, searchTerm]);
 
-  // Reset to first page whenever the filtered set changes
-  useEffect(() => { setPage(0); }, [filteredData]);
+  // The page resets to the first whenever the filtered set changes
+  const [pageState, setPageState] = useState({ data: filteredData, page: 0 });
+  const page = pageState.data === filteredData ? pageState.page : 0;
+  const setPage = (update: (p: number) => number) => setPageState({ data: filteredData, page: update(page) });
 
   const pageCount = Math.ceil(filteredData.length / PAGE_SIZE);
   const pagedData = useMemo(
@@ -71,7 +73,7 @@ export default function SchoolDataTable({ className = '' }: SchoolDataTableProps
       <td className="px-4 py-3 text-sm text-center font-medium">{item.total_confirmed_cases}</td>
       <td className="px-4 py-3 text-sm text-center">{item.confirmed_student_cases}</td>
       <td className="px-4 py-3 text-sm text-center">{item.confirmed_staff_cases}</td>
-      <td className="px-4 py-3 text-sm text-gray-500">{item.date ? new Date(item.date).toLocaleDateString() : 'N/A'}</td>
+      <td className="px-4 py-3 text-sm text-gray-500">{formatDate(item.date)}</td>
     </tr>
   );
 
@@ -80,7 +82,7 @@ export default function SchoolDataTable({ className = '' }: SchoolDataTableProps
       <td className="px-4 py-3 text-sm">
         <div>
           <div className="font-medium text-gray-900">{item.displayName || 'Unknown School'}</div>
-          <div className="text-gray-500">{getClosureBoardName(item) || 'Unknown Board'}</div>
+          <div className="text-gray-500">{item.board_name || 'Unknown Board'}</div>
         </div>
       </td>
       <td className="px-4 py-3 text-sm text-gray-900">{item.city}</td>
@@ -93,7 +95,7 @@ export default function SchoolDataTable({ className = '' }: SchoolDataTableProps
       <td className="px-4 py-3 text-sm text-center">-</td>
       <td className="px-4 py-3 text-sm text-center">-</td>
       <td className="px-4 py-3 text-sm text-gray-500">
-        {item.date ? new Date(item.date).toLocaleDateString() : 'N/A'} - {getReopeningDate(item) ? new Date(getReopeningDate(item)).toLocaleDateString() : 'N/A'}
+        {formatDate(item.date)} – {formatDate(item.date_of_reopening)}
       </td>
     </tr>
   );

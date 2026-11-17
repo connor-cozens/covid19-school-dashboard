@@ -1,7 +1,7 @@
 'use client';
 
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { useDashboardStore } from '@/store/dashboard-store';
+import { useFilteredCases } from '@/store/derived';
 import { format, parseISO } from 'date-fns';
 import { useMemo } from 'react';
 
@@ -11,7 +11,7 @@ interface TimeSeriesChartProps {
 }
 
 export default function TimeSeriesChart({ title, className = '' }: TimeSeriesChartProps) {
-  const { filteredCases } = useDashboardStore();
+  const filteredCases = useFilteredCases();
 
   // Process data for the chart - create time series from filtered case data
   const chartData = useMemo(() => {
@@ -43,20 +43,18 @@ export default function TimeSeriesChart({ title, className = '' }: TimeSeriesCha
       }
     });
 
-    // Convert to array and sort by date
+    // Sort by date (ISO strings sort chronologically) and add running totals
     const sortedData = Array.from(casesByDate.values())
-      .sort((a, b) => new Date(a.fullDate).getTime() - new Date(b.fullDate).getTime());
+      .sort((a, b) => a.fullDate.localeCompare(b.fullDate));
 
-    // Calculate cumulative values
+    const result = [];
     let cumulativeCases = 0;
     let cumulativeSchools = 0;
-    
-    return sortedData.map(day => {
+    for (const day of sortedData) {
       cumulativeCases += day['Total Cases'];
       const uniqueSchoolsToday = day['Schools with Cases'].size;
       cumulativeSchools += uniqueSchoolsToday;
-      
-      return {
+      result.push({
         date: day.date,
         fullDate: day.fullDate,
         'Total Cases': day['Total Cases'],
@@ -65,8 +63,9 @@ export default function TimeSeriesChart({ title, className = '' }: TimeSeriesCha
         'Schools with Cases': uniqueSchoolsToday,
         'Cumulative Cases': cumulativeCases,
         'Cumulative Schools with Cases': cumulativeSchools,
-      };
-    });
+      });
+    }
+    return result;
   }, [filteredCases]);
 
   return (

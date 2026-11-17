@@ -1,6 +1,6 @@
 'use client';
 
-import { useDashboardStore } from '@/store/dashboard-store';
+import { useDashboardStats } from '@/store/derived';
 import FilterPanel from '../ui/FilterPanel';
 import TimeSeriesChart from '../charts/TimeSeriesChart';
 import BarChart from '../charts/BarChart';
@@ -8,7 +8,7 @@ import PieChart from '../charts/PieChart';
 import SchoolDataTable from '../tables/SchoolDataTable';
 
 export default function SummaryView() {
-  const { dashboardStats } = useDashboardStore();
+  const dashboardStats = useDashboardStats();
 
   return (
     <div>

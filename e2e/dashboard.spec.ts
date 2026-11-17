@@ -81,3 +81,21 @@ for (const { tab, heading } of staticViews) {
     expect(errors).toEqual([]);
   });
 }
+
+test('the URL keeps the tab and filters', async ({ page }) => {
+  const errors = trackPageErrors(page);
+  await openDashboard(page);
+
+  await page.locator('input[type="date"]').first().fill('2020-11-16');
+  await expect(page).toHaveURL(/date=2020-11-16/);
+  await page.getByRole('button', { name: 'Summary & Analytics' }).click();
+  await expect(page).toHaveURL(/tab=summary/);
+
+  // A reload (or a shared link) opens the same view
+  await page.reload();
+  await expect(page.getByRole('heading', { name: 'Summary & Analytics' })).toBeVisible();
+  await page.getByRole('button', { name: 'Interactive Map' }).click();
+  await expect(statValue(page, 'Selected Date')).toHaveText('2020-11-16');
+
+  expect(errors).toEqual([]);
+});

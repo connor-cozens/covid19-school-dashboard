@@ -1,8 +1,10 @@
-// scripts/clean_school_data.js
+// scripts/lib/clean-cases.js
+//
+// Cleans the two raw Ontario per-school case CSVs in data/raw/ into one array of
+// case records. Used by scripts/build_data.js, which writes the published files.
 const fs = require('fs').promises;
 const path = require('path');
 const { parse } = require('csv-parse/sync');
-const process = require('process');
 
 // Utility to normalize column names
 function normalizeHeader(header) {
@@ -172,12 +174,13 @@ async function loadAndCleanCsv(inputCsv) {
   });
 }
 
-async function main() {
+const RAW_DIR = path.join(__dirname, '../../data/raw');
+
+async function cleanCases() {
   const inputCsvs = [
-    path.join(__dirname, '../public/data/covid19_schools_active_with_demographics_19_20.csv'),
-    path.join(__dirname, '../public/data/covid19_schools_active_with_demographics_20_21.csv'),
+    path.join(RAW_DIR, 'covid19_schools_active_with_demographics_19_20.csv'),
+    path.join(RAW_DIR, 'covid19_schools_active_with_demographics_20_21.csv'),
   ];
-  const outputJson = path.join(__dirname, '../public/data/covid19_schools_active_with_demographics_combined.json');
 
   const allCleaned = [];
   for (const csvPath of inputCsvs) {
@@ -186,7 +189,7 @@ async function main() {
   }
 
   // Load demographics lookup for encoding recovery
-  const demographicsLookupPath = path.join(__dirname, '../public/data/school_demographics_lookup.json');
+  const demographicsLookupPath = path.join(RAW_DIR, 'school_demographics_lookup.json');
   const demographicsLookup = JSON.parse(await fs.readFile(demographicsLookupPath, 'utf8'));
 
   // U+FFFD replacement character — used throughout school-name resolution below
@@ -316,19 +319,7 @@ async function main() {
     return record;
   });
 
-  await fs.writeFile(outputJson, JSON.stringify(finalData, null, 2), 'utf8');
-
-  // Log statistics
-  const originalSize = JSON.stringify(allCleaned).length;
-  const leanSize = JSON.stringify(finalData).length;
-  const reduction = ((originalSize - leanSize) / originalSize * 100).toFixed(1);
-
-  console.log(`Wrote lean data to ${outputJson}`);
-  console.log(`Original size: ${(originalSize / 1024 / 1024).toFixed(1)} MB`);
-  console.log(`Lean size: ${(leanSize / 1024 / 1024).toFixed(1)} MB`);
-  console.log(`Size reduction: ${reduction}%`);
-
-  console.log(`\nEncoding recovery:`);
+  console.log(`Encoding recovery:`);
   console.log(`- School names recovered via demographics lookup: ${recoveredCount}`);
   console.log(`- School names recovered via manual alias: ${aliasRecoveredCount}`);
   console.log(`- School names still corrupt after all recovery: ${stillCorruptCount - aliasRecoveredCount}`);
@@ -341,9 +332,7 @@ async function main() {
   const corruptMuns = finalData.filter(r => (r.municipality||'').includes(REPLACEMENT_CHAR)).length;
   if (corruptBoards > 0) console.warn(`WARNING: ${corruptBoards} records have corrupt school_board`);
   if (corruptMuns > 0) console.warn(`WARNING: ${corruptMuns} records have corrupt municipality`);
+  return finalData;
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-}); 
+module.exports = { cleanCases, RAW_DIR };

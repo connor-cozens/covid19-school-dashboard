@@ -15,7 +15,6 @@ container or cloud project to maintain.
 2. Copies the closures spreadsheet into `private-data/` and generates
    `public/data/school_closures.json` with `scripts/clean_school_closures.js`.
 3. `npm run build`:
-   - **prebuild**: regenerates filter options and runs the data regression check
    - **build**: static export to `out/`
    - **postbuild**: `scripts/check_export.js` fails the build if `out/` contains the spreadsheet,
      the corrections log, raw data files or env/key files
@@ -29,7 +28,8 @@ container or cloud project to maintain.
 | Closures source spreadsheet | Private data repo; locally in `private-data/` (gitignored) | **Never** |
 | `closure_corrections_log.json` | `private-data/` (gitignored) | **Never** |
 | `school_closures.json` | Generated at build time into `public/data/` (gitignored) | Yes, served by the site |
-| All other data | Committed in `public/data/` | Yes |
+| Case data (`cases.json`, `school_profiles.json`, `summaries.json`) | Committed in `public/data/` | Yes |
+| Raw case inputs | `data/raw/` | No |
 
 Everything in `public/` is published, so private files must never be placed there.
 `check_export.js` enforces this on every build.
@@ -102,6 +102,6 @@ previous version. To redeploy without code changes, re-run the latest successful
 | Deploy fails at "Check data repo token" | `DATA_REPO_TOKEN` secret missing | See *Data repo token* above |
 | Deploy fails at "Fetch private closures data" | Token expired or lacks access to the data repo | Generate a new token, update the secret |
 | `check_export: FAIL` | A private file ended up in `public/` | Move it to `private-data/` |
-| Data regression check fails | Committed case data changed unexpectedly | Run `npm run check-regression` locally; if the change is intended, `npm run update-baseline` |
+| `data-files.test.ts` fails in CI | Committed case data changed unexpectedly | Run `npm run build-data` and `npm test` locally; if the change is intended, update the expected numbers in the test |
 | Site shows "Failed to load dashboard data" | A data file is missing from `public/data/` | Check the build log; run the browser tests locally |
 | Custom domain shows a 404 or certificate error | DNS not yet propagated, or HTTPS not yet issued | Wait (up to 24h) and re-check the Pages settings page |

@@ -57,17 +57,12 @@ src/
    node scripts/clean_school_closures.js
    ```
 
-3. **Generate filter options**:
-   ```bash
-   npm run setup
-   ```
-
-4. **Run the development server**:
+3. **Run the development server**:
    ```bash
    npm run dev
    ```
 
-5. **Open your browser** and navigate to `http://localhost:3000`
+4. **Open your browser** and navigate to `http://localhost:3000`
 
 > **Note on school closures data**: the source spreadsheet is private and must never be committed or placed in `public/` (everything in `public/` is published). It lives in the private data repo and, locally, in the gitignored `private-data/` folder. `school_closures.json` is generated from it and is gitignored. All other data files are included. To work without it, use the sample data (see Testing).
 
@@ -83,9 +78,9 @@ Every PR to `master` runs [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
 
 | Check | What it does |
 |---|---|
-| Unit tests | `npm ci`, Jest, and lint (report only) |
+| Unit tests | `npm ci`, Jest (including checks on the committed data files), and lint |
 | Security audit | `npm audit` on production dependencies and GitHub dependency review — fails on high/critical |
-| Build & browser tests | Builds the static site with sample closures data (running the data regression and private-file checks), then runs the Playwright tests against it |
+| Build & browser tests | Builds the static site with sample closures data (running the private-file check), then runs the Playwright tests against it |
 
 Dependabot ([`.github/dependabot.yml`](.github/dependabot.yml)) opens weekly grouped PRs for npm and GitHub Actions; security fixes arrive in their own group.
 
@@ -97,6 +92,19 @@ Merging to `master` deploys automatically: [`.github/workflows/deploy.yml`](.git
 - **Update closures data**: replace the spreadsheet in the private data repo, then run **Actions → Deploy → Run workflow**
 
 See [docs/DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) for setup (data repo token, Pages, custom domain) and troubleshooting.
+
+## Data
+
+The app fetches four JSON files from `public/data/` (everything there is published):
+
+| File | Contents | Built by |
+|---|---|---|
+| `cases.json` | Per-school daily case records, in a compact format | `npm run build-data` (committed) |
+| `school_profiles.json` | School details and demographics for map popups | `npm run build-data` (committed) |
+| `summaries.json` | Province-wide daily case summaries | `npm run build-data` (committed) |
+| `school_closures.json` | School closures | `scripts/clean_school_closures.js` from the private spreadsheet (not committed) |
+
+The case data is frozen (it ends 2021-12-22), so `npm run build-data` only needs to run if a raw input in `data/raw/` or the cleaning logic in `scripts/lib/clean-cases.js` changes. `src/__tests__/data-files.test.ts` checks the committed files' record counts and totals. See [scripts/README.md](scripts/README.md).
 
 ## Data Sources
 

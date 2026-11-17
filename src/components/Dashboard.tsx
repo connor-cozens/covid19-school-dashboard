@@ -11,19 +11,13 @@ import DataSourcesView from './DataSourcesView';
 import ErrorBoundary from './ErrorBoundary';
 
 export default function Dashboard() {
-  const { activeTab, isLoading, error } = useDashboardStore();
+  const activeTab = useDashboardStore((s) => s.activeTab);
+  const status = useDashboardStore((s) => s.status);
 
-  if (isLoading) {
+  // Content pages don't need the data; the map and summary wait for it.
+  // Load errors are shown by DataProvider.
+  if (status !== 'ready' && (activeTab === 'map' || activeTab === 'summary')) {
     return <LoadingSpinner />;
-  }
-
-  if (error) {
-    return (
-      <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-        <h3 className="text-lg font-medium text-red-800">Error Loading Data</h3>
-        <p className="text-red-600 mt-2">{error}</p>
-      </div>
-    );
   }
 
   const renderContent = () => {

@@ -1,6 +1,5 @@
 import { aggregateCases, getCaseMarkerColor, getCaseMarkerRadius } from '@/lib/map-aggregation';
-import { SchoolCase } from '@/types';
-import { DemographicsData } from '@/hooks/useDemographicsLookup';
+import { SchoolCase, SchoolProfile, SchoolProfiles } from '@/types';
 import {
   CASE_COLOR_LOW,
   CASE_COLOR_HIGH,
@@ -11,10 +10,10 @@ import {
 function makeCase(overrides: Partial<SchoolCase> = {}): SchoolCase {
   return {
     collected_date: '2020-09-15',
-    reported_date: '2020-09-15',
     school_board: 'Toronto DSB',
     school_number: 123456,
     school_name: 'Test School',
+    city: 'Toronto',
     municipality: 'Toronto',
     confirmed_student_cases: 2,
     confirmed_staff_cases: 1,
@@ -26,7 +25,7 @@ function makeCase(overrides: Partial<SchoolCase> = {}): SchoolCase {
   };
 }
 
-const emptyLookup: Record<number, DemographicsData> = {};
+const emptyLookup: SchoolProfiles = {};
 
 // ---------------------------------------------------------------------------
 // aggregateCases
@@ -144,9 +143,9 @@ describe('aggregateCases', () => {
         percentage_of_school_aged_children_who_live_in_low_income_households: 20,
         percentage_of_students_whose_parents_have_no_degree__diploma_or_certificate: 30,
       },
-    } as DemographicsData;
+    } as SchoolProfile;
 
-    const lookup: Record<number, DemographicsData> = { 123456: demo };
+    const lookup: SchoolProfiles = { 123456: demo };
     const cases = [makeCase({ school_number: 123456 })];
     const result = aggregateCases(cases, lookup);
     expect(result[0]._demo).toEqual(demo);

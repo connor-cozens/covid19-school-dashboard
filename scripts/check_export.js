@@ -1,7 +1,7 @@
 // scripts/check_export.js
 // Runs after `next build` (postbuild). Fails the build if the static export in out/
 // contains anything that must never be published: the source closures spreadsheet,
-// the corrections log, raw data formats, or env/secret files. Everything in out/
+// the corrections log, raw data formats (including CSVs), or env/secret files. Everything in out/
 // is served publicly by GitHub Pages.
 //
 // Usage: node scripts/check_export.js [dir]   (default: out)
@@ -13,6 +13,7 @@ const OUT_DIR = path.resolve(__dirname, '..', process.argv[2] || 'out');
 
 const FORBIDDEN = [
   { test: (f) => /\.(xlsx|xls|xlsm|numbers|rds|rdata)$/i.test(f), why: 'source spreadsheet / raw data file' },
+  { test: (f) => /\.csv$/i.test(f), why: 'raw CSV (build inputs live in data/raw/; the app only fetches JSON)' },
   { test: (f) => path.basename(f) === 'closure_corrections_log.json', why: 'closures corrections log' },
   { test: (f) => /^\.env/.test(path.basename(f)), why: 'environment file' },
   { test: (f) => /\.(pem|key)$/i.test(f), why: 'key file' },
